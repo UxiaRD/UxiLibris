@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 class Libreria {
   // Compartida por toda la app
   static List<Libro> todosLosLibros = [];
-
   List<Libro> libros;
 
   // Constructor que permite pasar una lista (uso en los filtros)
@@ -47,7 +46,7 @@ class Libreria {
   /// Actualiza los datos de un libro existente
   void editarLibro(Libro original, Libro modificado) {
     original.titulo = modificado.titulo;
-    original.autor = modificado.autor;
+    original.autorId = modificado.autorId;
     original.estado = modificado.estado;
     original.puntuacion = modificado.puntuacion;
     original.rutaImagen = modificado.rutaImagen;
@@ -84,8 +83,7 @@ class Libreria {
 
       librosBuscados = libros.where((libro) {
         // Busqueda por titulo o por autor
-        return libro.titulo.toLowerCase().contains(busqueda) ||
-            libro.autor.toLowerCase().contains(busqueda);
+        return libro.titulo.toLowerCase().contains(busqueda);
       }).toList();
     }
     return librosBuscados;

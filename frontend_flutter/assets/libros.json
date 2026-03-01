@@ -1,100 +1,22 @@
 [
   {
-    "titulo": "Siega",
-    "autor": "Neal Shusterman",
-    "puntuacion": 5.0,
-    "rutaImagen": "assets/images/portadas/siega.jpg",
-    "estado": "leido"
-  },
-  {
+    "id": 1,
     "titulo": "Alas de Sangre",
-    "autor": "Rebecca Yarros",
-    "puntuacion": 3.0,
+    "puntuacion": 4.5,
+    "estado": "leyendo",
     "rutaImagen": "assets/images/portadas/alasDeSangre.jpg",
-    "estado": "leido"
-  },
-  {
-    "titulo": "Los Juegos del Hambre",
-    "autor": "Suzanne Collins",
-    "puntuacion": 4.0,
-    "rutaImagen": "assets/images/portadas/losJuegosDelHambre.jpg",
-    "estado": "leido"
-  },
-  {
-    "titulo": "Babel",
-    "autor": "R. F. Kuang",
-    "puntuacion": 3.0,
-    "rutaImagen": "assets/images/portadas/babel.jpg",
-    "estado": "leido"
-  },
-  {
-    "titulo": "Embrujo de Espinas",
-    "autor": "Margaret Rogerson",
-    "puntuacion": 5.0,
-    "rutaImagen": "assets/images/portadas/embrujoDeEspinas.jpg",
-    "estado": "leido"
-  },
-  {
-    "titulo": "El Pozo de la Ascensión",
-    "autor": "Brandon Sanderson",
-    "puntuacion": 4.0,
-    "rutaImagen": "assets/images/portadas/elPozoDeLaAscension.jpg",
-    "estado": "leido"
-  },
-  {
-    "titulo": "La casa en el mar más azul",
-    "autor": "TJ Klune",
-    "puntuacion": 2.0,
-    "rutaImagen": "assets/images/portadas/laCasaDelMarMasAzul.jpg",
-    "estado": "leido"
-  },
-  {
-    "titulo": "La Hija de la Diosa de la Luna",
-    "autor": "Sue Lynn Tan",
-    "puntuacion": 4.0,
-    "rutaImagen": "assets/images/portadas/laHijaDeLaDiosaDeLaLuna.jpg",
-    "estado": "leido"
-  },
-  {
-    "titulo": "Historia del Arsénico",
-    "autor": "Guiomar Calvo",
-    "puntuacion": 0.0,
-    "rutaImagen": "assets/images/portadas/historiaDelArsenico.jpg",
-    "estado": "leyendo"
-  },
-  {
-    "titulo": "Ahora todo es mejor",
-    "autor": "Neal Shusterman",
-    "puntuacion": 0.0,
-    "rutaImagen": "assets/images/portadas/ahoraTodoEsMejor.jpg",
-    "estado": "leyendo"
-  },
-  {
-    "titulo": "Katabasis",
-    "autor": "R.F. Kuang",
-    "puntuacion": 0.0,
-    "rutaImagen": "assets/images/portadas/katabasis.jpg",
-    "estado": "pendiente"
-  },
-  {
-    "titulo": "Una ventana a la oscuridad",
-    "autor": "Rachel Gillig",
-    "puntuacion": 0.0,
-    "rutaImagen": "assets/images/portadas/unaVentanaALaOscuridad.jpg",
-    "estado": "pendiente"
-  },
-  {
-    "titulo": "La casa de los aleteos",
-    "autor": "Olivia Wildenstein",
-    "puntuacion": 0.0,
-    "rutaImagen": "assets/images/portadas/laCasaDeLosAleteos.jpg",
-    "estado": "pendiente"
-  },
-  {
-    "titulo": "El descubrimiento de las brujas",
-    "autor": "Deborah Harkness",
-    "puntuacion": 0.0,
-    "rutaImagen": "assets/images/portadas/elDescubrimientoDeLasBrujas.jpg",
-    "estado": "pendiente"
+    "propiedades": [
+      {
+        "nombre": "ISBN",
+        "tipo": "texto",
+        "valor": "978-84-123456-7-8"
+      },
+      {
+        "nombre": "Editorial",
+        "tipo": "lista",
+        "valor": "Planeta",
+        "opciones": ["Planeta", "Minotauro", "Nova"]
+      }
+    ]
   }
 ]
