@@ -33,6 +33,6 @@ public class Libro {
     private String rutaImagen;
 
     // Relación con el Almacén de Propiedades Dinámicas
-    @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PropiedadValor> propiedades;
 }

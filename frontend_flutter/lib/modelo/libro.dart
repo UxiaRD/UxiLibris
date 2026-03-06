@@ -43,16 +43,37 @@ class Libro {
       id: json['id'],
       titulo: json['titulo'],
       autorNombre: json['autorNombre'],
-      sagaId: json['sagaId'],
-      numLibroSaga: json['numLibroSaga'],
-      puntuacion: (json['puntuacion'] as num?)?.toDouble() ?? 0.0,
+      sagaNombre: json['sagaNombre'],
+      // Usamos toDouble() para asegurar compatibilidad con la puntuación de 0.5
+      numLibroSaga: json['numLibroSaga']?.toDouble(),
+      puntuacion: json['puntuacion']?.toDouble(),
       estado: EstadoLibro.values.firstWhere(
-        (e) => e.name == json['estado'],
+        (e) => e.name.toLowerCase() == (json['estado'] as String).toLowerCase(),
         orElse: () => EstadoLibro.pendiente,
       ),
-      rutaImagen: json['rutaImagen'] ?? 'assets/images/fondos/libro.png',
+      fechaInicio: json['fechaInicio'] != null
+          ? DateTime.parse(json['fechaInicio'])
+          : null,
+      fechaFin: json['fechaFin'] != null
+          ? DateTime.parse(json['fechaFin'])
+          : null,
+      rutaImagen: json['rutaImagen'] ?? "assets/images/fondos/libro.png",
+
       // Cargamos el almacén desde la lista de propiedades del JSON
       almacen: AlmacenPropiedades.fromJson(json['propiedades'] ?? []),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'titulo': titulo,
+      'autorNombre': autorNombre,
+      'sagaNombre': sagaNombre,
+      'numLibroSaga': numLibroSaga, // Soporta el double (ej: 1.5)
+      'puntuacion': puntuacion, // Soporta el paso de 0.5 [cite: 61, 78]
+      'estado': estado.name, // Convertir Enum a String para Java
+      'fechaInicio': fechaInicio?.toIso8601String(), // [cite: 60, 78]
+      'fechaFin': fechaFin?.toIso8601String(), // [cite: 60, 78]
+    };
   }
 }

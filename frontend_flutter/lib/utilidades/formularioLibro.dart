@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 import 'package:frontend_flutter/modelo/propiedad.dart';
+import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/dialogosConfiguracion.dart';
 import 'package:frontend_flutter/utilidades/widgetsFormulario.dart';
 import '../../modelo/libro.dart';
@@ -33,13 +34,26 @@ class _FormularioLibroState extends State<FormularioLibro> {
   // Lista local para manejar los cambios en las propiedades dinámicas
   late List<Propiedad> _propiedadesDinamicas;
 
-  List<String> _sagasSugeridas = [
-    "Empireo",
-    "Nacidos de la Bruma",
-    "Crónica del Asesino de Reyes",
-  ];
+  List<String> _autoresSugeridos = [];
+  List<String> _sagasSugeridas = [];
 
-  List<String> _autoresSugeridos = ["Cervantes", "Jane Austen", "J.K. Rowling"];
+  List<double> _numerosOcupados = [];
+
+  // Método auxiliar para no bloquear el initState
+  Future<void> _cargarDatosDesdeServidor() async {
+    try {
+      final autores = await ApiService.fetchAutores(); // Petición GET a Java
+      final sagas = await ApiService.fetchSagas(); // Petición GET a Java
+
+      setState(() {
+        _autoresSugeridos = autores;
+        _sagasSugeridas = sagas;
+      });
+    } catch (e) {
+      print("Error al conectar con el servidor: $e");
+      // Aquí podrías mostrar un SnackBar si el servidor Java está apagado
+    }
+  }
 
   @override
   void initState() {
@@ -78,9 +92,10 @@ class _FormularioLibroState extends State<FormularioLibro> {
             ) // Usamos copyWith para no alterar el original
             .toList() ??
         [];
-  }
 
-  List<double> _numerosOcupados = [];
+    // Disparamos la carga asíncrona de autores y sagas desde Java
+    _cargarDatosDesdeServidor();
+  }
 
   void _actualizarSugerenciaSaga(String nombreSaga) async {
     // 1. Simulación de llamada al Backend para obtener números ocupados
@@ -131,8 +146,8 @@ class _FormularioLibroState extends State<FormularioLibro> {
     }
   }
 
-  void _guardarFormulario() {
-    // Validamos que al menos el título no esté vacío
+  Future<void> _guardarLibro() async {
+    // 1. Mantenemos tu validación de título
     if (_tituloController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -140,23 +155,52 @@ class _FormularioLibroState extends State<FormularioLibro> {
       return;
     }
 
-    // Creamos el objeto Libro final combinando fijos y dinámicos
+    // 2. Creamos el objeto final (mezclando tu lógica actual con el nuevo envío)
     final libroFinal = Libro(
+      id: widget
+          .libroParaEditar
+          ?.id, // Importante para que Java sepa si es UPDATE o INSERT
       titulo: _tituloController.text,
       autorNombre: _autorController.text,
       sagaNombre: _sagaNombreController.text,
-      puntuacion: _puntuacionActual,
+      puntuacion: _puntuacionActual, // Soporta tus pasos de 0.5
       estado: _estadoSeleccionado,
-      fechaInicio: _fechaInicio, // Guardamos fechas
+      fechaInicio: _fechaInicio,
       fechaFin: _fechaFin,
       rutaImagen:
           widget.libroParaEditar?.rutaImagen ??
           "assets/images/fondos/libro.png",
-      numLibroSaga: double.tryParse(_numLibroSagaController.text),
-      almacen: AlmacenPropiedades(propiedades: _propiedadesDinamicas),
+      numLibroSaga: double.tryParse(
+        _numLibroSagaController.text,
+      ), // Soporta tus decimales
+      almacen: AlmacenPropiedades(
+        propiedades: _propiedadesDinamicas,
+      ), // Tu sistema de personalización extrema
     );
 
-    widget.alGuardar(libroFinal);
+    // 3. Envío asíncrono al Backend en Java
+    try {
+      // Mostramos un indicador de carga si quieres, o simplemente esperamos la respuesta
+      bool exito = await ApiService.guardarLibro(libroFinal);
+
+      if (exito) {
+        // 4. Si el servidor responde OK, ejecutamos el callback local (si aún lo usas) y cerramos
+        widget.alGuardar(libroFinal);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("¡Libro guardado en la base de datos!")),
+        );
+
+        Navigator.pop(context, true); // Volvemos a la pantalla principal
+      } else {
+        throw Exception("El servidor no pudo procesar el guardado");
+      }
+    } catch (e) {
+      // Si falla el servidor (ej: Spring Boot apagado), avisamos al usuario
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error de conexión: $e")));
+    }
   }
 
   @override
@@ -264,13 +308,24 @@ class _FormularioLibroState extends State<FormularioLibro> {
         const SizedBox(height: 30),
 
         // BOTÓN GUARDAR
-        ElevatedButton(
-          onPressed: _guardarFormulario,
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-          ),
-          child: Text(
-            widget.libroParaEditar == null ? "Añadir Libro" : "Guardar Cambios",
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: ElevatedButton.icon(
+            onPressed: _guardarLibro, // Llamamos a nuestra función lógica
+            icon: const Icon(Icons.save),
+            label: Text(
+              widget.libroParaEditar == null
+                  ? "Registrar Libro"
+                  : "Actualizar Libro",
+            ),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              backgroundColor: colores.primary,
+              foregroundColor: colores.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ),
       ],

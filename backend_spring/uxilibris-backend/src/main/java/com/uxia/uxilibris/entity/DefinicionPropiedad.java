@@ -4,6 +4,8 @@ import com.uxia.uxilibris.model.TipoDato;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "definicion_propiedades")
 @Data

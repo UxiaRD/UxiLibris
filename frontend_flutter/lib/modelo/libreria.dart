@@ -1,6 +1,7 @@
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:frontend_flutter/servicio/ApiService.dart';
 
 class Libreria {
   // Compartida por toda la app
@@ -11,30 +12,30 @@ class Libreria {
   Libreria({List<Libro>? libros}) : libros = libros ?? todosLosLibros;
 
   // Método estático para inicializar los datos
-  static Future<Libreria> conDatosLocal() async {
+  static Future<Libreria> conDatosBackend() async {
     Libreria instancia = Libreria();
-    await instancia._cargarDesdeJson();
+    await instancia._cargarDesdeBackend();
     return instancia;
   }
 
-  // Método de carga de los datos desde JSON
-  Future<void> _cargarDesdeJson() async {
+  // Sustituto de _cargarDesdeJson
+  Future<void> _cargarDesdeBackend() async {
     try {
-      // Cargar el String del archivo
-      final String respuesta = await rootBundle.loadString(
-        'assets/libros.json',
-      );
+      // Usamos el ApiService que creamos para obtener los datos de Java
+      final List<Libro> librosDesdeServidor = await ApiService.fetchLibros();
 
-      // Decodificar a una lista dinámica
-      final List<dynamic> datos = json.decode(respuesta);
-
-      // Convertir cada elemento en una instancia de Libro y llenar las lista estática
-      todosLosLibros = datos.map((json) => Libro.fromJson(json)).toList();
-
-      // También llenamos la lista de la instancia actual
+      // Actualizamos la lista compartida con los datos reales de MySQL
+      todosLosLibros = librosDesdeServidor;
       libros = List.from(todosLosLibros);
+
+      print(
+        "Conexión con UxiLibrisDB exitosa: ${todosLosLibros.length} libros cargados.",
+      );
     } catch (e) {
-      print("Error al cargar JSON: $e");
+      print("Error al conectar con el Backend en Java: $e");
+      // Opcional: podrías cargar una lista vacía para que la app no crashee
+      todosLosLibros = [];
+      libros = [];
     }
   }
 
