@@ -22,8 +22,9 @@ uxilbris_project/
 │   │   ├── modelo/         # Lógica de libros y sagas
 │   │   ├── pantallas/      # Vistas de usuario
 │   │   └── utilidades/     # Componentes compartidos
-├── backend_spring/         # Servidor API (Java Spring Boot) - PRÓXIMAMENTE
-└── database/               # Esquemas y scripts SQL - PRÓXIMAMENTE
+├── backend_spring/         # Servidor API (Java Spring Boot)
+├── database/               # Esquemas y scripts SQL
+└── documentación           # Memoria y diagramas
 ```
 
 ## 🎨 Capturas de Pantalla
