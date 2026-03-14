@@ -8,19 +8,21 @@ class Libro {
   final int? id; // ID de la base de datos SQL
   String titulo;
   int? autorId; // Relación con la tabla autoras
-  String autorNombre; // Para mostrar en la App y usar en el Formulario
+  String
+  autorNombre; // Para mostrar en la App y usar en el utilidades/formularioLibro.dart
   int? sagaId; // Relación con la tabla sagas
-  String? sagaNombre;
+  String? sagaNombre; // Para mostrar en la App
   double? numLibroSaga;
   double puntuacion;
-  EstadoLibro estado; // El enum que ya tenías
+  EstadoLibro estado;
   DateTime? fechaInicio;
   DateTime? fechaFin;
   String rutaImagen;
 
-  // AQUÍ reside la personalización extrema
+  // Base para la personalización
   AlmacenPropiedades almacen;
 
+  // Constructor
   Libro({
     this.id,
     required this.titulo,
@@ -38,13 +40,13 @@ class Libro {
   });
 
   // Constructor factory para crear un Libro desde un Map (JSON)
+  // Recibir el Libro del JSON
   factory Libro.fromJson(Map<String, dynamic> json) {
     return Libro(
       id: json['id'],
       titulo: json['titulo'],
       autorNombre: json['autorNombre'],
       sagaNombre: json['sagaNombre'],
-      // Usamos toDouble() para asegurar compatibilidad con la puntuación de 0.5
       numLibroSaga: json['numLibroSaga']?.toDouble(),
       puntuacion: json['puntuacion']?.toDouble(),
       estado: EstadoLibro.values.firstWhere(
@@ -59,21 +61,22 @@ class Libro {
           : null,
       rutaImagen: json['rutaImagen'] ?? "assets/images/fondos/libro.png",
 
-      // Cargamos el almacén desde la lista de propiedades del JSON
+      // Se carga el almacén desde la lista de propiedades del JSON
       almacen: AlmacenPropiedades.fromJson(json['propiedades'] ?? []),
     );
   }
 
+  // Enviar el Libro con JSON
   Map<String, dynamic> toJson() {
     return {
       'titulo': titulo,
       'autorNombre': autorNombre,
       'sagaNombre': sagaNombre,
-      'numLibroSaga': numLibroSaga, // Soporta el double (ej: 1.5)
-      'puntuacion': puntuacion, // Soporta el paso de 0.5 [cite: 61, 78]
-      'estado': estado.name, // Convertir Enum a String para Java
-      'fechaInicio': fechaInicio?.toIso8601String(), // [cite: 60, 78]
-      'fechaFin': fechaFin?.toIso8601String(), // [cite: 60, 78]
+      'numLibroSaga': numLibroSaga,
+      'puntuacion': puntuacion,
+      'estado': estado.name, // Convertir de enumm a String para enviar
+      'fechaInicio': fechaInicio?.toIso8601String(),
+      'fechaFin': fechaFin?.toIso8601String(),
     };
   }
 }

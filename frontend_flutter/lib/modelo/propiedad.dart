@@ -5,7 +5,7 @@ class Propiedad {
   final TipoDato tipo;
   final bool esOptativa;
 
-  // El valor puede ser un String, un int, o incluso un objeto como una Saga
+  // El valor puede ser un String, un int, o un objeto
   dynamic valor;
 
   // Si es tipo 'lista', aquí guardamos las opciones disponibles (ej: Editoriales)

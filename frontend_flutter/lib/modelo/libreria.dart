@@ -1,6 +1,4 @@
 import 'package:frontend_flutter/modelo/libro.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 
 class Libreria {
@@ -18,7 +16,7 @@ class Libreria {
     return instancia;
   }
 
-  // Sustituto de _cargarDesdeJson
+  // Carga de datos del archivo JSON recibido del Backend
   Future<void> _cargarDesdeBackend() async {
     try {
       // Usamos el ApiService que creamos para obtener los datos de Java
@@ -33,18 +31,18 @@ class Libreria {
       );
     } catch (e) {
       print("Error al conectar con el Backend en Java: $e");
-      // Opcional: podrías cargar una lista vacía para que la app no crashee
+      // Se carga una lista vacía para evitar errores fatales en ejecución
       todosLosLibros = [];
       libros = [];
     }
   }
 
-  /// Añade un libro nuevo a la lista global
+  // Añade un libro nuevo a la lista global
   void agregarLibro(Libro nuevo) {
     todosLosLibros.add(nuevo);
   }
 
-  /// Actualiza los datos de un libro existente
+  // Actualiza los datos de un libro existente
   void editarLibro(Libro original, Libro modificado) {
     original.titulo = modificado.titulo;
     original.autorId = modificado.autorId;
@@ -53,7 +51,7 @@ class Libreria {
     original.rutaImagen = modificado.rutaImagen;
   }
 
-  /// Elimina un libro de la lista
+  // Elimina un libro de la lista
   void eliminarLibro(Libro libro) {
     todosLosLibros.remove(libro);
   }
@@ -83,7 +81,7 @@ class Libreria {
       String busqueda = consulta.toLowerCase();
 
       librosBuscados = libros.where((libro) {
-        // Busqueda por titulo o por autor
+        // Busqueda por titulo
         return libro.titulo.toLowerCase().contains(busqueda);
       }).toList();
     }

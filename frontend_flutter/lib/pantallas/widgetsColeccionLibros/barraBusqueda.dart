@@ -19,7 +19,7 @@ class BarraBusqueda extends StatelessWidget {
         controller: controladorBusqueda,
         onChanged: onChanged, // Usamos la función que viene del padre
         decoration: InputDecoration(
-          hintText: "Buscar por título o autor...",
+          hintText: "Buscar por título...",
           prefixIcon: const Icon(Icons.search),
           suffixIcon: IconButton(
             icon: const Icon(Icons.clear),
