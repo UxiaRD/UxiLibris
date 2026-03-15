@@ -4,12 +4,14 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // URL base para el emulador de Android (localhost de la máquina)
-  static const String baseUrl = "http://10.0.2.2:8080/api/libros";
+  // static const String baseUrl = "http://10.0.2.2:8080/api/libros";
+  // URL base para el emulador de Chrome
+  static const String baseUrl = 'http://localhost:8080/api';
 
   static Future<List<Libro>> fetchLibros() async {
     try {
       // Realizamos la petición GET al endpoint principal
-      final response = await http.get(Uri.parse(baseUrl));
+      final response = await http.get(Uri.parse('$baseUrl/libros'));
 
       if (response.statusCode == 200) {
         // Decodificamos el cuerpo de la respuesta (un JSON Array)
@@ -65,6 +67,35 @@ class ApiService {
         libro.toJson(),
       ), // Debes tener el método toJson en tu modelo
     );
+    return response.statusCode == 200;
+  }
+
+  static Future<bool> registrarUsuario(
+    String username,
+    String email,
+    String password,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/registro'),
+      body: jsonEncode({
+        'username': username,
+        'email': email,
+        'password': password,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+    return response.statusCode == 200;
+  }
+
+  static Future<bool> login(String username, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/login'),
+      body: jsonEncode({'username': username, 'password': password}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    print("Respuesta del servidor: ${response.statusCode}");
+    print("Cuerpo de respuesta: ${response.body}");
+
     return response.statusCode == 200;
   }
 }

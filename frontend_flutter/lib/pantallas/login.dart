@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_flutter/controladores/loginController.dart';
+import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
 import 'package:frontend_flutter/pantallas/menuPrincipal.dart';
@@ -15,6 +17,44 @@ class PantallaLogin extends StatefulWidget {
 
 class _PantallaLoginState extends State<PantallaLogin> {
   bool _ocultarContrasena = true;
+  // CONTROLADORES
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passController = TextEditingController();
+  bool _cargando = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _iniciarSesion() async {
+    setState(() => _cargando = true);
+
+    // Llamada al backend de Java a través del ApiService
+    bool exito = await ApiService.login(
+      _usernameController.text.trim(),
+      _passController.text.trim(),
+    );
+
+    setState(() => _cargando = false);
+
+    if (exito) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MenuPrincipal()),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Email o contraseña incorrectos")),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +92,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
               // CAMPO: USUARIO
               // El TextFormField se usa para introducir texto en un formulario
               TextFormField(
+                controller: _usernameController,
                 // No es necesario incluir el style ya que lo toma el textTheme
                 decoration: InputDecoration(
                   labelText: "Usuario",
@@ -63,6 +104,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
 
               // CAMPO: CONTRASEÑA
               TextFormField(
+                controller: _passController,
                 // Propiedad que oculta el texto escrito
                 obscureText: _ocultarContrasena,
                 decoration: InputDecoration(
@@ -88,20 +130,25 @@ class _PantallaLoginState extends State<PantallaLogin> {
               SizedBox(
                 width: double.infinity,
                 height: 55,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => MenuPrincipal()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    // onPrimary es el color de texto que se define para ir SOBRE el morado
-                    backgroundColor: colores.primary,
-                    foregroundColor: colores.onPrimary,
-                  ),
-                  child: const Text("Iniciar sesión"),
-                ),
+                child: _cargando
+                    ? const Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        onPressed: () {
+                          LoginController.iniciarSesion(
+                            context: context,
+                            username: _usernameController.text,
+                            password: _passController.text,
+                            setCargando: (valor) =>
+                                setState(() => _cargando = valor),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          // onPrimary es el color de texto que se define para ir SOBRE el morado
+                          backgroundColor: colores.primary,
+                          foregroundColor: colores.onPrimary,
+                        ),
+                        child: const Text("Iniciar sesión"),
+                      ),
               ),
 
               SizedBox(height: 20),

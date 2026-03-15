@@ -22,6 +22,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.13.1
   image_picker: ^1.1.2
+  path_provider: ^2.1.2
 
 flutter:
   uses-material-design: true
@@ -29,6 +30,7 @@ flutter:
   assets:
   - assets/images/
   - assets/images/fondos/
+  - assets/images/ilustraciones/
 
 # Configuración de iconos de la app
 flutter_launcher_icons:

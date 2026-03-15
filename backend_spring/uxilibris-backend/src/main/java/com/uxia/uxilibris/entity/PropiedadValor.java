@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "libro_propiedades_valores") // Nombre exacto de tu tabla
+@Table(name = "libro_propiedades_valores")
 @Data
 public class PropiedadValor {
 
@@ -12,7 +12,7 @@ public class PropiedadValor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "valor_texto") // Mapea con tu columna TEXT del SQL
+    @Column(name = "valor_texto") // Mapea con la columna TEXT del SQL
     private String valor;
 
     // Relación con el Libro (Muchos valores pertenecen a un Libro)

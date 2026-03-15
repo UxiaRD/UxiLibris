@@ -55,3 +55,12 @@ CREATE TABLE libro_propiedades_valores (
     FOREIGN KEY (libro_id) REFERENCES libros(id),
     FOREIGN KEY (propiedad_id) REFERENCES definicion_propiedades(id)
 );
+
+-- 3. Usuarios de app
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL, -- Almacenaremos el hash, no texto plano
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

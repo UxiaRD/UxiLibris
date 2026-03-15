@@ -4,9 +4,11 @@ import com.uxia.uxilibris.entity.Libro;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public interface LibroRepository extends JpaRepository<Libro, Long> {
     // Busca los números de volumen ya ocupados para una saga específica
     @Query("SELECT l.numLibroSaga FROM Libro l WHERE l.sagaNombre = :saga")

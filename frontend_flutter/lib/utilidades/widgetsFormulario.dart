@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/propiedad.dart';
 import '../modelo/libro.dart';
@@ -80,7 +82,7 @@ class WidgetsFormulario {
     );
   }
 
-  // Método para los campos que se añaden dinámicamente
+  // MÉTODO PARA AÑADIR LOS CAMPOS DINÁMICAMENTE
   static Widget buildCampoDinamico(Propiedad prop, ColorScheme colores) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
@@ -97,7 +99,7 @@ class WidgetsFormulario {
     );
   }
 
-  /// Genera un selector de fecha con estilo consistente
+  // MÉTODO PARA EL SELECTOR DE FECHA
   static Widget buildDatePicker(
     BuildContext context,
     String label,
@@ -142,6 +144,7 @@ class WidgetsFormulario {
     );
   }
 
+  // MÉTODO PARA LA BÚSQUEDA DE LA IMAGEN
   static Widget buildSearchField({
     required TextEditingController controller,
     required List<String> opciones,
@@ -189,5 +192,62 @@ class WidgetsFormulario {
         );
       },
     );
+  }
+
+  static Widget buildSelectorImagen({
+    required File? imagenArchivo,
+    required String? rutaImagenInicial,
+    required VoidCallback alPulsar,
+    required Color primaryColor,
+  }) {
+    return Center(
+      child: Stack(
+        children: [
+          Container(
+            width: 150,
+            height: 220,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: _renderizarImagen(imagenArchivo, rutaImagenInicial),
+            ),
+          ),
+          Positioned(
+            bottom: 8,
+            right: 8,
+            child: CircleAvatar(
+              backgroundColor: primaryColor,
+              child: IconButton(
+                icon: const Icon(Icons.camera_alt, color: Colors.white),
+                onPressed: alPulsar,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _renderizarImagen(File? archivo, String? rutaInicial) {
+    // 1. Prioridad: Imagen recién seleccionada por el usuario
+    if (archivo != null) {
+      return Image.file(archivo, fit: BoxFit.cover);
+    }
+    // 2. Imagen que ya existía en la base de datos (si no es el asset por defecto)
+    if (rutaInicial != null && !rutaInicial.contains("assets/")) {
+      return Image.file(File(rutaInicial), fit: BoxFit.cover);
+    }
+    // 3. Imagen por defecto de la aplicación
+    return Image.asset("assets/images/fondos/libro.png", fit: BoxFit.cover);
   }
 }

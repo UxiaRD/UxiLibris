@@ -46,11 +46,14 @@ class _PantallaGestionLibroState extends State<PantallaGestionLibro> {
 
       appBar: AppBar(
         // El título cambia dinámicamente
-        title: Text(esModoEdicion ? "Editar Libro" : "Añadir a la Estantería"),
+        title: Text(
+          esModoEdicion ? "Editar Libro" : "Añadir manualmente a la Estantería",
+        ),
         centerTitle: true,
+        backgroundColor: Colors.transparent,
         actions: ActionsAppBar.obtenerAcciones(
           context,
-          mostrarCerrarSesion: true,
+          mostrarCerrarSesion: false,
           // Solo se pasa el método eliminar si se está en modo edición
           alEliminar: esModoEdicion ? _eliminarLibro : null,
         ),

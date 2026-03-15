@@ -3,10 +3,12 @@ package com.uxia.uxilibris.service;
 import com.uxia.uxilibris.entity.Libro;
 import com.uxia.uxilibris.repository.LibroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Service
 public class LibroService {
     @Autowired
     private LibroRepository libroRepository;
@@ -15,9 +17,9 @@ public class LibroService {
     public Double sugerirSiguienteVolumen(String nombreSaga) {
         List<Double> volumenes = libroRepository.findVolumesBySaga(nombreSaga);
         if (volumenes.isEmpty()) {
-            return 1.0; // Si la saga es nueva, empezamos por el 1
+            return 1.0; // Si la saga es nueva, empieza por el 1
         }
-        // Buscamos el máximo y sumamos 1
+        // Busca el máximo y suma 1
         return volumenes.stream().mapToDouble(v -> v).max().orElse(0.0) + 1.0;
     }
 

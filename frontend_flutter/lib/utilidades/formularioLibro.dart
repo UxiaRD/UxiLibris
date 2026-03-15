@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 import 'package:frontend_flutter/modelo/propiedad.dart';
@@ -8,13 +12,9 @@ import '../../modelo/libro.dart';
 
 class FormularioLibro extends StatefulWidget {
   final Libro? libroParaEditar; // Si es null, estamos creando. Si no, editando.
-  final Function(Libro) alGuardar; // Acción que haremos al pulsar el botón
+  final Function(Libro)? alGuardar; // Acción que haremos al pulsar el botón
 
-  const FormularioLibro({
-    super.key,
-    this.libroParaEditar,
-    required this.alGuardar,
-  });
+  const FormularioLibro({super.key, this.libroParaEditar, this.alGuardar});
 
   @override
   State<FormularioLibro> createState() => _FormularioLibroState();
@@ -38,6 +38,9 @@ class _FormularioLibroState extends State<FormularioLibro> {
   List<String> _sagasSugeridas = [];
 
   List<double> _numerosOcupados = [];
+
+  File? _imagenSeleccionada; // Para guardar el archivo físico en Android
+  final ImagePicker _picker = ImagePicker();
 
   // Método auxiliar para no bloquear el initState
   Future<void> _cargarDatosDesdeServidor() async {
@@ -146,6 +149,33 @@ class _FormularioLibroState extends State<FormularioLibro> {
     }
   }
 
+  // Método para seleccionar la imagen
+  Future<void> _seleccionarImagen() async {
+    final XFile? imagenTemporal = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (imagenTemporal != null) {
+      // 1. Obtenemos el directorio permanente de la app
+      final directorio = await getApplicationDocumentsDirectory();
+
+      // 2. Creamos un nombre único para el archivo (usando la fecha actual)
+      final String nombreArchivo =
+          'libro_${DateTime.now().millisecondsSinceEpoch}.png';
+      final String rutaPermanente = '${directorio.path}/$nombreArchivo';
+
+      // 3. Copiamos el archivo de la caché a la carpeta permanente
+      final File imagenGuardada = await File(
+        imagenTemporal.path,
+      ).copy(rutaPermanente);
+
+      setState(() {
+        _imagenSeleccionada = imagenGuardada;
+        // Ahora esta es la ruta que enviaremos a Java y MySQL
+      });
+    }
+  }
+
   Future<void> _guardarLibro() async {
     // 1. Mantenemos tu validación de título
     if (_tituloController.text.isEmpty) {
@@ -168,6 +198,7 @@ class _FormularioLibroState extends State<FormularioLibro> {
       fechaInicio: _fechaInicio,
       fechaFin: _fechaFin,
       rutaImagen:
+          _imagenSeleccionada?.path ??
           widget.libroParaEditar?.rutaImagen ??
           "assets/images/fondos/libro.png",
       numLibroSaga: double.tryParse(
@@ -185,7 +216,7 @@ class _FormularioLibroState extends State<FormularioLibro> {
 
       if (exito) {
         // 4. Si el servidor responde OK, ejecutamos el callback local (si aún lo usas) y cerramos
-        widget.alGuardar(libroFinal);
+        widget.alGuardar?.call(libroFinal);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("¡Libro guardado en la base de datos!")),
@@ -207,128 +238,146 @@ class _FormularioLibroState extends State<FormularioLibro> {
   Widget build(BuildContext context) {
     final ColorScheme colores = Theme.of(context).colorScheme;
 
-    return Column(
-      children: [
-        // --- SECCIÓN DE CAMPOS FIJOS ---
-        // 1. TITULO
-        WidgetsFormulario.buildTextField(
-          _tituloController,
-          "Título",
-          Icons.book,
-          colores,
-        ),
-        const SizedBox(height: 15),
-        // 2. AUTOR
-        WidgetsFormulario.buildSearchField(
-          controller: _autorController,
-          opciones: _autoresSugeridos,
-          label: "Autor/a",
-          icono: Icons.person,
-          colores: colores,
-        ),
-        const SizedBox(height: 15),
-        // 3. SAGAS -> Buscador en la DB
-        WidgetsFormulario.buildSearchField(
-          controller: _sagaNombreController,
-          opciones: _sagasSugeridas,
-          label: "Saga",
-          icono: Icons.library_books,
-          colores: colores,
-        ),
-        const SizedBox(height: 15),
-        // 4. VOLUMEN del libro en la Saga
-        WidgetsFormulario.buildTextField(
-          _numLibroSagaController,
-          "Volumen en Saga",
-          Icons.format_list_numbered,
-          colores,
-          esNumerico: true,
-          // Pasamos la lógica de validación como argumento
-          errorText:
-              _numerosOcupados.contains(
-                double.tryParse(_numLibroSagaController.text),
-              )
-              ? "Este volumen ya existe en la saga"
-              : null,
-        ),
-        const SizedBox(height: 20),
-        // 5. CAMBIO DE ESTADO
-        WidgetsFormulario.buildDropdownEstado(
-          _estadoSeleccionado,
-          colores,
-          (val) => _cambiarEstado(val!),
-        ),
-        const SizedBox(height: 20),
-        // 6. FECHA INCIO
-        if (_estaEmpezado)
-          WidgetsFormulario.buildDatePicker(
-            context,
-            "Fecha Inicio",
-            _fechaInicio,
-            (d) => setState(() => _fechaInicio = d),
-          ),
-        // 7. FECHA FIN
-        if (_esLeido)
-          WidgetsFormulario.buildDatePicker(
-            context,
-            "Fecha Fin",
-            _fechaFin,
-            (d) => setState(() => _fechaFin = d),
-          ),
-        const SizedBox(height: 20),
-        // 8. PUNTUACIÓN
-        WidgetsFormulario.buildSelectorPuntuacion(_puntuacionActual, _esLeido, (
-          val,
-        ) {
-          setState(() => _puntuacionActual = val);
-        }),
-        // Separador
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Divider(),
-        ),
-        // Titulo
-        Text(
-          "Campos Personalizados",
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 15),
-
-        // --- SECCIÓN DE CAMPOS DINÁMICOS (El Almacén) ---
-        // Recorrer la lista y creamos un campo por cada propiedad
-        ..._propiedadesDinamicas
-            .map((prop) => WidgetsFormulario.buildCampoDinamico(prop, colores))
-            .toList(),
-
-        TextButton.icon(
-          onPressed: _gestionarNuevaPropiedad,
-          icon: const Icon(Icons.add_circle_outline),
-          label: const Text("Añadir campo personalizado"),
-        ),
-        const SizedBox(height: 30),
-
-        // BOTÓN GUARDAR
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: ElevatedButton.icon(
-            onPressed: _guardarLibro, // Llamamos a nuestra función lógica
-            icon: const Icon(Icons.save),
-            label: Text(
-              widget.libroParaEditar == null
-                  ? "Registrar Libro"
-                  : "Actualizar Libro",
+    return SingleChildScrollView(
+      // Ayuda con el segundo error (overflow)
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // --- SECCIÓN DE CAMPOS FIJOS ---
+            // 1. IMAGEN
+            WidgetsFormulario.buildSelectorImagen(
+              imagenArchivo: _imagenSeleccionada,
+              rutaImagenInicial: widget.libroParaEditar?.rutaImagen,
+              primaryColor: colores.primary,
+              alPulsar: _seleccionarImagen, // Tu método con ImagePicker
             ),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 50),
-              backgroundColor: colores.primary,
-              foregroundColor: colores.onPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 24),
+            // 2. TITULO
+            WidgetsFormulario.buildTextField(
+              _tituloController,
+              "Título",
+              Icons.book,
+              colores,
+            ),
+            const SizedBox(height: 15),
+            // 3. AUTOR
+            WidgetsFormulario.buildSearchField(
+              controller: _autorController,
+              opciones: _autoresSugeridos,
+              label: "Autor/a",
+              icono: Icons.person,
+              colores: colores,
+            ),
+            const SizedBox(height: 15),
+            // 4. SAGAS -> Buscador en la DB
+            WidgetsFormulario.buildSearchField(
+              controller: _sagaNombreController,
+              opciones: _sagasSugeridas,
+              label: "Saga",
+              icono: Icons.library_books,
+              colores: colores,
+            ),
+            const SizedBox(height: 15),
+            // 5. VOLUMEN del libro en la Saga
+            WidgetsFormulario.buildTextField(
+              _numLibroSagaController,
+              "Volumen en Saga",
+              Icons.format_list_numbered,
+              colores,
+              esNumerico: true,
+              // Pasamos la lógica de validación como argumento
+              errorText:
+                  _numerosOcupados.contains(
+                    double.tryParse(_numLibroSagaController.text),
+                  )
+                  ? "Este volumen ya existe en la saga"
+                  : null,
+            ),
+            const SizedBox(height: 20),
+            // 6. CAMBIO DE ESTADO
+            WidgetsFormulario.buildDropdownEstado(
+              _estadoSeleccionado,
+              colores,
+              (val) => _cambiarEstado(val!),
+            ),
+            const SizedBox(height: 20),
+            // 7. FECHA INCIO
+            if (_estaEmpezado)
+              WidgetsFormulario.buildDatePicker(
+                context,
+                "Fecha Inicio",
+                _fechaInicio,
+                (d) => setState(() => _fechaInicio = d),
+              ),
+            // 8. FECHA FIN
+            if (_esLeido)
+              WidgetsFormulario.buildDatePicker(
+                context,
+                "Fecha Fin",
+                _fechaFin,
+                (d) => setState(() => _fechaFin = d),
+              ),
+            const SizedBox(height: 20),
+            // 9. PUNTUACIÓN
+            WidgetsFormulario.buildSelectorPuntuacion(
+              _puntuacionActual,
+              _esLeido,
+              (val) {
+                setState(() => _puntuacionActual = val);
+              },
+            ),
+            // Separador
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Divider(),
+            ),
+            // Titulo
+            Text(
+              "Campos Personalizados",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 15),
+
+            // --- SECCIÓN DE CAMPOS DINÁMICOS (El Almacén) ---
+            // Recorrer la lista y creamos un campo por cada propiedad
+            ..._propiedadesDinamicas
+                .map(
+                  (prop) => WidgetsFormulario.buildCampoDinamico(prop, colores),
+                )
+                .toList(),
+
+            TextButton.icon(
+              onPressed: _gestionarNuevaPropiedad,
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text("Añadir campo personalizado"),
+            ),
+            const SizedBox(height: 30),
+
+            // BOTÓN GUARDAR
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: ElevatedButton.icon(
+                onPressed: _guardarLibro, // Llamamos a nuestra función lógica
+                icon: const Icon(Icons.save),
+                label: Text(
+                  widget.libroParaEditar == null
+                      ? "Registrar Libro"
+                      : "Actualizar Libro",
+                ),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: colores.primary,
+                  foregroundColor: colores.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -81,8 +81,21 @@ class Libreria {
       String busqueda = consulta.toLowerCase();
 
       librosBuscados = libros.where((libro) {
-        // Busqueda por titulo
-        return libro.titulo.toLowerCase().contains(busqueda);
+        // Busqueda por título
+        final coincideTitulo = libro.titulo.toLowerCase().contains(busqueda);
+
+        // Busqueda por autor
+        final coincideAutor = libro.autorNombre.toLowerCase().contains(
+          busqueda,
+        );
+
+        // Busqueda por saga (usando operador null-aware para evitar errores)
+        final coincideSaga = (libro.sagaNombre ?? "").toLowerCase().contains(
+          busqueda,
+        );
+
+        // Retorna si coincide con cualquiera de los tres criterios
+        return coincideTitulo || coincideAutor || coincideSaga;
       }).toList();
     }
     return librosBuscados;
