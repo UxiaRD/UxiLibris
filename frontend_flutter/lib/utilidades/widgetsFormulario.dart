@@ -35,7 +35,7 @@ class WidgetsFormulario {
     Function(EstadoLibro?) onChanged,
   ) {
     return DropdownButtonFormField<EstadoLibro>(
-      value: valorActual,
+      initialValue: valorActual,
       decoration: InputDecoration(
         labelText: "Estado de lectura",
         prefixIcon: Icon(Icons.import_contacts, color: colores.primary),
@@ -156,8 +156,9 @@ class WidgetsFormulario {
       textEditingController: controller,
       focusNode: FocusNode(),
       optionsBuilder: (TextEditingValue textEditingValue) {
-        if (textEditingValue.text.isEmpty)
+        if (textEditingValue.text.isEmpty) {
           return const Iterable<String>.empty();
+        }
         return opciones.where(
           (String option) => option.toLowerCase().contains(
             textEditingValue.text.toLowerCase(),

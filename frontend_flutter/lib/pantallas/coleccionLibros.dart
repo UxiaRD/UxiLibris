@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
-import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 import 'package:frontend_flutter/pantallas/seleccionMetodoCarga.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/barraBusqueda.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/gridViewColeccion.dart';

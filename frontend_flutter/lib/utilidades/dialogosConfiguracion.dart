@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/propiedad.dart';
-import '../modelo/libro.dart';
 
 class DialogosConfiguracion {
   /// Muestra un diálogo para crear una nueva propiedad dinámica.

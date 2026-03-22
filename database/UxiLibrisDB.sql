@@ -29,7 +29,7 @@ CREATE TABLE libros (
 );
 
 -- 2. SISTEMA DE PROPIEDADES DINÁMICAS (El "Almacén")
--- Aquí defines qué propiedades existen (Ej: 'ISBN', 'Editorial', 'Saga', 'Traductor')
+-- Aquí se define qué propiedades existen (Ej: 'ISBN', 'Editorial', 'Saga', 'Traductor')
 CREATE TABLE definicion_propiedades (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL, -- Nombre de la propiedad
@@ -37,7 +37,7 @@ CREATE TABLE definicion_propiedades (
     tipo_dato ENUM('TEXTO', 'NUMERO', 'LISTA', 'FECHA') DEFAULT 'TEXTO'
 );
 
--- Para propiedades tipo 'LISTA', aquí guardas las opciones (Ej: Planeta, Minotauro)
+-- Para propiedades tipo 'LISTA', aquí se guardan las opciones (Ej: Planeta, Minotauro)
 CREATE TABLE opciones_propiedades (
     id INT AUTO_INCREMENT PRIMARY KEY,
     propiedad_id INT,
@@ -51,12 +51,12 @@ CREATE TABLE libro_propiedades_valores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     libro_id INT,
     propiedad_id INT,
-    valor_texto TEXT, -- Aquí guardas el valor (o un JSON si son varios)
+    valor_texto TEXT, -- Aquí se guarda el valor (o un JSON si son varios)
     FOREIGN KEY (libro_id) REFERENCES libros(id),
     FOREIGN KEY (propiedad_id) REFERENCES definicion_propiedades(id)
 );
 
--- 3. Usuarios de app
+-- 4. USUARIOS de app
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,

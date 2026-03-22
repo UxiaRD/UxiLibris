@@ -3,10 +3,17 @@ import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // URL base para el emulador de Android (localhost de la máquina)
-  // static const String baseUrl = "http://10.0.2.2:8080/api/libros";
-  // URL base para el emulador de Chrome
-  static const String baseUrl = 'http://localhost:8080/api';
+  // 1. Definimos la dirección IP específica
+  // Para emulador Android: 10.0.2.2
+  // Para Web/Local: localhost
+  //static const String _host = '10.0.2.2';
+  static const String _host = 'localhost';
+
+  // 2. Definimos el puerto concreto de tu Backend en Java
+  static const String _puerto = '8080';
+
+  // 3. Construimos la URL base final
+  static const String baseUrl = 'http://$_host:$_puerto/api';
 
   static Future<List<Libro>> fetchLibros() async {
     try {

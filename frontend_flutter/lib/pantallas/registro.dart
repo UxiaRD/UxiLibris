@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend_flutter/controladores/registroController.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
-import 'package:frontend_flutter/pantallas/login.dart';
 
 // WIDGET que gestiona el Registro de la app
 

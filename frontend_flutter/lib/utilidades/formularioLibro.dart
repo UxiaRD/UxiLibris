@@ -341,11 +341,9 @@ class _FormularioLibroState extends State<FormularioLibro> {
 
             // --- SECCIÓN DE CAMPOS DINÁMICOS (El Almacén) ---
             // Recorrer la lista y creamos un campo por cada propiedad
-            ..._propiedadesDinamicas
-                .map(
-                  (prop) => WidgetsFormulario.buildCampoDinamico(prop, colores),
-                )
-                .toList(),
+            ..._propiedadesDinamicas.map(
+              (prop) => WidgetsFormulario.buildCampoDinamico(prop, colores),
+            ),
 
             TextButton.icon(
               onPressed: _gestionarNuevaPropiedad,

@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  google_fonts: ^6.3.2
+  google_fonts: ^6.1.0
   provider: ^6.1.5+1
   http: ^1.6.0
 
@@ -20,7 +20,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
   image_picker: ^1.1.2
   path_provider: ^2.1.2
 
@@ -31,6 +31,13 @@ flutter:
   - assets/images/
   - assets/images/fondos/
   - assets/images/ilustraciones/
+
+  fonts:
+    - family: MontserratAlternates
+      fonts:
+        - asset: assets/fonts/Montserrat_Alternates/MontserratAlternates-Regular.ttf
+        - asset: assets/fonts/Montserrat_Alternates/MontserratAlternates-Bold.ttf
+          weight: 700
 
 # Configuración de iconos de la app
 flutter_launcher_icons:
