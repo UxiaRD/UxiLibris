@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class Cardlibro extends StatelessWidget {
@@ -12,6 +14,33 @@ class Cardlibro extends StatelessWidget {
     required this.puntuacion,
   });
 
+  // El método _buildImagen va aquí dentro, como método PRIVADO del propio
+  // widget. No hace falta un archivo aparte ni pasarlo como children.
+  // Se llama directamente desde el build() igual que cualquier otro método.
+  //
+  // La lógica es:
+  //   1. Si la ruta empieza por 'assets/' → Image.asset  (bundle de la app)
+  //   2. Si no                            → Image.file   (galería / disco)
+  //      con un errorBuilder de seguridad por si el archivo fue borrado.
+  Widget _buildImagen() {
+    if (rutaImagen.startsWith('assets/')) {
+      return Image.asset(rutaImagen, fit: BoxFit.cover, width: double.infinity);
+    }
+    return Image.file(
+      File(rutaImagen),
+      fit: BoxFit.cover,
+      width: double.infinity,
+      errorBuilder: (context, error, stackTrace) {
+        // Si el archivo ya no existe en disco, mostramos la portada por defecto
+        return Image.asset(
+          'assets/images/fondos/libro.png',
+          fit: BoxFit.cover,
+          width: double.infinity,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -19,13 +48,7 @@ class Cardlibro extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          Expanded(
-            child: Image.asset(
-              rutaImagen, // Se saca la ruta del objeto
-              fit: BoxFit.cover,
-              width: double.infinity,
-            ),
-          ),
+          Expanded(child: _buildImagen()),
           Padding(
             padding: const EdgeInsets.all(4.0),
             child: Column(

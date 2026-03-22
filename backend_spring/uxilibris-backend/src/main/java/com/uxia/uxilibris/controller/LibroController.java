@@ -15,29 +15,48 @@ public class LibroController {
     @Autowired
     private LibroService libroService;
 
+    // GET /api/libros → devuelve todos los libros
     @GetMapping
     public List<Libro> listarTodos() {
         return libroService.listarTodosLosLibros(); // Este debe devolver libroRepository.findAll()
     }
+    // POST /api/libros → guarda o actualiza un libro
+    // Si el JSON incluye 'id', Spring hace UPDATE. Si no, hace INSERT.
+    @PostMapping
+    public ResponseEntity<Libro> guardar(@RequestBody Libro libro) {
+        return ResponseEntity.ok(libroService.guardarLibro(libro));
+    }
 
-    @GetMapping("/sagas")
+    // DELETE /api/libros/{id} → elimina un libro por su id
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        libroService.eliminarLibro(id);
+        return ResponseEntity.noContent().build(); // devuelve 204
+    }
+
+    // GET /api/libros/volumenes?saga=NombreSaga
+    @GetMapping("/volumenes")
+    public ResponseEntity<List<Double>> getVolumenesPorSaga(
+            @RequestParam String saga) {
+        List<Double> volumenes = libroService.obtenerVolumenesDeSaga(saga);
+        return ResponseEntity.ok(volumenes);
+    }
+
+    // GET /api/sagas
+    @GetMapping("/api/sagas")
     public List<String> getSagas() {
         return libroService.listarSagasExistentes();
     }
 
-    @GetMapping("/autores")
+    // GET /api/autores
+    @GetMapping("/api/autores")
     public List<String> getAutores() {
         return libroService.listarAutoresExistentes();
     }
 
-    @GetMapping("/sugerir-volumen")
+    // GET /api/sugerir-volumen?saga=NombreSaga
+    @GetMapping("/api/sugerir-volumen")
     public Double getSugerencia(@RequestParam String saga) {
         return libroService.sugerirSiguienteVolumen(saga);
-    }
-
-    @PostMapping
-    public ResponseEntity<Libro> crearLibro(@RequestBody Libro libro) {
-        Libro guardado = libroService.guardarLibro(libro);
-        return ResponseEntity.ok(guardado);
     }
 }

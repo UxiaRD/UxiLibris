@@ -40,6 +40,12 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
   // Nueva función para traer los datos de Java antes de filtrar
   Future<void> _cargarYFiltrar() async {
     setState(() => _estaCargando = true);
+    // Si ya hay datos en memoria, solo filtrar sin ir al servidor
+    if (Libreria.todosLosLibros.isNotEmpty) {
+      _buscarLibros(_controladorDeBusqueda.text);
+      setState(() => _estaCargando = false);
+      return;
+    }
     try {
       // 1. Llamamos al ApiService (AQUÍ ES DONDE DABA EL 404)
       // Debes asegurarte que en ApiService.dart la ruta sea exacta a Java
@@ -74,7 +80,7 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
       Libreria base = Libreria(libros: Libreria.todosLosLibros);
 
       // Paso 1: Filtramos por la pestaña actual (Estado)
-      List<Libro> porEstado = base.filtarPorEstado(widget.filtro);
+      List<Libro> porEstado = base.filtrarPorEstado(widget.filtro);
 
       // Paso 2: Filtramos sobre el resultado anterior usando el texto de búsqueda
       Libreria temporalEstado = Libreria(libros: porEstado);

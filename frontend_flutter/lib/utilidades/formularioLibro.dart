@@ -53,8 +53,7 @@ class _FormularioLibroState extends State<FormularioLibro> {
         _sagasSugeridas = sagas;
       });
     } catch (e) {
-      print("Error al conectar con el servidor: $e");
-      // Aquí podrías mostrar un SnackBar si el servidor Java está apagado
+      // Si el servidor está apagado, los autocompletes quedan vacíos
     }
   }
 
@@ -100,17 +99,38 @@ class _FormularioLibroState extends State<FormularioLibro> {
     _cargarDatosDesdeServidor();
   }
 
-  void _actualizarSugerenciaSaga(String nombreSaga) async {
-    // 1. Simulación de llamada al Backend para obtener números ocupados
-    // En el futuro será: _numerosOcupados = await api.getNumerosSaga(nombreSaga);
-    _numerosOcupados = [1.0, 2.0];
+  @override
+  void dispose() {
+    // Buena práctica: liberar los controladores cuando el widget se destruye
+    _tituloController.dispose();
+    _autorController.dispose();
+    _sagaNombreController.dispose();
+    _numLibroSagaController.dispose();
+    super.dispose();
+  }
 
-    if (_numerosOcupados.isNotEmpty) {
+  Future<void> _actualizarSugerenciaSaga(String nombreSaga) async {
+    if (nombreSaga.isEmpty) return;
+    try {
+      // Petición 1: siguiente volumen sugerido
+      final double siguiente = await ApiService.fetchSugerenciaVolumen(
+        nombreSaga,
+      );
+
+      // Petición 2: volúmenes ya ocupados (para la validación visual)
+      // Reutilizamos el endpoint que ya tienes en LibroRepository
+      final List<double> ocupados = await ApiService.fetchVolumenesOcupados(
+        nombreSaga,
+      );
+
+      if (!mounted) return;
       setState(() {
-        // Sugerimos el siguiente número entero
-        double maxActual = _numerosOcupados.reduce((a, b) => a > b ? a : b);
-        _numLibroSagaController.text = (maxActual + 1).toString();
+        _numerosOcupados = ocupados;
+        _numLibroSagaController.text = siguiente.toString();
       });
+    } catch (_) {
+      // Si falla la petición, no hacemos nada: el usuario puede escribir
+      // el volumen manualmente sin perder lo que ya tenía en el campo.
     }
   }
 
@@ -277,6 +297,7 @@ class _FormularioLibroState extends State<FormularioLibro> {
               label: "Saga",
               icono: Icons.library_books,
               colores: colores,
+              onSelected: (saga) => _actualizarSugerenciaSaga(saga),
             ),
             const SizedBox(height: 15),
             // 5. VOLUMEN del libro en la Saga

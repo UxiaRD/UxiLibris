@@ -1,19 +1,28 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // 1. Definimos la dirección IP específica
-  // Para emulador Android: 10.0.2.2
-  // Para Web/Local: localhost
-  //static const String _host = '10.0.2.2';
-  static const String _host = 'localhost';
+  // Detectamos la plataforma automáticamente para no tener que cambiar
+  // el host a mano cada vez que cambiamos entre web y emulador Android:
+  //
+  //  · Web (kIsWeb = true)        → localhost  (el navegador habla directamente
+  //                                              con el backend en tu máquina)
+  //  · Emulador Android           → 10.0.2.2   (alias especial del emulador
+  //                                              que apunta a la máquina host)
+  //  · Dispositivo físico Android → cambia 10.0.2.2 por la IP local de tu
+  //                                  máquina, ej: '192.168.1.50'
+  static String get _host {
+    if (kIsWeb) return 'localhost';
+    return '192.168.1.200'; // emular en dispositivo físico
+    //return '10.0.2.2'; // emulador Android
+  }
 
-  // 2. Definimos el puerto concreto de tu Backend en Java
   static const String _puerto = '8080';
 
-  // 3. Construimos la URL base final
-  static const String baseUrl = 'http://$_host:$_puerto/api';
+  // baseUrl es ahora un getter (no const) porque _host también lo es
+  static String get baseUrl => 'http://$_host:$_puerto/api';
 
   static Future<List<Libro>> fetchLibros() async {
     try {
@@ -68,13 +77,18 @@ class ApiService {
   // 4. Guardar un nuevo libro
   static Future<bool> guardarLibro(Libro libro) async {
     final response = await http.post(
-      Uri.parse(baseUrl),
+      Uri.parse('$baseUrl/libros'),
       headers: {"Content-Type": "application/json"},
       body: json.encode(
         libro.toJson(),
       ), // Debes tener el método toJson en tu modelo
     );
     return response.statusCode == 200;
+  }
+
+  static Future<bool> eliminarLibro(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/libros/$id'));
+    return response.statusCode == 200 || response.statusCode == 204;
   }
 
   static Future<bool> registrarUsuario(
@@ -104,5 +118,28 @@ class ApiService {
     print("Cuerpo de respuesta: ${response.body}");
 
     return response.statusCode == 200;
+  }
+
+  /// Devuelve la lista de números de volumen ya ocupados para una saga.
+  static Future<List<double>> fetchVolumenesOcupados(String saga) async {
+    try {
+      final response = await http.get(
+        // Uri.encodeComponent convierte espacios y caracteres especiales
+        // del nombre de la saga para que la URL sea válida
+        // Ej: "El Señor de los Anillos" → "El%20Se%C3%B1or%20de%20los%20Anillos"
+        Uri.parse(
+          '$baseUrl/libros/volumenes?saga=${Uri.encodeComponent(saga)}',
+        ),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> body = json.decode(response.body);
+        // Convertimos cada elemento a double de forma segura
+        return body.map((v) => (v as num).toDouble()).toList();
+      }
+      return [];
+    } catch (_) {
+      // Si falla la petición, devolvemos lista vacía para no bloquear la UI
+      return [];
+    }
   }
 }

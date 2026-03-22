@@ -45,10 +45,15 @@ class Libreria {
   // Actualiza los datos de un libro existente
   void editarLibro(Libro original, Libro modificado) {
     original.titulo = modificado.titulo;
-    original.autorId = modificado.autorId;
+    original.autorNombre = modificado.autorNombre;
+    original.sagaNombre = modificado.sagaNombre;
+    original.numLibroSaga = modificado.numLibroSaga;
     original.estado = modificado.estado;
     original.puntuacion = modificado.puntuacion;
+    original.fechaInicio = modificado.fechaInicio;
+    original.fechaFin = modificado.fechaFin;
     original.rutaImagen = modificado.rutaImagen;
+    original.almacen = modificado.almacen;
   }
 
   // Elimina un libro de la lista
@@ -57,7 +62,7 @@ class Libreria {
   }
 
   // Método para filtrar por el estado del libro (leyendo, pendiente, leido)
-  List<Libro> filtarPorEstado(String filtroEstado) {
+  List<Libro> filtrarPorEstado(String filtroEstado) {
     List<Libro> librosPorPestana = [];
 
     if (filtroEstado == "todos") {

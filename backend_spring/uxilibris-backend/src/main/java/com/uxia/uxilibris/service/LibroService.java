@@ -37,6 +37,20 @@ public class LibroService {
         return libroRepository.findAll();
     }
 
+    @Transactional
+    public void eliminarLibro(Long id) {
+        if (!libroRepository.existsById(id)) {
+            throw new jakarta.persistence.EntityNotFoundException(
+                    "Libro no encontrado con id: " + id
+            );
+        }
+        libroRepository.deleteById(id);
+    }
+
+    public List<Double> obtenerVolumenesDeSaga(String nombreSaga) {
+        return libroRepository.findVolumesBySaga(nombreSaga);
+    }
+
     // Métodos para los buscadores de Flutter
     public List<String> listarSagasExistentes() {
         return libroRepository.findAllUniqueSagas();

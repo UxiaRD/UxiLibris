@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/propiedad.dart';
 import '../modelo/libro.dart';
+import 'package:frontend_flutter/utilidades/searchField.dart';
 
 class WidgetsFormulario {
   // MÉTODO PARA CAMPOS DE TEXTO
@@ -144,57 +145,26 @@ class WidgetsFormulario {
     );
   }
 
-  // MÉTODO PARA LA BÚSQUEDA DE LA IMAGEN
+  // MÉTODO PARA CAMPO DE TEXTO CON AUTOCOMPLETADO
   static Widget buildSearchField({
     required TextEditingController controller,
     required List<String> opciones,
     required String label,
     required IconData icono,
     required ColorScheme colores,
+    Function(String)? onSelected,
   }) {
-    return RawAutocomplete<String>(
-      textEditingController: controller,
-      focusNode: FocusNode(),
-      optionsBuilder: (TextEditingValue textEditingValue) {
-        if (textEditingValue.text.isEmpty) {
-          return const Iterable<String>.empty();
-        }
-        return opciones.where(
-          (String option) => option.toLowerCase().contains(
-            textEditingValue.text.toLowerCase(),
-          ),
-        );
-      },
-      onSelected: (String selection) => controller.text = selection,
-      fieldViewBuilder:
-          (context, fieldController, focusNode, onFieldSubmitted) {
-            return buildTextField(fieldController, label, icono, colores);
-          },
-      optionsViewBuilder: (context, onSelected, options) {
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Material(
-            elevation: 4.0,
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              width: 300,
-              color: colores.surface,
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (context, index) => ListTile(
-                  title: Text(options.elementAt(index)),
-                  onTap: () => onSelected(options.elementAt(index)),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+    return SearchField(
+      controller: controller,
+      opciones: opciones,
+      label: label,
+      icono: icono,
+      colores: colores,
+      onSelected: onSelected,
     );
   }
 
+  // MÉTODO PARA LA BUSQUEDA DE IMAGEN
   static Widget buildSelectorImagen({
     required File? imagenArchivo,
     required String? rutaImagenInicial,

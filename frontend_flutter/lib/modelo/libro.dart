@@ -48,9 +48,11 @@ class Libro {
       autorNombre: json['autorNombre'],
       sagaNombre: json['sagaNombre'],
       numLibroSaga: json['numLibroSaga']?.toDouble(),
-      puntuacion: json['puntuacion']?.toDouble(),
+      puntuacion: json['puntuacion']?.toDouble() ?? 0.0,
       estado: EstadoLibro.values.firstWhere(
-        (e) => e.name.toLowerCase() == (json['estado'] as String).toLowerCase(),
+        (e) =>
+            e.name.toLowerCase() ==
+            (json['estadoLectura'] as String? ?? 'pendiente').toLowerCase(),
         orElse: () => EstadoLibro.pendiente,
       ),
       fechaInicio: json['fechaInicio'] != null
@@ -69,12 +71,14 @@ class Libro {
   // Enviar el Libro con JSON
   Map<String, dynamic> toJson() {
     return {
+      if (id != null) 'id': id,
       'titulo': titulo,
       'autorNombre': autorNombre,
       'sagaNombre': sagaNombre,
       'numLibroSaga': numLibroSaga,
       'puntuacion': puntuacion,
-      'estado': estado.name, // Convertir de enumm a String para enviar
+      'estadoLectura': estado.name
+          .toUpperCase(), // Convertir de enumm a String para enviar
       'fechaInicio': fechaInicio?.toIso8601String(),
       'fechaFin': fechaFin?.toIso8601String(),
     };
