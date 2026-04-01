@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:http/http.dart' as http;
+import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 
 class ApiService {
   // Detectamos la plataforma automáticamente para no tener que cambiar
@@ -45,18 +46,18 @@ class ApiService {
     }
   }
 
-  // 1. Obtener autores para el Autocomplete [cite: 62, 78]
+  // 1. Obtener autores para el Autocomplete
   static Future<List<String>> fetchAutores() async {
-    final response = await http.get(Uri.parse("$baseUrl/autores"));
+    final response = await http.get(Uri.parse("$baseUrl/libros/autores"));
     if (response.statusCode == 200) {
       return List<String>.from(json.decode(response.body));
     }
     return [];
   }
 
-  // 2. Obtener sagas para el Autocomplete [cite: 52, 78]
+  // 2. Obtener sagas para el Autocomplete
   static Future<List<String>> fetchSagas() async {
-    final response = await http.get(Uri.parse("$baseUrl/sagas"));
+    final response = await http.get(Uri.parse("$baseUrl/libros/sagas"));
     if (response.statusCode == 200) {
       return List<String>.from(json.decode(response.body));
     }
@@ -66,7 +67,7 @@ class ApiService {
   // 3. Obtener sugerencia de volumen
   static Future<double> fetchSugerenciaVolumen(String saga) async {
     final response = await http.get(
-      Uri.parse("$baseUrl/sugerir-volumen?saga=$saga"),
+      Uri.parse("$baseUrl/libros/sugerir-volumen?saga=$saga"),
     );
     if (response.statusCode == 200) {
       return double.parse(response.body);
@@ -141,5 +142,29 @@ class ApiService {
       // Si falla la petición, devolvemos lista vacía para no bloquear la UI
       return [];
     }
+  }
+
+  /// Busca información de un libro por ISBN delegando en el backend.
+  /// Devuelve un [Libro] pre-rellenado o null si no se encuentra (404).
+  /// Lanza [Exception] si hay error de servidor o red.
+  static Future<Libro?> buscarLibroPorISBN(String isbn) async {
+    final response = await http.get(Uri.parse('$baseUrl/libros/isbn/$isbn'));
+
+    if (response.statusCode == 404) return null;
+    if (response.statusCode != 200) {
+      throw Exception('Error del servidor: ${response.statusCode}');
+    }
+
+    final Map<String, dynamic> data = json.decode(response.body);
+    return Libro(
+      titulo: data['titulo'] as String,
+      autorNombre: data['autor'] as String? ?? '',
+      sagaNombre: data['saga'] as String?,
+      numLibroSaga: (data['numLibroSaga'] as num?)?.toDouble(),
+      estado: EstadoLibro.pendiente,
+      puntuacion: 0.0,
+      rutaImagen: data['portada'] as String? ?? 'assets/images/fondos/libro.png',
+      almacen: AlmacenPropiedades(propiedades: []),
+    );
   }
 }

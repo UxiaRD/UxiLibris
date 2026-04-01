@@ -1,6 +1,8 @@
 package com.uxia.uxilibris.controller;
 
+import com.uxia.uxilibris.dto.IsbnResultDto;
 import com.uxia.uxilibris.entity.Libro;
+import com.uxia.uxilibris.service.GoogleBooksService;
 import com.uxia.uxilibris.service.LibroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,9 @@ import java.util.List;
 public class LibroController {
     @Autowired
     private LibroService libroService;
+
+    @Autowired
+    private GoogleBooksService googleBooksService;
 
     // GET /api/libros → devuelve todos los libros
     @GetMapping
@@ -42,21 +47,29 @@ public class LibroController {
         return ResponseEntity.ok(volumenes);
     }
 
-    // GET /api/sagas
-    @GetMapping("/api/sagas")
+    // GET /api/libros/sagas
+    @GetMapping("/sagas")
     public List<String> getSagas() {
         return libroService.listarSagasExistentes();
     }
 
-    // GET /api/autores
-    @GetMapping("/api/autores")
+    // GET /api/libros/autores
+    @GetMapping("/autores")
     public List<String> getAutores() {
         return libroService.listarAutoresExistentes();
     }
 
-    // GET /api/sugerir-volumen?saga=NombreSaga
-    @GetMapping("/api/sugerir-volumen")
+    // GET /api/libros/sugerir-volumen?saga=NombreSaga
+    @GetMapping("/sugerir-volumen")
     public Double getSugerencia(@RequestParam String saga) {
         return libroService.sugerirSiguienteVolumen(saga);
+    }
+
+    // GET /api/libros/isbn/{isbn}
+    @GetMapping("/isbn/{isbn}")
+    public ResponseEntity<IsbnResultDto> buscarPorISBN(@PathVariable String isbn) {
+        return googleBooksService.buscarPorISBN(isbn)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

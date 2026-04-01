@@ -212,13 +212,32 @@ class WidgetsFormulario {
   static Widget _renderizarImagen(File? archivo, String? rutaInicial) {
     // 1. Prioridad: Imagen recién seleccionada por el usuario
     if (archivo != null) {
-      return Image.file(archivo, fit: BoxFit.cover);
+      return Image.file(
+        archivo,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) =>
+            Image.asset("assets/images/fondos/libro.png", fit: BoxFit.cover),
+      );
     }
-    // 2. Imagen que ya existía en la base de datos (si no es el asset por defecto)
+    // 2. URL remota (ej: portada de Google Books)
+    if (rutaInicial != null && rutaInicial.startsWith("http")) {
+      return Image.network(
+        rutaInicial,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) =>
+            Image.asset("assets/images/fondos/libro.png", fit: BoxFit.cover),
+      );
+    }
+    // 3. Imagen local guardada en el dispositivo
     if (rutaInicial != null && !rutaInicial.contains("assets/")) {
-      return Image.file(File(rutaInicial), fit: BoxFit.cover);
+      return Image.file(
+        File(rutaInicial),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) =>
+            Image.asset("assets/images/fondos/libro.png", fit: BoxFit.cover),
+      );
     }
-    // 3. Imagen por defecto de la aplicación
+    // 4. Imagen por defecto de la aplicación
     return Image.asset("assets/images/fondos/libro.png", fit: BoxFit.cover);
   }
 }

@@ -26,12 +26,25 @@ class Cardlibro extends StatelessWidget {
     if (rutaImagen.startsWith('assets/')) {
       return Image.asset(rutaImagen, fit: BoxFit.cover, width: double.infinity);
     }
+    if (rutaImagen.startsWith('http')) {
+      return Image.network(
+        rutaImagen,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/images/fondos/libro.png',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
+      );
+    }
     return Image.file(
       File(rutaImagen),
       fit: BoxFit.cover,
       width: double.infinity,
       errorBuilder: (context, error, stackTrace) {
-        // Si el archivo ya no existe en disco, mostramos la portada por defecto
         return Image.asset(
           'assets/images/fondos/libro.png',
           fit: BoxFit.cover,

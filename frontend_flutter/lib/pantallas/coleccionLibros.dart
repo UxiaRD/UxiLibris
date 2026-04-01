@@ -5,7 +5,7 @@ import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/pantallas/seleccionMetodoCarga.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/barraBusqueda.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/gridViewColeccion.dart';
-import 'package:frontend_flutter/servicio/ApiService.dart';
+import 'package:frontend_flutter/controladores/coleccionController.dart';
 
 // WIDGET que gestiona la Colección de Libros
 
@@ -37,28 +37,13 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
     _cargarYFiltrar(); // Cambiamos la llamada inicial
   }
 
-  // Nueva función para traer los datos de Java antes de filtrar
   Future<void> _cargarYFiltrar() async {
     setState(() => _estaCargando = true);
-    // Si ya hay datos en memoria, solo filtrar sin ir al servidor
-    if (Libreria.todosLosLibros.isNotEmpty) {
-      _buscarLibros(_controladorDeBusqueda.text);
-      setState(() => _estaCargando = false);
-      return;
-    }
     try {
-      // 1. Llamamos al ApiService (AQUÍ ES DONDE DABA EL 404)
-      // Debes asegurarte que en ApiService.dart la ruta sea exacta a Java
-      var librosBackend = await ApiService.fetchLibros();
-
-      // 2. Actualizamos la lista estática global
-      Libreria.todosLosLibros = librosBackend;
-
-      // 3. Aplicamos los filtros que ya tenías
+      await ColeccionController.cargarLibros();
       _buscarLibros(_controladorDeBusqueda.text);
     } catch (e) {
       print("Error al cargar libros: $e");
-      // Si da 404, al menos detenemos el indicador de carga
     } finally {
       if (mounted) setState(() => _estaCargando = false);
     }

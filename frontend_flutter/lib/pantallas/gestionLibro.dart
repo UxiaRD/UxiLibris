@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
-import 'package:frontend_flutter/servicio/ApiService.dart';
+import 'package:frontend_flutter/controladores/gestionLibroController.dart';
 import 'package:frontend_flutter/utilidades/dialogos.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
@@ -11,7 +11,12 @@ import 'package:frontend_flutter/modelo/libro.dart';
 class PantallaGestionLibro extends StatefulWidget {
   final Libro?
   libroExistente; // Si existe el libro los editamos, si no lo añadimos
-  const PantallaGestionLibro({super.key, this.libroExistente});
+  final Libro? libroPrerellenado; // Datos del escaner sin ID
+  const PantallaGestionLibro({
+    super.key,
+    this.libroExistente,
+    this.libroPrerellenado,
+  });
 
   @override
   State<PantallaGestionLibro> createState() => _PantallaGestionLibroState();
@@ -29,20 +34,13 @@ class _PantallaGestionLibroState extends State<PantallaGestionLibro> {
   // La solución es extraer la lógica async FUERA del callback y pasarle
   // solo una función síncrona al diálogo que llame a ese método async.
   Future<void> _confirmarEliminacion() async {
-    // 'widget' y 'context' son accesibles aquí porque estamos dentro
-    // de _PantallaGestionLibroState, que es un State<> con acceso completo.
-    final id = widget.libroExistente?.id;
-    if (id == null) return;
-
-    final bool exito = await ApiService.eliminarLibro(id);
-
-    // Comprobamos 'mounted' para no usar context tras dispose del widget
-    if (!mounted) return;
-
-    if (exito) {
-      libreria.eliminarLibro(widget.libroExistente!);
+    if (widget.libroExistente == null) return;
+    try {
+      await GestionLibroController.eliminarLibro(widget.libroExistente!);
+      if (!mounted) return;
       Navigator.pop(context);
-    } else {
+    } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No se pudo eliminar el libro. Inténtalo de nuevo.'),
@@ -92,7 +90,7 @@ class _PantallaGestionLibroState extends State<PantallaGestionLibro> {
         rutaImagen: 'assets/images/fondos/addLibro.png',
 
         child: FormularioLibro(
-          libroParaEditar: widget.libroExistente,
+          libroParaEditar: widget.libroExistente ?? widget.libroPrerellenado,
           alGuardar: (libroRecibido) {
             if (esModoEdicion) {
               // LLAMADA A LÓGICA DE EDICIÓN

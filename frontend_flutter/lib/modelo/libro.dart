@@ -52,7 +52,7 @@ class Libro {
       estado: EstadoLibro.values.firstWhere(
         (e) =>
             e.name.toLowerCase() ==
-            (json['estadoLectura'] as String? ?? 'pendiente').toLowerCase(),
+            (json['estado'] as String? ?? 'pendiente').toLowerCase(),
         orElse: () => EstadoLibro.pendiente,
       ),
       fechaInicio: json['fechaInicio'] != null
@@ -77,10 +77,10 @@ class Libro {
       'sagaNombre': sagaNombre,
       'numLibroSaga': numLibroSaga,
       'puntuacion': puntuacion,
-      'estadoLectura': estado.name
-          .toUpperCase(), // Convertir de enumm a String para enviar
+      'estado': estado.name.toUpperCase(),
       'fechaInicio': fechaInicio?.toIso8601String(),
       'fechaFin': fechaFin?.toIso8601String(),
+      'rutaImagen': rutaImagen,
     };
   }
 }

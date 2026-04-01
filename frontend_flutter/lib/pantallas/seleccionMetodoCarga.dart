@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 import 'package:frontend_flutter/utilidades/botonMetodoCarga.dart';
+import 'package:frontend_flutter/pantallas/escanerISBN.dart';
 
 class SeleccionMetodoCarga extends StatelessWidget {
   const SeleccionMetodoCarga({super.key});
@@ -42,18 +43,17 @@ class SeleccionMetodoCarga extends StatelessWidget {
                     "assets/images/ilustraciones/registroAutomatico.png",
                 colorTexto: colores.primary,
                 colorFondo: colores.secondary,
-                onTap: () => _mostrarProximamente(context),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PantallaEscanerISBN(),
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  void _mostrarProximamente(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Funcionalidad de escaneo próximamente")),
     );
   }
 }
