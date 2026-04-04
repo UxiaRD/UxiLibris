@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:frontend_flutter/controladores/escanerController.dart';
+import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 
 class PantallaEscanerISBN extends StatefulWidget {
@@ -51,6 +52,36 @@ class _PantallaEscanerISBNState extends State<PantallaEscanerISBN>
       if (!mounted) return;
 
       if (libro != null) {
+        final duplicado = Libreria.todosLosLibros.any(
+          (l) => l.titulo.toLowerCase() == libro.titulo.toLowerCase(),
+        );
+        if (duplicado && mounted) {
+          final continuar = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Libro ya registrado'),
+              content: Text(
+                '"${libro.titulo}" ya está en tu biblioteca. ¿Deseas añadir otro ejemplar igualmente?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Añadir igualmente'),
+                ),
+              ],
+            ),
+          );
+          if (continuar != true) {
+            await _controller.start();
+            if (mounted) setState(() => _procesando = false);
+            return;
+          }
+        }
+        if (!mounted) return;
         await Navigator.pushReplacement(
           context,
           MaterialPageRoute(

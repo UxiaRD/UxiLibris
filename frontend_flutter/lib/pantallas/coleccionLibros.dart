@@ -82,26 +82,27 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
       body: FondoBase(
         rutaImagen: 'assets/images/fondos/estanteria.png',
         child: _estaCargando
-            ? const Center(
-                child: CircularProgressIndicator(),
-              ) // Mientras descarga de Java
-            : Column(
-                children: [
-                  // BARRA BÚSQUEDA
-                  BarraBusqueda(
-                    controladorBusqueda: _controladorDeBusqueda,
-                    onChanged: (valor) => _buscarLibros(valor),
-                  ),
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: _cargarYFiltrar,
+                child: Column(
+                  children: [
+                    // BARRA BÚSQUEDA
+                    BarraBusqueda(
+                      controladorBusqueda: _controladorDeBusqueda,
+                      onChanged: (valor) => _buscarLibros(valor),
+                    ),
 
-                  SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  // LIBROS
-                  // Pasamos una función para que el Grid avise cuando algo cambie
-                  GridColeccion(
-                    librosPantalla: librosFiltrados,
-                    alCambiar: () => _buscarLibros(_controladorDeBusqueda.text),
-                  ),
-                ],
+                    // LIBROS
+                    GridColeccion(
+                      librosPantalla: librosFiltrados,
+                      alCambiar: () =>
+                          _buscarLibros(_controladorDeBusqueda.text),
+                    ),
+                  ],
+                ),
               ),
       ),
 
@@ -112,8 +113,6 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
             context,
             MaterialPageRoute(builder: (context) => SeleccionMetodoCarga()),
           );
-          // Llamamos a la función con el texto que haya en el buscador (aunque esté vacío)
-          // para que refresque la lista respetando la pestaña actual.
           _buscarLibros(_controladorDeBusqueda.text);
         },
         backgroundColor: Theme.of(context).colorScheme.primary,

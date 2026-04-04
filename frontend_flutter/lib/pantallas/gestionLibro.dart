@@ -95,12 +95,11 @@ class _PantallaGestionLibroState extends State<PantallaGestionLibro> {
             if (esModoEdicion) {
               // LLAMADA A LÓGICA DE EDICIÓN
               libreria.editarLibro(widget.libroExistente!, libroRecibido);
-              Navigator.pop(context);
             } else {
               // LLAMADA A LÓGICA DE CREACIÓN
               libreria.agregarLibro(libroRecibido);
-              Navigator.pop(context);
             }
+            // El pop lo gestiona formularioLibro.dart con Navigator.pop(context, true)
           },
         ),
       ),

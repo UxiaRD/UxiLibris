@@ -1,19 +1,18 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
+import 'package:frontend_flutter/modelo/saga.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 
 class ApiService {
-  // Detectamos la plataforma automáticamente para no tener que cambiar
-  // el host a mano cada vez que cambiamos entre web y emulador Android:
+  // Se detecta la plataforma automáticamente para no tener que cambiar
+  // el host a mano cada vez que se cambia entre web y emulador Android:
   //
-  //  · Web (kIsWeb = true)        → localhost  (el navegador habla directamente
-  //                                              con el backend en tu máquina)
-  //  · Emulador Android           → 10.0.2.2   (alias especial del emulador
-  //                                              que apunta a la máquina host)
-  //  · Dispositivo físico Android → cambia 10.0.2.2 por la IP local de tu
-  //                                  máquina, ej: '192.168.1.50'
+  //  · Web (kIsWeb = true)        → localhost
+  //  · Emulador Android           → 10.0.2.2
+  //  · Dispositivo físico Android → 192.168.1.200
+
   static String get _host {
     if (kIsWeb) return 'localhost';
     return '192.168.1.200'; // emular en dispositivo físico
@@ -22,9 +21,12 @@ class ApiService {
 
   static const String _puerto = '8080';
 
-  // baseUrl es ahora un getter (no const) porque _host también lo es
+  // baseUrl es un getter porque _host también lo es
   static String get baseUrl => 'http://$_host:$_puerto/api';
 
+  // ── Libros ──────────────────────────────────────────────────────────────────
+
+  // 1. Obtención de los libros de la BD
   static Future<List<Libro>> fetchLibros() async {
     try {
       // Realizamos la petición GET al endpoint principal
@@ -46,7 +48,7 @@ class ApiService {
     }
   }
 
-  // 1. Obtener autores para el Autocomplete
+  // 2. Obtener autores para el Autocomplete
   static Future<List<String>> fetchAutores() async {
     final response = await http.get(Uri.parse("$baseUrl/libros/autores"));
     if (response.statusCode == 200) {
@@ -55,7 +57,7 @@ class ApiService {
     return [];
   }
 
-  // 2. Obtener sagas para el Autocomplete
+  // 3. Obtener sagas para el Autocomplete
   static Future<List<String>> fetchSagas() async {
     final response = await http.get(Uri.parse("$baseUrl/libros/sagas"));
     if (response.statusCode == 200) {
@@ -64,7 +66,7 @@ class ApiService {
     return [];
   }
 
-  // 3. Obtener sugerencia de volumen
+  // 4. Obtener sugerencia de volumen
   static Future<double> fetchSugerenciaVolumen(String saga) async {
     final response = await http.get(
       Uri.parse("$baseUrl/libros/sugerir-volumen?saga=$saga"),
@@ -73,52 +75,6 @@ class ApiService {
       return double.parse(response.body);
     }
     return 1.0;
-  }
-
-  // 4. Guardar un nuevo libro
-  static Future<bool> guardarLibro(Libro libro) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/libros'),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(
-        libro.toJson(),
-      ), // Debes tener el método toJson en tu modelo
-    );
-    return response.statusCode == 200;
-  }
-
-  static Future<bool> eliminarLibro(int id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/libros/$id'));
-    return response.statusCode == 200 || response.statusCode == 204;
-  }
-
-  static Future<bool> registrarUsuario(
-    String username,
-    String email,
-    String password,
-  ) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/registro'),
-      body: jsonEncode({
-        'username': username,
-        'email': email,
-        'password': password,
-      }),
-      headers: {'Content-Type': 'application/json'},
-    );
-    return response.statusCode == 200;
-  }
-
-  static Future<bool> login(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      body: jsonEncode({'username': username, 'password': password}),
-      headers: {'Content-Type': 'application/json'},
-    );
-    print("Respuesta del servidor: ${response.statusCode}");
-    print("Cuerpo de respuesta: ${response.body}");
-
-    return response.statusCode == 200;
   }
 
   /// Devuelve la lista de números de volumen ya ocupados para una saga.
@@ -144,6 +100,104 @@ class ApiService {
     }
   }
 
+  // 5. Guardar un nuevo libro
+  static Future<bool> guardarLibro(Libro libro) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/libros'),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(
+        libro.toJson(),
+      ), // Debes tener el método toJson en tu modelo
+    );
+    return response.statusCode == 200;
+  }
+
+  // 6. Eliminar un libro
+  static Future<bool> eliminarLibro(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/libros/$id'));
+    return response.statusCode == 200 || response.statusCode == 204;
+  }
+
+  // ── Usuarios ──────────────────────────────────────────────────────────────────
+
+  // Registro de un usuario
+  static Future<bool> registrarUsuario(
+    String username,
+    String email,
+    String password,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/registro'),
+      body: jsonEncode({
+        'username': username,
+        'email': email,
+        'password': password,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+    return response.statusCode == 200;
+  }
+
+  // Login de un usuario ya registrado
+  static Future<bool> login(String username, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/login'),
+      body: jsonEncode({'username': username, 'password': password}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    print("Respuesta del servidor: ${response.statusCode}");
+    print("Cuerpo de respuesta: ${response.body}");
+
+    return response.statusCode == 200;
+  }
+
+  // ── Sagas ──────────────────────────────────────────────────────────────────
+
+  // 1. Obtención de las Sagas de BD
+  static Future<List<Saga>> fetchSagasCompletas() async {
+    final response = await http.get(Uri.parse('$baseUrl/sagas'));
+    if (response.statusCode == 200) {
+      final List<dynamic> body = json.decode(response.body);
+      return body.map((e) => Saga.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  // 2. Guardar Saga
+  static Future<Saga?> guardarSaga(Saga saga) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/sagas'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(saga.toJson()),
+    );
+    if (response.statusCode == 200) {
+      return Saga.fromJson(json.decode(response.body));
+    }
+    return null;
+  }
+
+  // 3. Eliminar Saga
+  static Future<bool> eliminarSaga(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/sagas/$id'));
+    return response.statusCode == 204;
+  }
+
+  // 4. Asignación de una Saga a un Libro
+  static Future<bool> asignarSagaALibro(
+    int libroId,
+    String saga,
+    double? numLibroSaga,
+  ) async {
+    final params = StringBuffer('saga=${Uri.encodeComponent(saga)}');
+    if (numLibroSaga != null) params.write('&numLibroSaga=$numLibroSaga');
+    final response = await http.patch(
+      Uri.parse('$baseUrl/libros/$libroId/saga?$params'),
+    );
+    return response.statusCode == 200;
+  }
+
+  // ── Escaner ──────────────────────────────────────────────────────────────────
+
   /// Busca información de un libro por ISBN delegando en el backend.
   /// Devuelve un [Libro] pre-rellenado o null si no se encuentra (404).
   /// Lanza [Exception] si hay error de servidor o red.
@@ -163,7 +217,8 @@ class ApiService {
       numLibroSaga: (data['numLibroSaga'] as num?)?.toDouble(),
       estado: EstadoLibro.pendiente,
       puntuacion: 0.0,
-      rutaImagen: data['portada'] as String? ?? 'assets/images/fondos/libro.png',
+      rutaImagen:
+          data['portada'] as String? ?? 'assets/images/fondos/libro.png',
       almacen: AlmacenPropiedades(propiedades: []),
     );
   }

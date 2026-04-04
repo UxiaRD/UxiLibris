@@ -72,7 +72,12 @@ class _PantallaLoginState extends State<PantallaLogin> {
         /* El SingleChildScrollView es necesario cuando se usa TextFromField ya que se despliega el teclado
         y permite que si el contenido queda tapado el usuario pueda hacer scroll */
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(80.0),
+          padding: EdgeInsets.fromLTRB(
+            80,
+            80,
+            80,
+            80 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

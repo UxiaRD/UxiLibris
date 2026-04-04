@@ -94,7 +94,8 @@ class FormularioLibroController {
       titulo: titulo.trim(),
       autorNombre: autorNombre,
       sagaNombre: sagaNombre.isEmpty ? null : sagaNombre,
-      numLibroSaga: double.tryParse(numLibroSagaTexto),
+      // Si no hay saga, el número de saga tampoco tiene sentido
+      numLibroSaga: sagaNombre.isEmpty ? null : double.tryParse(numLibroSagaTexto),
       puntuacion: puntuacion,
       estado: estado,
       fechaInicio: fechaInicio,

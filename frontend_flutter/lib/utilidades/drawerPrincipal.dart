@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_flutter/pantallas/coleccionSagas.dart';
 
 class DrawerPrincipal extends StatelessWidget {
   const DrawerPrincipal({super.key});
@@ -33,6 +34,21 @@ class DrawerPrincipal extends StatelessWidget {
                 Text("Mi Biblioteca", style: TextStyle(color: Colors.white70)),
               ],
             ),
+          ),
+
+          // Opción: Sagas
+          ListTile(
+            leading: const Icon(Icons.shelves),
+            title: const Text("Sagas"),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const PantallaColeccionSagas(),
+                ),
+              );
+            },
           ),
 
           // Opción: Estadísticas

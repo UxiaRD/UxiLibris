@@ -2,27 +2,30 @@ package com.uxia.uxilibris.repository;
 
 import com.uxia.uxilibris.entity.Libro;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Service
+@Repository
 public interface LibroRepository extends JpaRepository<Libro, Long> {
-    /// Busca los números de volumen ya ocupados para una saga específica.
-    // Usado por sugerirSiguienteVolumen() y obtenerVolumenesDeSaga().
-    // Añadido IS NOT NULL para evitar que devuelva nulls si el campo está vacío.
-    @Query("SELECT l.numLibroSaga FROM Libro l WHERE l.sagaNombre = :saga AND l.numLibroSaga IS NOT NULL")
+
+    // Volúmenes ya ocupados para una saga (por la relación, no por nombre plano)
+    @Query("SELECT l.numLibroSaga FROM Libro l WHERE l.saga.nombre = :saga AND l.numLibroSaga IS NOT NULL")
     List<Double> findVolumesBySaga(@Param("saga") String saga);
 
-    // Obtiene la lista de nombres de sagas únicas para el Autocomplete de Flutter.
-    // Añadido ORDER BY para que lleguen ordenadas alfabéticamente.
-    @Query("SELECT DISTINCT l.sagaNombre FROM Libro l WHERE l.sagaNombre IS NOT NULL ORDER BY l.sagaNombre")
+    // Nombres de saga únicos para el Autocomplete de Flutter
+    @Query("SELECT DISTINCT l.saga.nombre FROM Libro l WHERE l.saga IS NOT NULL ORDER BY l.saga.nombre")
     List<String> findAllUniqueSagas();
 
-    // Obtiene la lista de autores únicos para el Autocomplete de Flutter.
-    // Añadido IS NOT NULL y ORDER BY.
+    // Autores únicos para el Autocomplete de Flutter
     @Query("SELECT DISTINCT l.autorNombre FROM Libro l WHERE l.autorNombre IS NOT NULL ORDER BY l.autorNombre")
     List<String> findAllUniqueAutores();
+
+    // Desasocia todos los libros de una saga antes de eliminarla
+    @Modifying
+    @Query("UPDATE Libro l SET l.saga = null WHERE l.saga.id = :sagaId")
+    void clearSagaById(@Param("sagaId") Long sagaId);
 }

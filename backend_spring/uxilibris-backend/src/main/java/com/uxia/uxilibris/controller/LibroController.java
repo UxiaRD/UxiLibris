@@ -65,6 +65,15 @@ public class LibroController {
         return libroService.sugerirSiguienteVolumen(saga);
     }
 
+    // PATCH /api/libros/{id}/saga → asigna saga y volumen sin tocar el resto
+    @PatchMapping("/{id}/saga")
+    public ResponseEntity<Libro> asignarSaga(
+            @PathVariable Long id,
+            @RequestParam String saga,
+            @RequestParam(required = false) Double numLibroSaga) {
+        return ResponseEntity.ok(libroService.asignarSaga(id, saga, numLibroSaga));
+    }
+
     // GET /api/libros/isbn/{isbn}
     @GetMapping("/isbn/{isbn}")
     public ResponseEntity<IsbnResultDto> buscarPorISBN(@PathVariable String isbn) {
