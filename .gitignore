@@ -106,3 +106,8 @@ DerivedData/
 .DS_Store
 Thumbs.db
 *.log
+
+
+# Ignorar el archivo que contiene la API Key real
+application.properties
+config.local.properties
