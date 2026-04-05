@@ -7,6 +7,7 @@ import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/modelo/propiedad.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
+import 'package:frontend_flutter/servicio/SessionManager.dart';
 
 class FormularioLibroController {
   /// Carga autores y sagas sugeridos del servidor en paralelo.
@@ -91,6 +92,7 @@ class FormularioLibroController {
 
     final libro = Libro(
       id: idExistente,
+      usuarioId: SessionManager.usuarioId,
       titulo: titulo.trim(),
       autorNombre: autorNombre,
       sagaNombre: sagaNombre.isEmpty ? null : sagaNombre,

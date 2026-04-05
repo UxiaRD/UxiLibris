@@ -2,8 +2,10 @@ package com.uxia.uxilibris.service;
 
 import com.uxia.uxilibris.entity.Libro;
 import com.uxia.uxilibris.entity.Saga;
+import com.uxia.uxilibris.entity.Usuario;
 import com.uxia.uxilibris.repository.LibroRepository;
 import com.uxia.uxilibris.repository.SagaRepository;
+import com.uxia.uxilibris.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,9 @@ public class LibroService {
 
     @Autowired
     private SagaRepository sagaRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     // Si el libro tiene una saga asignada y no existe aún en la tabla sagas, la crea
     private void autoCrearSagaSiNecesario(String sagaNombre) {
@@ -35,8 +40,15 @@ public class LibroService {
         return sagaRepository.findByNombre(sagaNombre.trim()).orElse(null);
     }
 
-    // Tras guardar, propaga la relación saga a los campos @Transient para que el JSON de respuesta los incluya
+    // Resuelve la entidad Usuario desde el campo transiente usuarioId
+    private Usuario resolverUsuario(Long usuarioId) {
+        if (usuarioId == null) return null;
+        return usuarioRepository.findById(usuarioId).orElse(null);
+    }
+
+    // Tras guardar, propaga las FK a los campos @Transient para que el JSON de respuesta los incluya
     private void propagarTransientes(Libro libro) {
+        libro.setUsuarioId(libro.getUsuario() != null ? libro.getUsuario().getId() : null);
         Saga saga = libro.getSaga();
         if (saga != null) {
             libro.setSagaNombre(saga.getNombre());
@@ -62,12 +74,14 @@ public class LibroService {
         String sagaNombre = libro.getSagaNombre();
         autoCrearSagaSiNecesario(sagaNombre);
         Saga saga = resolverSaga(sagaNombre);
+        Usuario usuario = resolverUsuario(libro.getUsuarioId());
 
         if (libro.getId() != null) {
             return libroRepository.findById(libro.getId()).map(existente -> {
                 existente.setTitulo(libro.getTitulo());
                 existente.setAutorNombre(libro.getAutorNombre());
                 existente.setSaga(saga);
+                existente.setUsuario(usuario);
                 existente.setNumLibroSaga(libro.getNumLibroSaga());
                 existente.setPuntuacion(libro.getPuntuacion());
                 existente.setEstado(libro.getEstado());
@@ -79,6 +93,7 @@ public class LibroService {
                 return saved;
             }).orElseGet(() -> {
                 libro.setSaga(saga);
+                libro.setUsuario(usuario);
                 if (libro.getPropiedades() == null) libro.setPropiedades(new java.util.ArrayList<>());
                 Libro saved = libroRepository.save(libro);
                 propagarTransientes(saved);
@@ -87,6 +102,7 @@ public class LibroService {
         }
 
         libro.setSaga(saga);
+        libro.setUsuario(usuario);
         if (libro.getPropiedades() == null) libro.setPropiedades(new java.util.ArrayList<>());
         Libro saved = libroRepository.save(libro);
         propagarTransientes(saved);
@@ -107,8 +123,8 @@ public class LibroService {
         return saved;
     }
 
-    public List<Libro> listarTodosLosLibros() {
-        return libroRepository.findAll();
+    public List<Libro> listarTodosLosLibros(Long usuarioId) {
+        return libroRepository.findByUsuarioId(usuarioId);
     }
 
     @Transactional

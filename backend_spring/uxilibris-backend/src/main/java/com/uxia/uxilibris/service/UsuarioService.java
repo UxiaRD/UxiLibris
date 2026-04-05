@@ -1,36 +1,38 @@
 package com.uxia.uxilibris.service;
 
 import com.uxia.uxilibris.dto.LoginRequest;
+import com.uxia.uxilibris.dto.LoginResponse;
 import com.uxia.uxilibris.entity.Usuario;
 import com.uxia.uxilibris.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // Método para registrar (recuerda que en el futuro usaremos BCrypt aquí)
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
     @Transactional
     public boolean guardar(Usuario usuario) {
-        // Comprobamos si ya existe por email o username
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent() ||
                 usuarioRepository.findByUsername(usuario.getUsername()).isPresent()) {
-            return false; // Esto hará que Flutter reciba un error y no se registre
+            return false;
         }
+        // Guardamos la contraseña cifrada con BCrypt
+        usuario.setPassword(encoder.encode(usuario.getPassword()));
         usuarioRepository.save(usuario);
         return true;
     }
 
-    public boolean verificar(LoginRequest loginRequest) {
-        // 1. Buscamos al usuario por email en la tabla 'usuarios'
+    public Optional<LoginResponse> verificar(LoginRequest loginRequest) {
         return usuarioRepository.findByUsername(loginRequest.getUsername())
-                .map(usuario -> {
-                    // 2. Comparamos la contraseña (por ahora texto plano, luego hash)
-                    return usuario.getPassword().equals(loginRequest.getPassword());
-                })
-                .orElse(false); // Si el usuario no existe, devuelve false
+                .filter(u -> encoder.matches(loginRequest.getPassword(), u.getPassword()))
+                .map(u -> new LoginResponse(u.getId(), u.getUsername()));
     }
 }

@@ -39,7 +39,7 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
         ),
       ),
 
-      drawer: DrawerPrincipal(),
+      drawer: DrawerPrincipal(pantallaActual: PantallaDrawer.libros),
 
       // Llamada a la lista con el índice para el BottomNavigationBar
       body: _paginas[_indiceActual],

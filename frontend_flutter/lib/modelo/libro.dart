@@ -6,6 +6,7 @@ enum EstadoLibro { leyendo, pendiente, leido }
 
 class Libro {
   final int? id; // ID de la base de datos SQL
+  int? usuarioId; // Relación con la tabla usuarios
   String titulo;
   int? autorId; // Relación con la tabla autoras
   String
@@ -25,6 +26,7 @@ class Libro {
   // Constructor
   Libro({
     this.id,
+    this.usuarioId,
     required this.titulo,
     this.autorId,
     required this.autorNombre,
@@ -44,6 +46,7 @@ class Libro {
   factory Libro.fromJson(Map<String, dynamic> json) {
     return Libro(
       id: json['id'],
+      usuarioId: json['usuarioId'] as int?,
       titulo: json['titulo'],
       autorNombre: json['autorNombre'],
       sagaNombre: json['sagaNombre'],
@@ -72,6 +75,7 @@ class Libro {
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
+      if (usuarioId != null) 'usuarioId': usuarioId,
       'titulo': titulo,
       'autorNombre': autorNombre,
       'sagaNombre': sagaNombre,

@@ -28,4 +28,8 @@ public interface LibroRepository extends JpaRepository<Libro, Long> {
     @Modifying
     @Query("UPDATE Libro l SET l.saga = null WHERE l.saga.id = :sagaId")
     void clearSagaById(@Param("sagaId") Long sagaId);
+
+    // Libros de un usuario concreto
+    @Query("SELECT l FROM Libro l WHERE l.usuario.id = :usuarioId")
+    List<Libro> findByUsuarioId(@Param("usuarioId") Long usuarioId);
 }

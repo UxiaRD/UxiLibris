@@ -1,8 +1,13 @@
 package com.uxia.uxilibris.service;
 
 import com.uxia.uxilibris.dto.IsbnResultDto;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
@@ -17,17 +22,44 @@ public class GoogleBooksService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${google.books.api.key:}")
+    private String apiKey;
+
     /**
      * Busca un libro por ISBN en Google Books.
      * @return Optional vacío si no se encuentra resultado.
+     * @throws ResponseStatusException 429 si se agotó la cuota de Google Books.
      */
     @SuppressWarnings("unchecked")
     public Optional<IsbnResultDto> buscarPorISBN(String isbn) {
-        String url = UriComponentsBuilder.fromHttpUrl(GOOGLE_BOOKS_URL)
-                .queryParam("q", "isbn:" + isbn)
-                .toUriString();
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl(GOOGLE_BOOKS_URL)
+                .queryParam("q", "isbn:" + isbn);
 
-        Map<String, Object> respuesta = restTemplate.getForObject(url, Map.class);
+        // Añadir API key si está configurada en application.properties
+        if (apiKey != null && !apiKey.isBlank()) {
+            builder.queryParam("key", apiKey);
+        }
+
+        Map<String, Object> respuesta;
+        try {
+            respuesta = restTemplate.getForObject(builder.toUriString(), Map.class);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                throw new ResponseStatusException(
+                        HttpStatus.TOO_MANY_REQUESTS,
+                        "Cuota de Google Books agotada. Espera unas horas o configura una API key propia."
+                );
+            }
+            // Cualquier otro error HTTP lo tratamos como "no encontrado"
+            return Optional.empty();
+        } catch (RestClientException e) {
+            // Error de red o servidor Google no disponible
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Google Books no está disponible en este momento."
+            );
+        }
 
         if (respuesta == null) return Optional.empty();
 

@@ -20,10 +20,10 @@ public class LibroController {
     @Autowired
     private GoogleBooksService googleBooksService;
 
-    // GET /api/libros → devuelve todos los libros
+    // GET /api/libros?usuarioId=1 → devuelve los libros del usuario indicado
     @GetMapping
-    public List<Libro> listarTodos() {
-        return libroService.listarTodosLosLibros(); // Este debe devolver libroRepository.findAll()
+    public List<Libro> listarTodos(@RequestParam Long usuarioId) {
+        return libroService.listarTodosLosLibros(usuarioId);
     }
     // POST /api/libros → guarda o actualiza un libro
     // Si el JSON incluye 'id', Spring hace UPDATE. Si no, hace INSERT.

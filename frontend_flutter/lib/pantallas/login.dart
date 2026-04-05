@@ -110,8 +110,10 @@ class _PantallaLoginState extends State<PantallaLogin> {
               // CAMPO: CONTRASEÑA
               TextFormField(
                 controller: _passController,
-                // Propiedad que oculta el texto escrito
                 obscureText: _ocultarContrasena,
+                // Al focalizarse, Flutter hace scroll hasta mostrar el botón
+                // que queda justo debajo (≈ 55px alto + 20px margen)
+                scrollPadding: const EdgeInsets.only(bottom: 100),
                 decoration: InputDecoration(
                   labelText: "Contraseña",
                   prefixIcon: Icon(Icons.password, color: colores.primary),

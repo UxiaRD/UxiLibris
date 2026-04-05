@@ -76,8 +76,7 @@ class _PantallaEscanerISBNState extends State<PantallaEscanerISBN>
             ),
           );
           if (continuar != true) {
-            await _controller.start();
-            if (mounted) setState(() => _procesando = false);
+            await _reiniciarEscaner();
             return;
           }
         }
@@ -89,9 +88,12 @@ class _PantallaEscanerISBNState extends State<PantallaEscanerISBN>
           ),
         );
       } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('No se encontró información para ISBN: $isbn'),
+            duration: const Duration(seconds: 4),
             action: SnackBarAction(
               label: 'Añadir manualmente',
               onPressed: () => Navigator.pushReplacement(
@@ -101,27 +103,35 @@ class _PantallaEscanerISBNState extends State<PantallaEscanerISBN>
             ),
           ),
         );
-        await _controller.start();
-        if (mounted) setState(() => _procesando = false);
+        await _reiniciarEscaner();
       }
     } on FormatException catch (e) {
       if (!mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
+        SnackBar(content: Text(e.message), duration: const Duration(seconds: 3)),
       );
-      await _controller.start();
-      if (mounted) setState(() => _procesando = false);
+      await _reiniciarEscaner();
     } catch (e) {
       if (!mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error al buscar el libro. Comprueba tu conexión.'),
+        SnackBar(
+          content: Text('Error al buscar el libro: $e'),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
         ),
       );
-      await _controller.start();
-      if (mounted) setState(() => _procesando = false);
+      await _reiniciarEscaner();
     }
+  }
+
+  /// Espera 3 s antes de reactivar la cámara para evitar redetectar
+  /// el mismo código de barras en bucle tras un error o ISBN no encontrado.
+  Future<void> _reiniciarEscaner() async {
+    await Future.delayed(const Duration(seconds: 3));
+    await _controller.start();
+    if (mounted) setState(() => _procesando = false);
   }
 
   void _mostrarDialogoISBNManual() {

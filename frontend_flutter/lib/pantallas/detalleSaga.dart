@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/controladores/gestionLibroController.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
+import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/modelo/saga.dart';
@@ -32,6 +33,41 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
       });
   }
 
+  /// Devuelve una lista de slots: Libro si está registrado, null si el hueco está vacío.
+  /// Solo genera huecos si la saga tiene totalLibros definido.
+  List<Libro?> _construirSlots(List<Libro> libros) {
+    final total = widget.saga.totalLibros;
+    if (total == null || total <= 0) return List<Libro?>.from(libros);
+
+    return List.generate(total, (i) {
+      final vol = (i + 1).toDouble();
+      try {
+        return libros.firstWhere((l) => l.numLibroSaga == vol);
+      } catch (_) {
+        return null;
+      }
+    });
+  }
+
+  Future<void> _anadirNuevoLibro(int volumen) async {
+    final prerellenado = Libro(
+      titulo: '',
+      autorNombre: '',
+      sagaNombre: widget.saga.nombre,
+      numLibroSaga: volumen.toDouble(),
+      estado: EstadoLibro.pendiente,
+      rutaImagen: 'assets/images/fondos/libro.png',
+      almacen: AlmacenPropiedades(propiedades: []),
+    );
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PantallaGestionLibro(libroPrerellenado: prerellenado),
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
   Future<void> _anadirLibroExistente() async {
     final cambiado = await DialogoAsignarSaga.mostrar(
       context: context,
@@ -43,9 +79,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
   Future<void> _editarSaga() async {
     final resultado = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (_) => PantallaGestionSaga(saga: widget.saga),
-      ),
+      MaterialPageRoute(builder: (_) => PantallaGestionSaga(saga: widget.saga)),
     );
     if (resultado == true && mounted) {
       // Volvemos a la pantalla anterior para que recargue la lista de sagas
@@ -68,7 +102,9 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('No se pudo eliminar el libro. Inténtalo de nuevo.'),
+              content: Text(
+                'No se pudo eliminar el libro. Inténtalo de nuevo.',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -80,6 +116,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
   @override
   Widget build(BuildContext context) {
     final libros = _libros();
+    final slots = _construirSlots(libros);
     final colores = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -104,11 +141,13 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
         child: const Icon(Icons.playlist_add, color: Colors.white),
       ),
       body: FondoBase(
-        rutaImagen: 'assets/images/fondos/estanteria.png',
-        child: libros.isEmpty
-            ? const Center(child: Text('No hay libros registrados en esta saga'))
+        rutaImagen: 'assets/images/fondos/fondoSagas.png',
+        child: libros.isEmpty && (widget.saga.totalLibros == null || widget.saga.totalLibros == 0)
+            ? const Center(
+                child: Text('No hay libros registrados en esta saga'),
+              )
             : Padding(
-                padding: const EdgeInsets.fromLTRB(12, 100, 12, 12),
+                padding: const EdgeInsets.fromLTRB(12, 40, 12, 12),
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 150,
@@ -116,9 +155,15 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                     mainAxisSpacing: 15,
                     childAspectRatio: 0.60,
                   ),
-                  itemCount: libros.length,
+                  itemCount: slots.length,
                   itemBuilder: (context, index) {
-                    final libro = libros[index];
+                    final libro = slots[index];
+                    if (libro == null) {
+                      return GestureDetector(
+                        onTap: () => _anadirNuevoLibro(index + 1),
+                        child: _CardHueco(volumen: index + 1),
+                      );
+                    }
                     return GestureDetector(
                       onTap: () async {
                         await Navigator.push(
@@ -140,6 +185,38 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                   },
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class _CardHueco extends StatelessWidget {
+  final int volumen;
+
+  const _CardHueco({required this.volumen});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[400]!, width: 1.5),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.add, size: 32, color: Colors.grey[600]),
+          const SizedBox(height: 8),
+          Text(
+            'Vol. $volumen',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

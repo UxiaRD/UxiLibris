@@ -22,9 +22,7 @@ class _PantallaGestionSagaState extends State<PantallaGestionSaga> {
   @override
   void initState() {
     super.initState();
-    _nombreController = TextEditingController(
-      text: widget.saga?.nombre ?? '',
-    );
+    _nombreController = TextEditingController(text: widget.saga?.nombre ?? '');
     _totalController = TextEditingController(
       text: widget.saga?.totalLibros?.toString() ?? '',
     );
@@ -58,9 +56,9 @@ class _PantallaGestionSagaState extends State<PantallaGestionSaga> {
     if (resultado != null) {
       Navigator.pop(context, true);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al guardar la saga')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Error al guardar la saga')));
     }
   }
 
@@ -107,7 +105,7 @@ class _PantallaGestionSagaState extends State<PantallaGestionSaga> {
         ],
       ),
       body: FondoBase(
-        rutaImagen: 'assets/images/fondos/estanteria.png',
+        rutaImagen: 'assets/images/fondos/addLibro.png',
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 100, 16, 16),
           child: Column(

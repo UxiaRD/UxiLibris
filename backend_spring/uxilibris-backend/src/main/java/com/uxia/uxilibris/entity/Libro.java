@@ -21,6 +21,15 @@ public class Libro {
 
     private String autorNombre;
 
+    // Relación con Usuario (FK usuario_id en la tabla libros)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id")
+    @JsonIgnore
+    private Usuario usuario;
+
+    @Transient
+    private Long usuarioId;
+
     // Relación con Saga (FK saga_id en la tabla libros)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "saga_id")
@@ -50,9 +59,10 @@ public class Libro {
     @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PropiedadValor> propiedades;
 
-    // Tras cargar desde DB, propaga los datos de la FK a los campos transientes
+    // Tras cargar desde DB, propaga los datos de las FK a los campos transientes
     @PostLoad
     private void cargarCamposTransientes() {
+        usuarioId = (usuario != null) ? usuario.getId() : null;
         if (saga != null) {
             sagaNombre = saga.getNombre();
             sagaId = saga.getId();

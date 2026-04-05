@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/modelo/saga.dart';
+import 'package:frontend_flutter/servicio/SessionManager.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 
@@ -26,24 +27,21 @@ class ApiService {
 
   // ── Libros ──────────────────────────────────────────────────────────────────
 
-  // 1. Obtención de los libros de la BD
+  // 1. Obtención de los libros del usuario autenticado
   static Future<List<Libro>> fetchLibros() async {
     try {
-      // Realizamos la petición GET al endpoint principal
-      final response = await http.get(Uri.parse('$baseUrl/libros'));
-
+      final usuarioId = SessionManager.usuarioId;
+      if (usuarioId == null) return [];
+      final response = await http.get(
+        Uri.parse('$baseUrl/libros?usuarioId=$usuarioId'),
+      );
       if (response.statusCode == 200) {
-        // Decodificamos el cuerpo de la respuesta (un JSON Array)
         List<dynamic> body = json.decode(response.body);
-
-        // Mapeamos cada elemento del JSON a una instancia de la clase Libro
         return body.map((dynamic item) => Libro.fromJson(item)).toList();
       } else {
         throw Exception("Error del servidor: ${response.statusCode}");
       }
     } catch (e) {
-      // Si el backend está apagado o no hay internet, propagamos el error
-      print("Error en ApiService.fetchLibros: $e");
       rethrow;
     }
   }
@@ -75,6 +73,21 @@ class ApiService {
       return double.parse(response.body);
     }
     return 1.0;
+  }
+
+  /// Lanza [Exception] con mensaje legible según el código HTTP de error.
+  static Exception _errorISBN(int statusCode) {
+    switch (statusCode) {
+      case 429:
+        return Exception(
+          'Cuota de Google Books agotada por hoy. '
+          'Espera unas horas o configura una API key propia en el backend.',
+        );
+      case 503:
+        return Exception('Google Books no está disponible. Inténtalo más tarde.');
+      default:
+        return Exception('Error del servidor ($statusCode) al buscar el ISBN.');
+    }
   }
 
   /// Devuelve la lista de números de volumen ya ocupados para una saga.
@@ -138,17 +151,19 @@ class ApiService {
     return response.statusCode == 200;
   }
 
-  // Login de un usuario ya registrado
+  // Login: devuelve true si OK y guarda la sesión; false si las credenciales son incorrectas
   static Future<bool> login(String username, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/login'),
       body: jsonEncode({'username': username, 'password': password}),
       headers: {'Content-Type': 'application/json'},
     );
-    print("Respuesta del servidor: ${response.statusCode}");
-    print("Cuerpo de respuesta: ${response.body}");
-
-    return response.statusCode == 200;
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      SessionManager.iniciar(data['userId'] as int, data['username'] as String);
+      return true;
+    }
+    return false;
   }
 
   // ── Sagas ──────────────────────────────────────────────────────────────────
@@ -205,9 +220,7 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/libros/isbn/$isbn'));
 
     if (response.statusCode == 404) return null;
-    if (response.statusCode != 200) {
-      throw Exception('Error del servidor: ${response.statusCode}');
-    }
+    if (response.statusCode != 200) throw _errorISBN(response.statusCode);
 
     final Map<String, dynamic> data = json.decode(response.body);
     return Libro(
