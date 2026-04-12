@@ -18,9 +18,17 @@ class CardSaga extends StatelessWidget {
     required this.onEditar,
   });
 
-  String _subtitulo() {
-    final registrados = libros.length;
+  List<Libro> get _librosEnRango {
     final total = saga.totalLibros;
+    if (total == null || total <= 0) return libros;
+    return libros
+        .where((l) => l.numLibroSaga != null && l.numLibroSaga! <= total)
+        .toList();
+  }
+
+  String _subtitulo() {
+    final total = saga.totalLibros;
+    final registrados = _librosEnRango.length;
     if (total != null && total > 0) {
       return '$registrados de $total ${total == 1 ? 'libro' : 'libros'}';
     }
@@ -28,10 +36,11 @@ class CardSaga extends StatelessWidget {
   }
 
   bool _estaCompleta() {
-    if (libros.isEmpty) return false;
     final total = saga.totalLibros;
-    if (total != null && total > 0 && libros.length < total) return false;
-    return libros.every((l) => l.estado == EstadoLibro.leido);
+    final relevantes = _librosEnRango;
+    if (relevantes.isEmpty) return false;
+    if (total != null && total > 0 && relevantes.length < total) return false;
+    return relevantes.every((l) => l.estado == EstadoLibro.leido);
   }
 
   @override

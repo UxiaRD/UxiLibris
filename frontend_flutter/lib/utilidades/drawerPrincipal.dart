@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/pantallas/coleccionSagas.dart';
+import 'package:frontend_flutter/pantallas/estadisticas.dart';
 
 enum PantallaDrawer { libros, sagas, estadisticas, deseos }
 
@@ -21,8 +22,10 @@ class DrawerPrincipal extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const PantallaColeccionSagas()),
         );
       case PantallaDrawer.estadisticas:
-        // TODO: navegar a PantallaEstadisticas
-        break;
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PantallaEstadisticas()),
+        );
       case PantallaDrawer.deseos:
         // TODO: navegar a PantallaDeseos
         break;

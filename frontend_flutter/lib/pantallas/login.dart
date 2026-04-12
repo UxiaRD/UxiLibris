@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/controladores/loginController.dart';
-import 'package:frontend_flutter/servicio/ApiService.dart';
+import 'package:frontend_flutter/servicio/SessionManager.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
 import 'package:frontend_flutter/pantallas/menuPrincipal.dart';
@@ -23,37 +23,27 @@ class _PantallaLoginState extends State<PantallaLogin> {
   bool _cargando = false;
 
   @override
+  void initState() {
+    super.initState();
+    _verificarSesionGuardada();
+  }
+
+  /// Si hay una sesión guardada en el dispositivo, salta directamente al menú.
+  Future<void> _verificarSesionGuardada() async {
+    final restaurado = await SessionManager.restaurar();
+    if (restaurado && mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MenuPrincipal()),
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _usernameController.dispose();
     _passController.dispose();
     super.dispose();
-  }
-
-  Future<void> _iniciarSesion() async {
-    setState(() => _cargando = true);
-
-    // Llamada al backend de Java a través del ApiService
-    bool exito = await ApiService.login(
-      _usernameController.text.trim(),
-      _passController.text.trim(),
-    );
-
-    setState(() => _cargando = false);
-
-    if (exito) {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MenuPrincipal()),
-        );
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Email o contraseña incorrectos")),
-        );
-      }
-    }
   }
 
   @override

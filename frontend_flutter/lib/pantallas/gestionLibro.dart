@@ -80,8 +80,6 @@ class _PantallaGestionLibroState extends State<PantallaGestionLibro> {
         backgroundColor: Colors.transparent,
         actions: ActionsAppBar.obtenerAcciones(
           context,
-          mostrarCerrarSesion: false,
-          // Solo se pasa el método eliminar si se está en modo edición
           alEliminar: esModoEdicion ? _eliminarLibro : null,
         ),
       ),

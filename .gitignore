@@ -110,4 +110,5 @@ Thumbs.db
 
 # Ignorar el archivo que contiene la API Key real
 application.properties
+**/application.properties
 config.local.properties

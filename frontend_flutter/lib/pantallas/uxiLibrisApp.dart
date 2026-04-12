@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:frontend_flutter/decoraciones/appThemes.dart';
 import 'package:frontend_flutter/pantallas/login.dart';
 import 'package:frontend_flutter/decoraciones/themeProvider.dart';
@@ -15,6 +16,17 @@ class UxiLibrisApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "UxiLibris",
+
+      // Localización en español (fechas en formato dd/mm/aaaa)
+      locale: const Locale('es', 'ES'),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', 'ES'),
+      ],
 
       // Definición de los temas
       theme: AppThemes.lightTheme,

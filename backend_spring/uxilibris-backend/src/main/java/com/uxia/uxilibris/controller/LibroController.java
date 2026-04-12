@@ -32,6 +32,13 @@ public class LibroController {
         return ResponseEntity.ok(libroService.guardarLibro(libro));
     }
 
+    // PUT /api/libros/{id} → actualiza un libro existente
+    @PutMapping("/{id}")
+    public ResponseEntity<Libro> actualizar(@PathVariable Long id, @RequestBody Libro libro) {
+        libro.setId(id);
+        return ResponseEntity.ok(libroService.guardarLibro(libro));
+    }
+
     // DELETE /api/libros/{id} → elimina un libro por su id
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {

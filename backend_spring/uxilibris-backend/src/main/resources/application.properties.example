@@ -1,0 +1,20 @@
+spring.application.name=uxilibris-backend
+server.port=8080
+server.address=0.0.0.0
+
+# Base de datos
+spring.datasource.url=jdbc:mysql://localhost:3306/UxiLibrisDB?createDatabaseIfNotExists=true
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.username=TU_USUARIO_MYSQL
+spring.datasource.password=TU_PASSWORD_MYSQL
+
+# JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+spring.jpa.open-in-view=false
+
+# Google Books API
+# Obtén una clave gratuita en: https://console.cloud.google.com → APIs → Books API → Credenciales
+# Sin clave la cuota es compartida (se agota fácil). Con clave: 1000 consultas/día propias.
+google.books.api.key=TU_API_KEY_GOOGLE_BOOKS

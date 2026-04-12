@@ -33,10 +33,7 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
       appBar: AppBar(
         title: Text("UxiLibris"),
         centerTitle: true,
-        actions: ActionsAppBar.obtenerAcciones(
-          context,
-          mostrarCerrarSesion: true,
-        ),
+        actions: ActionsAppBar.obtenerAcciones(context),
       ),
 
       drawer: DrawerPrincipal(pantallaActual: PantallaDrawer.libros),

@@ -115,13 +115,26 @@ class ApiService {
 
   // 5. Guardar un nuevo libro
   static Future<bool> guardarLibro(Libro libro) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/libros'),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(
-        libro.toJson(),
-      ), // Debes tener el método toJson en tu modelo
-    );
+    final headers = {"Content-Type": "application/json"};
+    final body = json.encode(libro.toJson());
+    final http.Response response;
+
+    if (libro.id != null) {
+      // Edición: PUT /libros/{id}
+      response = await http.put(
+        Uri.parse('$baseUrl/libros/${libro.id}'),
+        headers: headers,
+        body: body,
+      );
+    } else {
+      // Creación: POST /libros
+      response = await http.post(
+        Uri.parse('$baseUrl/libros'),
+        headers: headers,
+        body: body,
+      );
+    }
+
     return response.statusCode == 200;
   }
 
@@ -160,10 +173,58 @@ class ApiService {
     );
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as Map<String, dynamic>;
-      SessionManager.iniciar(data['userId'] as int, data['username'] as String);
+      SessionManager.iniciar(
+        data['userId'] as int,
+        data['username'] as String,
+        data['email'] as String? ?? '',
+      );
+      await SessionManager.guardar();
       return true;
     }
     return false;
+  }
+
+  // Actualizar datos del usuario (username, email, contraseña)
+  // Lanza FormatException con mensaje si la contraseña es incorrecta o hay conflicto.
+  static Future<void> actualizarUsuario({
+    required int usuarioId,
+    required String nuevoUsername,
+    required String nuevoEmail,
+    required String passwordActual,
+    String? nuevaPassword,
+  }) async {
+    final body = <String, dynamic>{
+      'nuevoUsername': nuevoUsername,
+      'nuevoEmail': nuevoEmail,
+      'passwordActual': passwordActual,
+    };
+    if (nuevaPassword != null && nuevaPassword.isNotEmpty) {
+      body['nuevaPassword'] = nuevaPassword;
+    }
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/auth/usuario/$usuarioId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      SessionManager.iniciar(
+        data['userId'] as int,
+        data['username'] as String,
+        data['email'] as String? ?? '',
+      );
+      await SessionManager.guardar();
+      return;
+    }
+    if (response.statusCode == 401) {
+      throw const FormatException('Contraseña actual incorrecta');
+    }
+    if (response.statusCode == 409) {
+      throw FormatException(response.body);
+    }
+    throw const FormatException('Error al actualizar los datos');
   }
 
   // ── Sagas ──────────────────────────────────────────────────────────────────
