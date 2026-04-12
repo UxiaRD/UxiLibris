@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'ajustes.dart';
+import '../pantallas/ajustes.dart';
 
 class ActionsAppBar {
   static List<Widget> obtenerAcciones(
     BuildContext context, {
-    VoidCallback? alEliminar, // Si se pasa una función, aparece el botón eliminar
+    VoidCallback?
+    alEliminar, // Si se pasa una función, aparece el botón eliminar
   }) {
     return [
       // BOTÓN ELIMINAR (Solo si se pasa la función alEliminar)

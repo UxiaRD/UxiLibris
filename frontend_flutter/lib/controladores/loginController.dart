@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/pantallas/menuPrincipal.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 
@@ -25,6 +26,7 @@ class LoginController {
       setCargando(false);
 
       if (exito && context.mounted) {
+        Libreria.todosLosLibros = [];
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MenuPrincipal()),
