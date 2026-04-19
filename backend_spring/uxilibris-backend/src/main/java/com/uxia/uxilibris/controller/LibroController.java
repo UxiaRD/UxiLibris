@@ -81,6 +81,14 @@ public class LibroController {
         return ResponseEntity.ok(libroService.asignarSaga(id, saga, numLibroSaga));
     }
 
+    // PATCH /api/libros/{id}/favorito?valor=true|false → marca/desmarca como favorito
+    @PatchMapping("/{id}/favorito")
+    public ResponseEntity<Libro> toggleFavorito(
+            @PathVariable Long id,
+            @RequestParam boolean valor) {
+        return ResponseEntity.ok(libroService.toggleFavorito(id, valor));
+    }
+
     // GET /api/libros/isbn/{isbn}
     @GetMapping("/isbn/{isbn}")
     public ResponseEntity<IsbnResultDto> buscarPorISBN(@PathVariable String isbn) {

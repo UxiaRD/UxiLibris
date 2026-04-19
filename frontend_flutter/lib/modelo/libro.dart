@@ -1,8 +1,13 @@
 // CLASE Libro
 
 import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
+import 'package:frontend_flutter/modelo/lectura.dart';
+
+export 'package:frontend_flutter/modelo/lectura.dart';
 
 enum EstadoLibro { leyendo, pendiente, leido }
+
+enum FormatoLibro { fisico, digital }
 
 class Libro {
   final int? id; // ID de la base de datos SQL
@@ -16,8 +21,9 @@ class Libro {
   double? numLibroSaga;
   double puntuacion;
   EstadoLibro estado;
-  DateTime? fechaInicio;
-  DateTime? fechaFin;
+  FormatoLibro formato;
+  List<Lectura> lecturas;
+  bool favorito;
   String rutaImagen;
 
   // Base para la personalización
@@ -35,11 +41,12 @@ class Libro {
     this.numLibroSaga,
     this.puntuacion = 0.0,
     required this.estado,
-    this.fechaInicio,
-    this.fechaFin,
+    this.formato = FormatoLibro.fisico,
+    List<Lectura>? lecturas,
+    this.favorito = false,
     required this.rutaImagen,
     required this.almacen,
-  });
+  }) : lecturas = lecturas ?? [];
 
   // Constructor factory para crear un Libro desde un Map (JSON)
   // Recibir el Libro del JSON
@@ -58,12 +65,16 @@ class Libro {
             (json['estado'] as String? ?? 'pendiente').toLowerCase(),
         orElse: () => EstadoLibro.pendiente,
       ),
-      fechaInicio: json['fechaInicio'] != null
-          ? DateTime.parse(json['fechaInicio'])
-          : null,
-      fechaFin: json['fechaFin'] != null
-          ? DateTime.parse(json['fechaFin'])
-          : null,
+      formato: FormatoLibro.values.firstWhere(
+        (f) =>
+            f.name.toLowerCase() ==
+            (json['formato'] as String? ?? 'fisico').toLowerCase(),
+        orElse: () => FormatoLibro.fisico,
+      ),
+      lecturas: (json['lecturas'] as List<dynamic>? ?? [])
+          .map((e) => Lectura.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      favorito: json['favorito'] as bool? ?? false,
       rutaImagen: json['rutaImagen'] ?? "assets/images/fondos/libro.png",
 
       // Se carga el almacén desde la lista de propiedades del JSON
@@ -82,8 +93,9 @@ class Libro {
       'numLibroSaga': numLibroSaga,
       'puntuacion': puntuacion,
       'estado': estado.name.toUpperCase(),
-      'fechaInicio': fechaInicio?.toIso8601String(),
-      'fechaFin': fechaFin?.toIso8601String(),
+      'formato': formato.name.toUpperCase(),
+      'lecturas': lecturas.map((l) => l.toJson()).toList(),
+      'favorito': favorito,
       'rutaImagen': rutaImagen,
     };
   }

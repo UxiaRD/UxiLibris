@@ -1,6 +1,7 @@
 package com.uxia.uxilibris.service;
 
 import com.uxia.uxilibris.entity.Libro;
+import com.uxia.uxilibris.entity.LecturaLibro;
 import com.uxia.uxilibris.entity.Saga;
 import com.uxia.uxilibris.entity.Usuario;
 import com.uxia.uxilibris.repository.LibroRepository;
@@ -85,9 +86,10 @@ public class LibroService {
                 existente.setNumLibroSaga(libro.getNumLibroSaga());
                 existente.setPuntuacion(libro.getPuntuacion());
                 existente.setEstado(libro.getEstado());
-                existente.setFechaInicio(libro.getFechaInicio());
-                existente.setFechaFin(libro.getFechaFin());
                 existente.setRutaImagen(libro.getRutaImagen());
+                if (libro.getFavorito() != null) existente.setFavorito(libro.getFavorito());
+                if (libro.getFormato() != null) existente.setFormato(libro.getFormato());
+                sincronizarLecturas(existente, libro.getLecturas());
                 Libro saved = libroRepository.save(existente);
                 propagarTransientes(saved);
                 return saved;
@@ -95,6 +97,7 @@ public class LibroService {
                 libro.setSaga(saga);
                 libro.setUsuario(usuario);
                 if (libro.getPropiedades() == null) libro.setPropiedades(new java.util.ArrayList<>());
+                sincronizarLecturas(libro, libro.getLecturas());
                 Libro saved = libroRepository.save(libro);
                 propagarTransientes(saved);
                 return saved;
@@ -104,9 +107,29 @@ public class LibroService {
         libro.setSaga(saga);
         libro.setUsuario(usuario);
         if (libro.getPropiedades() == null) libro.setPropiedades(new java.util.ArrayList<>());
+        sincronizarLecturas(libro, libro.getLecturas());
         Libro saved = libroRepository.save(libro);
         propagarTransientes(saved);
         return saved;
+    }
+
+    // Reemplaza la lista de lecturas de la entidad persistida con las que llegan del cliente.
+    // Se nulifican los IDs entrantes para que JPA siempre inserte filas nuevas (orphanRemoval
+    // eliminará las anteriores automáticamente al hacer save).
+    private void sincronizarLecturas(Libro destino, java.util.List<LecturaLibro> entradasCliente) {
+        // Copiamos antes de limpiar: cuando destino y entradasCliente comparten
+        // la misma lista (libro nuevo), clear() vaciaría también entradasCliente.
+        java.util.List<LecturaLibro> copia = entradasCliente != null
+                ? new java.util.ArrayList<>(entradasCliente)
+                : new java.util.ArrayList<>();
+        destino.getLecturas().clear();
+        for (LecturaLibro lec : copia) {
+            LecturaLibro nueva = new LecturaLibro();
+            nueva.setLibro(destino);
+            nueva.setFechaInicio(lec.getFechaInicio());
+            nueva.setFechaFin(lec.getFechaFin());
+            destino.getLecturas().add(nueva);
+        }
     }
 
     @Transactional
@@ -133,6 +156,16 @@ public class LibroService {
             throw new jakarta.persistence.EntityNotFoundException("Libro no encontrado con id: " + id);
         }
         libroRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Libro toggleFavorito(Long id, boolean favorito) {
+        Libro libro = libroRepository.findById(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Libro no encontrado: " + id));
+        libro.setFavorito(favorito);
+        Libro saved = libroRepository.save(libro);
+        propagarTransientes(saved);
+        return saved;
     }
 
     public List<Double> obtenerVolumenesDeSaga(String nombreSaga) {

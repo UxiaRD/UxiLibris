@@ -49,9 +49,10 @@ class Libreria {
     original.sagaNombre = modificado.sagaNombre;
     original.numLibroSaga = modificado.numLibroSaga;
     original.estado = modificado.estado;
+    original.formato = modificado.formato;
     original.puntuacion = modificado.puntuacion;
-    original.fechaInicio = modificado.fechaInicio;
-    original.fechaFin = modificado.fechaFin;
+    original.lecturas = modificado.lecturas;
+    original.favorito = modificado.favorito;
     original.rutaImagen = modificado.rutaImagen;
     original.almacen = modificado.almacen;
   }

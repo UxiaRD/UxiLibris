@@ -1,17 +1,22 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:frontend_flutter/modelo/libro.dart';
+
+const Color _colorDigital = Color(0xFF7B2FBE);
 
 class Cardlibro extends StatelessWidget {
   final String rutaImagen;
   final String titulo;
   final double puntuacion;
+  final FormatoLibro formato;
 
   const Cardlibro({
     super.key,
     required this.rutaImagen,
     required this.titulo,
     required this.puntuacion,
+    this.formato = FormatoLibro.fisico,
   });
 
   // El método _buildImagen va aquí dentro, como método PRIVADO del propio
@@ -56,12 +61,43 @@ class Cardlibro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final esDigital = formato == FormatoLibro.digital;
+
     return Card(
-      // La propiedad clipBehavior sirve para que los bordes curvos se vean suaves y no pixelados
       clipBehavior: Clip.antiAlias,
+      shape: esDigital
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: _colorDigital, width: 2),
+            )
+          : null,
       child: Column(
         children: [
-          Expanded(child: _buildImagen()),
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _buildImagen(),
+                if (esDigital)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: _colorDigital.withValues(alpha: 0.88),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: const Icon(
+                        Icons.tablet_android_rounded,
+                        color: Colors.white,
+                        size: 13,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(4.0),
             child: Column(

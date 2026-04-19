@@ -5,6 +5,9 @@ import 'package:frontend_flutter/modelo/propiedad.dart';
 import '../modelo/libro.dart';
 import 'package:frontend_flutter/utilidades/searchField.dart';
 
+// Color distintivo para libros digitales (usado en selector y badge)
+const Color _colorDigital = Color(0xFF7B2FBE);
+
 class WidgetsFormulario {
   // MÉTODO PARA CAMPOS DE TEXTO
   static Widget buildTextField(
@@ -205,6 +208,48 @@ class WidgetsFormulario {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // MÉTODO PARA SELECCIONAR EL FORMATO (físico / digital)
+  static Widget buildSelectorFormato(
+    FormatoLibro valorActual,
+    ColorScheme colores,
+    ValueChanged<FormatoLibro> onChanged,
+  ) {
+    return SegmentedButton<FormatoLibro>(
+      segments: const [
+        ButtonSegment(
+          value: FormatoLibro.fisico,
+          label: Text('Físico'),
+          icon: Icon(Icons.menu_book_rounded),
+        ),
+        ButtonSegment(
+          value: FormatoLibro.digital,
+          label: Text('Digital'),
+          icon: Icon(Icons.tablet_android_rounded),
+        ),
+      ],
+      selected: {valorActual},
+      onSelectionChanged: (sel) => onChanged(sel.first),
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return valorActual == FormatoLibro.digital
+                ? _colorDigital.withValues(alpha: 0.15)
+                : colores.primaryContainer;
+          }
+          return null;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return valorActual == FormatoLibro.digital
+                ? _colorDigital
+                : colores.onPrimaryContainer;
+          }
+          return null;
+        }),
       ),
     );
   }

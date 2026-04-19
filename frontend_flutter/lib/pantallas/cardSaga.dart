@@ -4,6 +4,8 @@ import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/modelo/saga.dart';
 import 'package:frontend_flutter/pantallas/portadasApiladas.dart';
 
+const Color _colorDigital = Color(0xFF7B2FBE);
+
 class CardSaga extends StatelessWidget {
   final Saga saga;
   final List<Libro> libros;
@@ -35,6 +37,10 @@ class CardSaga extends StatelessWidget {
     return '$registrados ${registrados == 1 ? 'libro registrado' : 'libros registrados'}';
   }
 
+  bool get _todosDigitales =>
+      libros.isNotEmpty &&
+      libros.every((l) => l.formato == FormatoLibro.digital);
+
   bool _estaCompleta() {
     final total = saga.totalLibros;
     final relevantes = _librosEnRango;
@@ -53,7 +59,12 @@ class CardSaga extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.only(bottom: 16),
         color: completa ? AppThemes.moradoClaro.withValues(alpha: 0.55) : null,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: _todosDigitales
+              ? const BorderSide(color: _colorDigital, width: 2)
+              : BorderSide.none,
+        ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
           child: Column(

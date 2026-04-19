@@ -5,6 +5,7 @@ import 'package:frontend_flutter/controladores/estadisticasController.dart';
 import 'package:frontend_flutter/decoraciones/appThemes.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
+import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/utilidades/drawerPrincipal.dart';
 
@@ -52,6 +53,14 @@ class _PantallaEstadisticasState extends State<PantallaEstadisticas> {
   List<Libro> _topPuntuados(int n) => EstadisticasController.topPuntuados(n);
   String get _mediaPuntuacion => EstadisticasController.mediaPuntuacion;
   String get _autorFavorito => EstadisticasController.autorFavorito;
+  List<Libro> _favoritosDelAnio(int anio) =>
+      EstadisticasController.favoritosDelAnio(anio);
+
+  // Alterna el estado favorito de un libro: actualización optimista + llamada API.
+  Future<void> _toggleFavorito(Libro libro) async {
+    setState(() => libro.favorito = !libro.favorito);
+    await ApiService.toggleFavorito(libro.id!, libro.favorito);
+  }
 
   // ── Build principal ──────────────────────────────────────────────────────────
 
@@ -90,10 +99,8 @@ class _PantallaEstadisticasState extends State<PantallaEstadisticas> {
                   children: [
                     // 1. Resumen rápido
                     _tarjetasResumen(
-                      leidos
-                          .where((l) => l.fechaFin!.year == anioActual)
-                          .length,
-                      leidos.length,
+                      EstadisticasController.lecturasEnAnio(anioActual),
+                      EstadisticasController.totalLecturas,
                       colores,
                     ),
                     const SizedBox(height: 28),
@@ -126,6 +133,17 @@ class _PantallaEstadisticasState extends State<PantallaEstadisticas> {
                     _tituloSeccion('Mejores puntuaciones', colores),
                     const SizedBox(height: 12),
                     _seccionTopPuntuados(colores),
+
+                    // 6. Favoritos del año seleccionado
+                    const SizedBox(height: 28),
+                    _tituloSeccion('Favoritos de $_anioSeleccionado', colores),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Pulsa ♥ en un libro para marcarlo como favorito del año.',
+                      style: TextStyle(fontSize: 11, color: colores.outline),
+                    ),
+                    const SizedBox(height: 12),
+                    _seccionFavoritosAnio(_anioSeleccionado, colores),
                   ],
                 ),
               ),
@@ -631,9 +649,70 @@ class _PantallaEstadisticasState extends State<PantallaEstadisticas> {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               // Estrellas
               _estrellas(libro.puntuacion, colores),
+              // Corazón favorito
+              GestureDetector(
+                onTap: libro.id != null ? () => _toggleFavorito(libro) : null,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Icon(
+                    libro.favorito ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                    size: 18,
+                    color: libro.favorito ? Colors.redAccent : colores.outline,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _seccionFavoritosAnio(int anio, ColorScheme colores) {
+    final favs = _favoritosDelAnio(anio);
+    if (favs.isEmpty) {
+      return Text(
+        'Ningún favorito marcado para $anio',
+        style: TextStyle(fontSize: 13, color: colores.outline),
+      );
+    }
+    return Column(
+      children: favs.map((libro) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Row(
+            children: [
+              Icon(Icons.favorite_rounded, size: 16, color: Colors.redAccent),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      libro.titulo,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                    ),
+                    Text(
+                      libro.autorNombre,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11, color: colores.outline),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _estrellas(libro.puntuacion, colores),
+              GestureDetector(
+                onTap: libro.id != null ? () => _toggleFavorito(libro) : null,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Icon(Icons.favorite_rounded, size: 18, color: Colors.redAccent),
+                ),
+              ),
             ],
           ),
         );

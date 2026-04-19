@@ -10,6 +10,7 @@ import 'package:frontend_flutter/pantallas/detalleSaga.dart';
 import 'package:frontend_flutter/pantallas/gestionSaga.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
+import 'package:frontend_flutter/utilidades/barraBusqueda.dart';
 import 'package:frontend_flutter/utilidades/drawerPrincipal.dart';
 
 class PantallaColeccionSagas extends StatefulWidget {
@@ -136,31 +137,11 @@ class _PantallaColeccionSagasState extends State<PantallaColeccionSagas> {
             : Column(
                 children: [
                   // Buscador
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    child: TextField(
-                      controller: _busquedaController,
-                      decoration: InputDecoration(
-                        hintText: 'Buscar saga...',
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: _textoBusqueda.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () => _busquedaController.clear(),
-                              )
-                            : null,
-                        filled: true,
-                        fillColor: colores.surface.withValues(alpha: 0.9),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 0,
-                          horizontal: 16,
-                        ),
-                      ),
-                    ),
+                  BarraBusqueda(
+                    controladorBusqueda: _busquedaController,
+                    hintText: 'Buscar saga...',
+                    onChanged: (valor) =>
+                        setState(() => _textoBusqueda = valor),
                   ),
 
                   // Lista de sagas + indicador de letra

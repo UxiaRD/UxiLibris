@@ -180,6 +180,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                         rutaImagen: libro.rutaImagen,
                         titulo: libro.titulo,
                         puntuacion: libro.puntuacion,
+                        formato: libro.formato,
                       ),
                     );
                   },

@@ -2,9 +2,9 @@ package com.uxia.uxilibris.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uxia.uxilibris.model.EstadoLibro;
+import com.uxia.uxilibris.model.FormatoLibro;
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -50,14 +50,20 @@ public class Libro {
     @Enumerated(EnumType.STRING)
     private EstadoLibro estado;
 
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
+    @Enumerated(EnumType.STRING)
+    private FormatoLibro formato = FormatoLibro.FISICO;
 
     private String rutaImagen;
+
+    private Boolean favorito = false;
 
     // Relación con el Almacén de Propiedades Dinámicas
     @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PropiedadValor> propiedades;
+
+    // Historial de lecturas del libro
+    @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<LecturaLibro> lecturas = new java.util.ArrayList<>();
 
     // Tras cargar desde DB, propaga los datos de las FK a los campos transientes
     @PostLoad

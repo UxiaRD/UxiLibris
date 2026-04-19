@@ -113,8 +113,9 @@ class ApiService {
     }
   }
 
-  // 5. Guardar un nuevo libro
-  static Future<bool> guardarLibro(Libro libro) async {
+  // 5. Guardar un libro (crea o edita).
+  // Devuelve el Libro con el id asignado por el servidor, o null si falla.
+  static Future<Libro?> guardarLibro(Libro libro) async {
     final headers = {"Content-Type": "application/json"};
     final body = json.encode(libro.toJson());
     final http.Response response;
@@ -135,10 +136,21 @@ class ApiService {
       );
     }
 
+    if (response.statusCode == 200) {
+      return Libro.fromJson(json.decode(response.body));
+    }
+    return null;
+  }
+
+  // 6. Marcar / desmarcar un libro como favorito (optimistic-friendly)
+  static Future<bool> toggleFavorito(int id, bool valor) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/libros/$id/favorito?valor=$valor'),
+    );
     return response.statusCode == 200;
   }
 
-  // 6. Eliminar un libro
+  // 7. Eliminar un libro
   static Future<bool> eliminarLibro(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/libros/$id'));
     return response.statusCode == 200 || response.statusCode == 204;

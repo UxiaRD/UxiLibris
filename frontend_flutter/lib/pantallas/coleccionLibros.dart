@@ -3,7 +3,7 @@ import 'package:frontend_flutter/decoraciones/fondoBase.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/pantallas/seleccionMetodoCarga.dart';
-import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/barraBusqueda.dart';
+import 'package:frontend_flutter/utilidades/barraBusqueda.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/gridViewColeccion.dart';
 import 'package:frontend_flutter/controladores/coleccionController.dart';
 
@@ -104,8 +104,9 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
             : '#';
         _indicePorLetra.putIfAbsent(letra, () => i);
       }
-      _letraActiva =
-          _indicePorLetra.isNotEmpty ? _indicePorLetra.keys.first : '';
+      _letraActiva = _indicePorLetra.isNotEmpty
+          ? _indicePorLetra.keys.first
+          : '';
     });
   }
 
@@ -114,15 +115,11 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
     final libros = librosFiltrados.obtenerTodos();
     if (libros.isEmpty || !_scrollController.hasClients) return;
 
-    final anchoDisponible =
-        MediaQuery.of(context).size.width - _anchoSidebar;
-    final numColumnas =
-        (anchoDisponible / _maxAnchoCelda).ceil().clamp(1, 10);
+    final anchoDisponible = MediaQuery.of(context).size.width - _anchoSidebar;
+    final numColumnas = (anchoDisponible / _maxAnchoCelda).ceil().clamp(1, 10);
     final alturaFila = _alturaItemGrid + _espaciadoGrid;
-    final filaActual =
-        (_scrollController.offset / alturaFila).floor();
-    final indice =
-        (filaActual * numColumnas).clamp(0, libros.length - 1);
+    final filaActual = (_scrollController.offset / alturaFila).floor();
+    final indice = (filaActual * numColumnas).clamp(0, libros.length - 1);
 
     final letra = libros[indice].titulo.isNotEmpty
         ? libros[indice].titulo[0].toUpperCase()
@@ -136,10 +133,8 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
     final index = _indicePorLetra[letra];
     if (index == null || !_scrollController.hasClients) return;
 
-    final anchoDisponible =
-        MediaQuery.of(context).size.width - _anchoSidebar;
-    final numColumnas =
-        (anchoDisponible / _maxAnchoCelda).ceil().clamp(1, 10);
+    final anchoDisponible = MediaQuery.of(context).size.width - _anchoSidebar;
+    final numColumnas = (anchoDisponible / _maxAnchoCelda).ceil().clamp(1, 10);
     final alturaFila = _alturaItemGrid + _espaciadoGrid;
     final fila = index ~/ numColumnas;
 
@@ -165,6 +160,7 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
                     // BARRA BÚSQUEDA
                     BarraBusqueda(
                       controladorBusqueda: _controladorDeBusqueda,
+                      hintText: 'Buscar libro...',
                       onChanged: (valor) => _buscarLibros(valor),
                     ),
 
@@ -243,8 +239,7 @@ class _BarraLetras extends StatelessWidget {
                   letra,
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight:
-                        activa ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: activa ? FontWeight.bold : FontWeight.normal,
                     color: activa ? colores.primary : colores.outline,
                   ),
                 ),

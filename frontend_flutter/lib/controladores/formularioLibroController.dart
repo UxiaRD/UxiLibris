@@ -18,7 +18,7 @@ class FormularioLibroController {
         ApiService.fetchAutores(),
         ApiService.fetchSagas(),
       ]);
-      return (results[0] as List<String>, results[1] as List<String>);
+      return (results[0], results[1]);
     } catch (_) {
       return (<String>[], <String>[]);
     }
@@ -47,24 +47,36 @@ class FormularioLibroController {
     return File(temporal.path).copy('${directorio.path}/$nombre');
   }
 
-  /// Calcula las fechas automáticas al cambiar el estado de lectura.
+  /// Calcula el historial de lecturas automáticamente al cambiar el estado.
   /// Es una función pura: no tiene efectos secundarios.
-  static ({DateTime? inicio, DateTime? fin}) calcularFechasAutomaticas({
+  ///
+  /// - pendiente → sin cambios en lecturas existentes
+  /// - leyendo   → añade lectura activa (sin fechaFin) si no hay ninguna
+  /// - leido     → cierra la lectura activa con fechaFin=hoy; si no hay activa,
+  ///               añade una lectura completada sólo si la lista estaba vacía
+  static List<Lectura> calcularLecturasAutomaticas({
     required EstadoLibro nuevoEstado,
-    required DateTime? inicioActual,
-    required DateTime? finActual,
+    required List<Lectura> lecturasActuales,
   }) {
-    DateTime? inicio = inicioActual;
-    DateTime? fin = finActual;
+    final ahora = DateTime.now();
+    final lecturas = List<Lectura>.from(lecturasActuales);
+    final idxActiva = lecturas.indexWhere((l) => l.fechaFin == null);
+    final tieneActiva = idxActiva != -1;
 
-    if (nuevoEstado == EstadoLibro.leido) {
-      fin = fin ?? DateTime.now();
-      inicio = inicio ?? DateTime.now();
-    } else if (nuevoEstado == EstadoLibro.leyendo) {
-      inicio = inicio ?? DateTime.now();
+    if (nuevoEstado == EstadoLibro.leyendo) {
+      if (!tieneActiva) {
+        lecturas.add(Lectura(fechaInicio: ahora));
+      }
+    } else if (nuevoEstado == EstadoLibro.leido) {
+      if (tieneActiva) {
+        lecturas[idxActiva] = lecturas[idxActiva].withFechaFin(ahora);
+      } else if (lecturas.isEmpty) {
+        lecturas.add(Lectura(fechaInicio: ahora, fechaFin: ahora));
+      }
     }
+    // pendiente: no se modifican las lecturas existentes
 
-    return (inicio: inicio, fin: fin);
+    return lecturas;
   }
 
   /// Valida, construye y envía el libro al servidor.
@@ -79,9 +91,9 @@ class FormularioLibroController {
     required String sagaNombre,
     required String numLibroSagaTexto,
     required EstadoLibro estado,
+    required FormatoLibro formato,
     required double puntuacion,
-    required DateTime? fechaInicio,
-    required DateTime? fechaFin,
+    required List<Lectura> lecturas,
     required File? imagenSeleccionada,
     required String? rutaImagenExistente,
     required List<Propiedad> propiedades,
@@ -100,8 +112,8 @@ class FormularioLibroController {
       numLibroSaga: sagaNombre.isEmpty ? null : double.tryParse(numLibroSagaTexto),
       puntuacion: puntuacion,
       estado: estado,
-      fechaInicio: fechaInicio,
-      fechaFin: fechaFin,
+      formato: formato,
+      lecturas: lecturas,
       rutaImagen:
           imagenSeleccionada?.path ??
           rutaImagenExistente ??
@@ -109,9 +121,9 @@ class FormularioLibroController {
       almacen: AlmacenPropiedades(propiedades: propiedades),
     );
 
-    final exito = await ApiService.guardarLibro(libro);
-    if (!exito) throw Exception('El servidor no pudo procesar el guardado');
+    final libroGuardado = await ApiService.guardarLibro(libro);
+    if (libroGuardado == null) throw Exception('El servidor no pudo procesar el guardado');
 
-    return libro;
+    return libroGuardado;
   }
 }
