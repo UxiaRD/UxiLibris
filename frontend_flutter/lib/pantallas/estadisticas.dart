@@ -53,8 +53,7 @@ class _PantallaEstadisticasState extends State<PantallaEstadisticas> {
   List<Libro> _topPuntuados(int n) => EstadisticasController.topPuntuados(n);
   String get _mediaPuntuacion => EstadisticasController.mediaPuntuacion;
   String get _autorFavorito => EstadisticasController.autorFavorito;
-  List<Libro> _favoritosDelAnio(int anio) =>
-      EstadisticasController.favoritosDelAnio(anio);
+  List<Libro> get _favoritos => EstadisticasController.favoritos;
 
   // Alterna el estado favorito de un libro: actualización optimista + llamada API.
   Future<void> _toggleFavorito(Libro libro) async {
@@ -134,16 +133,11 @@ class _PantallaEstadisticasState extends State<PantallaEstadisticas> {
                     const SizedBox(height: 12),
                     _seccionTopPuntuados(colores),
 
-                    // 6. Favoritos del año seleccionado
+                    // 6. Favoritos
                     const SizedBox(height: 28),
-                    _tituloSeccion('Favoritos de $_anioSeleccionado', colores),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Pulsa ♥ en un libro para marcarlo como favorito del año.',
-                      style: TextStyle(fontSize: 11, color: colores.outline),
-                    ),
+                    _tituloSeccion('Mis favoritos', colores),
                     const SizedBox(height: 12),
-                    _seccionFavoritosAnio(_anioSeleccionado, colores),
+                    _seccionFavoritos(colores),
                   ],
                 ),
               ),
@@ -671,11 +665,11 @@ class _PantallaEstadisticasState extends State<PantallaEstadisticas> {
     );
   }
 
-  Widget _seccionFavoritosAnio(int anio, ColorScheme colores) {
-    final favs = _favoritosDelAnio(anio);
+  Widget _seccionFavoritos(ColorScheme colores) {
+    final favs = _favoritos;
     if (favs.isEmpty) {
       return Text(
-        'Ningún favorito marcado para $anio',
+        'Aún no tienes ningún favorito marcado.',
         style: TextStyle(fontSize: 13, color: colores.outline),
       );
     }

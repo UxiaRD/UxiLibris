@@ -8,6 +8,7 @@ import 'package:frontend_flutter/modelo/saga.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 import 'package:frontend_flutter/pantallas/gestionSaga.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/cardLibro.dart';
+import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/dialogoAsignarSaga.dart';
 import 'package:frontend_flutter/utilidades/dialogos.dart';
 
@@ -182,6 +183,12 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                         puntuacion: libro.puntuacion,
                         formato: libro.formato,
                         esDeseo: libro.estado == EstadoLibro.deseo,
+                        favorito: libro.favorito,
+                        onFavoritoToggle: libro.id == null ? null : () async {
+                          libro.favorito = !libro.favorito;
+                          setState(() {});
+                          await ApiService.toggleFavorito(libro.id!, libro.favorito);
+                        },
                       ),
                     );
                   },

@@ -3,6 +3,7 @@ import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/cardLibro.dart';
+import 'package:frontend_flutter/servicio/ApiService.dart';
 
 class GridColeccion extends StatelessWidget {
   final Libreria librosPantalla;
@@ -54,6 +55,12 @@ class GridColeccion extends StatelessWidget {
             puntuacion: libro.puntuacion,
             formato: libro.formato,
             esDeseo: libro.estado == EstadoLibro.deseo,
+            favorito: libro.favorito,
+            onFavoritoToggle: libro.id == null ? null : () async {
+              libro.favorito = !libro.favorito;
+              alCambiar();
+              await ApiService.toggleFavorito(libro.id!, libro.favorito);
+            },
           ),
         );
       },

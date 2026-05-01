@@ -12,6 +12,8 @@ class Cardlibro extends StatelessWidget {
   final double puntuacion;
   final FormatoLibro formato;
   final bool esDeseo;
+  final bool favorito;
+  final VoidCallback? onFavoritoToggle;
 
   const Cardlibro({
     super.key,
@@ -20,6 +22,8 @@ class Cardlibro extends StatelessWidget {
     required this.puntuacion,
     this.formato = FormatoLibro.fisico,
     this.esDeseo = false,
+    this.favorito = false,
+    this.onFavoritoToggle,
   });
 
   // El método _buildImagen va aquí dentro, como método PRIVADO del propio
@@ -106,6 +110,22 @@ class Cardlibro extends StatelessWidget {
                       ),
                     ),
                   ),
+                // Estrella de favorito (arriba-derecha), siempre visible
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: GestureDetector(
+                    onTap: onFavoritoToggle,
+                    child: Icon(
+                      favorito ? Icons.star_rounded : Icons.star_border_rounded,
+                      color: favorito ? Colors.amber : Colors.white70,
+                      size: 20,
+                      shadows: const [
+                        Shadow(color: Colors.black54, blurRadius: 6),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

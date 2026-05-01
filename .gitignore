@@ -98,7 +98,7 @@ DerivedData/
 # Secretos y variables de entorno
 # ----------------------------------------------------------------------------
 .env*
-! .env.example
+!.env.example
 
 # ----------------------------------------------------------------------------
 # Varios (macOS, Windows, logs)
@@ -106,6 +106,9 @@ DerivedData/
 .DS_Store
 Thumbs.db
 *.log
+
+# Ficheros temporales de LibreOffice / OpenOffice
+.~lock.*#
 
 
 # Ignorar el archivo que contiene la API Key real

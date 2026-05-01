@@ -75,18 +75,11 @@ class EstadisticasController {
     return top.isEmpty ? '—' : top.first.key;
   }
 
-  /// Libros marcados como favorito que tienen al menos una lectura completada
-  /// en el año indicado, ordenados por puntuación descendente.
-  static List<Libro> favoritosDelAnio(int anio) {
-    return Libreria.todosLosLibros
-        .where(
-          (l) =>
-              l.favorito &&
-              l.lecturas.any(
-                (lec) => lec.fechaFin != null && lec.fechaFin!.year == anio,
-              ),
-        )
-        .toList()
-      ..sort((a, b) => b.puntuacion.compareTo(a.puntuacion));
+  /// Todos los libros marcados como favorito, ordenados por puntuación descendente.
+  static List<Libro> get favoritos {
+    return (Libreria.todosLosLibros
+            .where((l) => l.favorito)
+            .toList()
+          ..sort((a, b) => b.puntuacion.compareTo(a.puntuacion)));
   }
 }

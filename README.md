@@ -1,176 +1,338 @@
-# 📚 UxiLibris - Gestor de Lecturas Personal
+# UxiLibris — Gestor de Lecturas Personal
 
-Una aplicación móvil moderna diseñada para amantes de la lectura que desean llevar un registro detallado de su colección, lecturas en curso y deseos futuros.
+Una aplicación para amantes de la lectura que permite llevar un registro detallado de su colección, lecturas en curso, lista de deseos y hábitos de lectura con estadísticas visuales.
 
-## 🚀 Características Actuales
+<p align="center">
+<img src="frontend_flutter/assets/images/icono.png" alt="Icono UxiLibris" width="150">
+</p>
+
+## Índice
+
+1. [Características](#características)
+2. [Tecnologías utilizadas](#tecnologías-utilizadas)
+3. [Estructura del proyecto](#estructura-del-proyecto)
+4. [Instalación y ejecución](#instalación-y-ejecución)
+   - [Opción A — Docker en el navegador (recomendado)](#opción-a--docker-en-el-navegador-recomendado)
+   - [Opción B — App móvil Android (APK)](#opción-b--app-móvil-android-apk)
+   - [Opción C — Entorno de desarrollo local](#opción-c--entorno-de-desarrollo-local)
+5. [Limitaciones de la versión web](#limitaciones-de-la-versión-web)
+6. [Autora](#autora)
+
+---
+
+## Características
 
 ### 🔐 Autenticación
-- Registro e inicio de sesión seguros con validaciones de cliente y servidor.
-- Restricciones de registro: mayúsculas en contraseña, formato de email y unicidad de usuario.
-- **Sesión persistente**: las credenciales se almacenan de forma segura en el dispositivo (keychain/keystore) y no es necesario volver a introducirlas al abrir la app.
+- Registro e inicio de sesión seguros con validaciones en cliente y servidor.
+- Restricciones de contraseña: mínimo una mayúscula y un número.
+- **Sesión persistente**: las credenciales se almacenan cifradas en el dispositivo (keychain/keystore) y no es necesario volver a introducirlas al abrir la app.
 
-### 📖 Colección de Libros
-- Añadir libros **manualmente** o mediante **escáner de código de barras ISBN**.
-  - El escáner consulta la **API de Google Books** y rellena automáticamente título, autor, portada y datos de saga.
-  - Detección de duplicados: aviso si el libro ya está registrado al escanear el mismo ISBN.
+### 📖 Colección de libros
+- Añadir libros **manualmente**, mediante **escáner de código de barras ISBN** o mediante **búsqueda por título/autor en Google Books**.
+  - El escáner y la búsqueda consultan la **API de Google Books** y rellenan automáticamente título, autor, portada y datos de saga.
+  - Detección de duplicados: aviso si el ISBN ya está registrado.
 - Editar y eliminar libros de la biblioteca.
 - Filtrado por estado de lectura: *Todos*, *Leyendo*, *Pendientes*, *Leídos*.
 - Barra de búsqueda por título, autor o saga.
-- **Ordenación alfabética** automática por título en todas las vistas.
-- **Barra lateral de letras** estática: siempre visible a la derecha, muestra las iniciales presentes en la lista actual. Al pulsar una letra, el grid salta directamente a esa sección; la letra activa se resalta mientras se hace scroll.
-- Pull-to-refresh para actualizar la colección.
-- **Portadas** desde URL (Google Books), imagen local (galería) o imagen por defecto.
+- **Ordenación alfabética** automática con **barra de letras lateral**: al pulsar una letra el grid salta directamente a esa sección.
+- Pull-to-refresh para sincronizar con el servidor.
+- **Portadas** desde URL (Google Books), imagen local (galería del dispositivo) o imagen por defecto.
+- **Formato del libro**: distingue entre ejemplar físico (borde por defecto) y digital (borde morado).
+- **Favoritos**: marca un libro como favorito con la estrella de la portada; se refleja en estadísticas.
 
-### 📚 Gestión de Sagas
-- Pantalla de colección de sagas con portadas apiladas de los volúmenes registrados.
-- Las sagas **completadas** (todos los libros en estado *leído*) se muestran con fondo en morado claro.
-- **Indicador de letra flotante** al hacer scroll: aparece centrado en pantalla con la inicial de la saga visible y desaparece tras 1,2 segundos de inactividad.
+### 💜 Lista de Deseos
+- Pantalla dedicada con los libros marcados como *deseo*.
+- Los libros deseados se muestran con borde y corazón rosas para distinguirlos visualmente.
+- Añadir deseos directamente desde el menú de carga con el estado preseleccionado.
+
+### 📚 Gestión de sagas
+- Colección de sagas con portadas apiladas de los volúmenes registrados.
+- Las sagas **completadas** (todos los libros en estado *leído*) se muestran con fondo morado claro.
+- Indicador de letra flotante al hacer scroll.
 - Buscador por nombre de saga en tiempo real.
 - Crear, editar y eliminar sagas.
-- Pantalla de detalle por saga con la lista de libros ordenada por volumen.
-  - Si la saga tiene el total de libros definido, se muestran **tarjetas en gris** para los volúmenes aún no registrados. Al pulsar una, se abre el formulario de añadir libro con la saga y el volumen prerellenados.
-- Asignar libros existentes a una saga desde el diálogo de la pantalla de detalle.
-- Eliminar libros de una saga mediante pulsación larga.
+- Pantalla de detalle con libros ordenados por volumen.
+  - Si la saga tiene el total de libros definido, aparecen **tarjetas grises** para los volúmenes pendientes: al pulsar una se abre el formulario con saga y volumen prerellenados.
+- Asignar libros existentes a una saga desde el diálogo de detalle.
 - **Auto-creación de saga**: al guardar un libro con saga asignada, la saga se crea automáticamente si no existe.
 
 ### 📊 Estadísticas
-- Tarjetas de resumen: libros leídos este año, total leídos, nota media y autor favorito.
+- Tarjetas de resumen: libros leídos este año, total histórico, nota media y autor favorito.
 - Gráfica de barras de libros leídos por mes con selector de año.
-- Gráfica de líneas comparativa entre años (visible cuando hay datos de más de un año).
+- Gráfica de líneas comparativa entre años (cuando hay datos de más de un año).
 - Ranking de los 5 autores más leídos con barra de progreso relativa.
-- Ranking de los 5 libros mejor puntuados con visualización de estrellas.
+- Ranking de los 5 libros mejor puntuados.
+- Sección **Mis favoritos**: todos los libros marcados como favorito, ordenados por puntuación.
 
 ### ⚙️ Ajustes
-- **Edición de datos de cuenta**: cambio de nombre de usuario, correo y contraseña con verificación de la contraseña actual.
-- Cambio entre **tema claro y oscuro**.
+- Cambio de nombre de usuario, correo y contraseña (con verificación de la contraseña actual).
+- Alternancia entre **tema claro y oscuro**.
 - Recarga manual de la biblioteca desde el servidor.
 - Cierre de sesión con confirmación.
 
 ### 🧭 Navegación
-- **Drawer principal unificado** (`DrawerPrincipal`) compartido por todas las pantallas.
-  - Muestra siempre las cuatro opciones de navegación: Libros, Sagas, Estadísticas y Lista de Deseos.
-  - La pantalla activa se resalta con `selected: true`; las demás navegan directamente a su destino.
-  - Controlado por el enum `PantallaDrawer` para facilitar la incorporación de nuevas pantallas.
+- **Drawer principal unificado** compartido por todas las pantallas: Libros, Sagas, Estadísticas y Lista de Deseos.
+- La pantalla activa se resalta; las demás navegan directamente a su destino.
 
-### 🎨 UI/UX
-- Material 3 con soporte de tema claro/oscuro.
-- Fondos personalizados con filtro adaptativo según el tema.
-- AppBar transparente con extensión detrás del contenido.
-- Feedback visual mediante indicadores de carga y SnackBars.
-- Campos personalizados dinámicos por libro.
-- Formulario de libro con autocompletado de autores y sagas existentes.
-- Sugerencia automática del siguiente volumen de saga al añadir un libro.
+---
 
-## 📋 Próximas Mejoras (Roadmap)
-
-- **Lista de Deseos**: marcar libros que se quieren leer en el futuro antes de registrarlos en la colección principal.
-- **Búsqueda por título o autor en Google Books**: complementar el escáner ISBN con una búsqueda manual de texto libre contra la API de Google Books para facilitar el registro de libros sin código de barras.
-- **Formato del libro (físico / digital)**: añadir un campo al formulario para distinguir si el ejemplar es físico, ebook o audiolibro.
-
-## 🏗️ Tecnologías Utilizadas
+## Tecnologías utilizadas
 
 | Capa | Tecnología |
 |---|---|
-| **Frontend** | Flutter & Dart |
-| **Backend** | Java 17, Spring Boot, Spring Data JPA |
-| **Base de Datos** | MySQL |
-| **Comunicación** | API REST (JSON), CORS |
-| **APIs externas** | Google Books API (búsqueda por ISBN) |
+| **Frontend** | Flutter 3 & Dart |
+| **Backend** | Java 21, Spring Boot 3.2, Spring Data JPA |
+| **Base de datos** | MySQL 8.0 |
+| **Comunicación** | API REST (JSON), CORS global |
+| **APIs externas** | Google Books API (ISBN y búsqueda por texto) |
 | **Escaneo** | mobile_scanner (códigos de barras) |
 | **Gráficas** | fl_chart |
 | **Sesión segura** | flutter_secure_storage |
-| **Estado del tema** | provider |
+| **Estado** | provider |
+| **Contenedores** | Docker, Docker Compose, nginx |
 
-## 🛠️ Estructura del Proyecto
+---
+
+## Estructura del proyecto
 
 ```text
 uxilibris_project/
-├── frontend_flutter/               # Aplicación móvil (Flutter)
+├── docker-compose.yml              # Orquesta backend + BD + frontend web
+├── nginx.conf                      # Configuración del servidor web (frontend)
+├── Vagrantfile                     # Alternativa: VM Ubuntu con Docker preinstalado
+│
+├── frontend_flutter/               # App Flutter (móvil y web)
 │   └── lib/
 │       ├── controladores/          # Lógica de negocio desacoplada de la UI
 │       ├── decoraciones/           # Temas, fondos y estilos globales
-│       ├── modelo/                 # Entidades: Libro, Saga, Libreria...
+│       ├── modelo/                 # Entidades: Libro, Saga, Libreria…
 │       ├── servicio/               # ApiService y SessionManager
 │       ├── pantallas/              # Pantallas de la aplicación
-│       │   ├── coleccionLibros     # Colección principal con filtros y barra de letras
-│       │   ├── coleccionSagas      # Colección de sagas con buscador e indicador de letra
-│       │   ├── cardSaga            # Tarjeta de saga (portadas apiladas + título)
-│       │   ├── portadasApiladas    # Widget de portadas apiladas reutilizable
-│       │   ├── detalleSaga         # Detalle, libros registrados y slots vacíos de una saga
-│       │   ├── estadisticas        # Gráficas y resumen de hábitos de lectura
+│       │   ├── coleccionLibros/    # Grid principal con filtros y barra de letras
+│       │   ├── coleccionSagas/     # Grid de sagas con buscador
+│       │   ├── widgetsColeccionLibros/ # CardLibro y GridColeccion
+│       │   ├── detalleSaga         # Volúmenes de una saga y slots vacíos
+│       │   ├── estadisticas        # Gráficas y favoritos
 │       │   ├── gestionLibro        # Añadir / editar libro
 │       │   ├── gestionSaga         # Añadir / editar saga
 │       │   ├── escanerISBN         # Escáner de código de barras
+│       │   ├── busquedaLibros      # Búsqueda por texto en Google Books
+│       │   ├── listaDeseos         # Libros marcados como deseo
 │       │   ├── login / registro    # Autenticación
-│       │   └── menuPrincipal       # Navegación principal (tabs)
-│       └── utilidades/             # Componentes compartidos
-│           ├── ajustes             # Pantalla de ajustes
-│           ├── dialogoEditarCuenta # Diálogo de edición de datos de usuario
-│           └── drawerPrincipal     # Drawer unificado con enum PantallaDrawer
-├── backend_spring/                 # Servidor API (Java Spring Boot)
-│   └── src/main/java/.../
-│       ├── config/                 # CORS (todos los métodos HTTP)
-│       ├── controller/             # Endpoints REST: libros, sagas, auth, ISBN
-│       ├── service/                # Lógica de negocio y validaciones
-│       ├── repository/             # Acceso a datos (JPA)
-│       ├── entity/                 # Entidades JPA: Libro, Saga, Usuario...
-│       └── dto/                    # IsbnResultDto, LoginResponse, ActualizarUsuarioRequest
-├── casos de uso/                   # Diagramas de secuencia UC-01 a UC-09 (draw.io)
-└── documentación/                  # Memoria, diagramas ER, de clases y relacional
+│       │   └── seleccionMetodoCarga # Selector de método de carga
+│       └── utilidades/             # Componentes compartidos (drawer, diálogos…)
+│
+├── backend_spring/                 # API REST (Java Spring Boot)
+│   └── uxilibris-backend/
+│       ├── Dockerfile              # Imagen Docker del backend
+│       └── src/main/java/.../
+│           ├── config/             # CORS
+│           ├── controller/         # Endpoints: libros, sagas, auth, ISBN
+│           ├── service/            # Lógica de negocio
+│           ├── repository/         # Acceso a datos (JPA)
+│           ├── entity/             # Entidades JPA: Libro, Saga, Usuario…
+│           └── dto/                # Objetos de transferencia de datos
+│
+├── casos de uso/                   # Diagramas de secuencia UC-01…UC-09
+└── documentación/                  # Memoria, diagramas ER, clases y relacional
 ```
 
-## ⚙️ Preparación del entorno
+---
 
-### Requisitos previos
+## Instalación y ejecución
+
+Hay tres formas de ejecutar UxiLibris según el caso de uso. Escoge la que mejor se adapte:
+
+| | Opción A — Docker | Opción B — APK | Opción C — Desarrollo |
+|---|---|---|---|
+| **Uso** | Demo / presentación en navegador | Demo en móvil Android | Desarrollo activo |
+| **Instalar** | Docker Desktop | Android (sideload APK) | Flutter, Java 21, MySQL |
+| **Tiempo de setup** | ~5 min | ~2 min | ~20 min |
+
+---
+
+### Opción A — Docker en el navegador (recomendado)
+
+Levanta toda la infraestructura (base de datos, backend y frontend) con un solo comando. Solo necesitas **Docker Desktop** instalado en el ordenador.
+
+#### Requisitos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, Mac o Linux)
+- Git
+- Flutter SDK — **solo para compilar el frontend web**
+
+#### Paso 1 — Clonar el repositorio
+
+```bash
+git clone https://github.com/UxiaRD/uxilibris_project.git
+cd uxilibris_project
+```
+
+#### Paso 2 — Compilar el frontend web
+
+> Este paso se hace **una sola vez** en cualquier ordenador que tenga Flutter instalado. El resultado (la carpeta `build/web/`) se lleva junto con el proyecto.
+
+```bash
+cd frontend_flutter
+flutter pub get
+flutter build web --release
+cd ..
+```
+
+Los ficheros compilados quedan en `frontend_flutter/build/web/`. Docker los servirá automáticamente.
+
+#### Paso 3 — Levantar todos los servicios
+
+```bash
+docker compose up --build
+```
+
+La primera vez tarda entre 5 y 10 minutos (descarga las imágenes de MySQL y Maven, compila el backend). Las siguientes arrancará en unos segundos porque las capas quedan en caché.
+
+Verás los siguientes servicios activos:
+
+| Servicio | URL |
+|---|---|
+| **App en el navegador** | http://localhost |
+| **API Backend** | http://localhost:8080/api |
+| **MySQL** | localhost:3306 |
+
+#### Paso 4 — Primera vez: registrar un usuario
+
+La base de datos arranca vacía. Abre http://localhost en el navegador, pulsa **Registrarse** y crea tu cuenta. A partir de ahí puedes añadir libros con normalidad.
+
+#### Parar los servicios
+
+```bash
+# Parar (los datos de la BD se conservan)
+docker compose down
+
+# Parar y borrar también los datos de la BD
+docker compose down -v
+```
+
+---
+
+### Opción B — App móvil Android (APK)
+
+Instala la app directamente en un dispositivo Android sin necesidad de compilar ni tener Flutter en el ordenador de destino.
+
+#### Requisitos
+
+- Un ordenador con Flutter SDK instalado (para compilar el APK una sola vez).
+- Un dispositivo Android con **Instalar desde fuentes desconocidas** activado.
+- El backend debe estar en ejecución (con Docker según la Opción A, o manualmente según la Opción C).
+
+#### Paso 1 — Configurar la IP del backend
+
+Abre `frontend_flutter/lib/servicio/ApiService.dart` y ajusta la IP en la línea 19:
+
+```dart
+static String get _host {
+  if (kIsWeb) return 'localhost';
+  return '192.168.X.X';   // ← IP local del ordenador donde corre el backend
+  // return '10.0.2.2';   // ← usa esta línea si usas el emulador Android
+}
+```
+
+Para conocer la IP local del ordenador con el backend:
+- **Windows**: ejecuta `ipconfig` → busca "Dirección IPv4"
+- **Mac/Linux**: ejecuta `ip addr` o `ifconfig`
+
+El móvil y el ordenador deben estar en la **misma red Wi-Fi**.
+
+#### Paso 2 — Compilar el APK
+
+```bash
+cd frontend_flutter
+flutter pub get
+flutter build apk --release
+```
+
+El APK queda en:
+```
+frontend_flutter/build/app/outputs/flutter-apk/app-release.apk
+```
+
+#### Paso 3 — Instalar en el móvil
+
+Transfiere el fichero `app-release.apk` al dispositivo (por cable, correo, Google Drive, etc.) y ábrelo para instalarlo. Si el sistema pide confirmación para instalar desde fuentes desconocidas, acéptala.
+
+---
+
+### Opción C — Entorno de desarrollo local
+
+Para desarrollo activo con recarga en caliente (`hot reload`).
+
+#### Requisitos
 
 | Herramienta | Versión mínima |
 |---|---|
 | Flutter SDK | 3.x |
-| Java JDK | 17 |
+| Java JDK | 21 |
 | MySQL Server | 8.0 |
-| Android Studio / VS Code | Cualquiera reciente |
+| Android Studio o VS Code | Cualquiera reciente |
 
-### 1. Base de datos
+#### Paso 1 — Base de datos
 
-1. Inicia MySQL y crea la base de datos:
-   ```sql
-   CREATE DATABASE uxilibris;
-   ```
-2. Spring Boot creará las tablas automáticamente al arrancar gracias a `spring.jpa.hibernate.ddl-auto`.
+Inicia MySQL y crea la base de datos:
 
-### 2. Backend (Spring Boot)
+```sql
+CREATE DATABASE UxiLibrisDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-1. Abre `backend_spring/src/main/resources/application.properties` y configura:
+Spring Boot creará las tablas automáticamente al arrancar gracias a `spring.jpa.hibernate.ddl-auto=update`.
+
+#### Paso 2 — Backend
+
+1. Abre `backend_spring/uxilibris-backend/src/main/resources/application.properties` y ajusta las credenciales si difieren de las predeterminadas:
+
    ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/uxilibris
-   spring.datasource.username=TU_USUARIO
-   spring.datasource.password=TU_CONTRASEÑA
-   google.books.api.key=TU_API_KEY   # opcional, aumenta la cuota diaria
+   spring.datasource.url=jdbc:mysql://localhost:3306/UxiLibrisDB?createDatabaseIfNotExists=true
+   spring.datasource.username=root
+   spring.datasource.password=abc123.
    ```
-2. Lanza el servidor desde IntelliJ IDEA o con:
+
+2. Lanza el servidor desde tu IDE o con Maven:
+
    ```bash
-   ./mvnw spring-boot:run
+   cd backend_spring/uxilibris-backend
+   ./mvnw spring-boot:run       # Mac / Linux
+   mvnw.cmd spring-boot:run     # Windows
    ```
-   El servidor arranca en `http://localhost:8080`.
 
-> **Nota:** Sin `google.books.api.key` la búsqueda por ISBN sigue funcionando pero está limitada a 1 000 peticiones diarias por IP.
+   El backend arranca en `http://localhost:8080`.
 
-### 3. Frontend (Flutter)
+> **API de Google Books:** la clave incluida en `application.properties` es de uso personal. Para evitar agotar la cuota, obtén la tuya gratis en [Google Cloud Console](https://console.cloud.google.com) → APIs → Books API → Credenciales.
 
-1. Instala las dependencias:
+#### Paso 3 — Frontend Flutter
+
+1. Configura la IP del backend en `frontend_flutter/lib/servicio/ApiService.dart` (ver [Paso 1 de la Opción B](#paso-1--configurar-la-ip-del-backend)).
+
+2. Instala dependencias y lanza la app:
+
    ```bash
    cd frontend_flutter
    flutter pub get
-   ```
-2. Asegúrate de que el dispositivo o emulador esté conectado y lanza la app:
-   ```bash
-   flutter run
+   flutter run               # en dispositivo o emulador conectado
+   flutter run -d chrome     # en el navegador
    ```
 
-> **Nota:** La URL del backend está definida en `frontend_flutter/lib/servicio/ApiService.dart`. Si el backend no corre en `localhost:8080` (por ejemplo, en un dispositivo físico), actualiza `baseUrl` con la IP de tu máquina en la red local.
+---
 
-## 🎨 Capturas de Pantalla
-*(Próximamente)*
+## Limitaciones de la versión web
 
-## 👩‍💻 Autora
+Algunas funciones nativas del móvil no están disponibles cuando la app se ejecuta en el navegador:
+
+| Función | Móvil | Web |
+|---|---|---|
+| Escáner de código de barras ISBN | ✅ | ❌ `mobile_scanner` no soporta web |
+| Selección de imagen de galería | ✅ | ⚠️ Selector de ficheros del sistema operativo |
+| Almacenamiento seguro de sesión | ✅ Keychain/Keystore | ⚠️ `localStorage` (sin cifrado) |
+| Resto de la aplicación | ✅ | ✅ |
+
+---
+
+## Autora
+
 **Uxía RD** — [GitHub](https://github.com/UxiaRD)
