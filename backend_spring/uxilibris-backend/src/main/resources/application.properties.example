@@ -3,10 +3,17 @@ server.port=8080
 server.address=0.0.0.0
 
 # Base de datos
+# Para desarrollo local con MySQL:
 spring.datasource.url=jdbc:mysql://localhost:3306/UxiLibrisDB?createDatabaseIfNotExists=true
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.datasource.username=TU_USUARIO_MYSQL
 spring.datasource.password=TU_PASSWORD_MYSQL
+
+# Para Render (PostgreSQL) — sustituye los valores por los de tu dashboard de Render:
+# spring.datasource.url=jdbc:postgresql://HOST:PORT/NOMBRE_BD
+# spring.datasource.username=TU_USUARIO_POSTGRESQL
+# spring.datasource.password=TU_PASSWORD_POSTGRESQL
+
+# El driver se detecta automáticamente desde la URL (no hace falta declararlo)
 
 # JPA
 spring.jpa.hibernate.ddl-auto=update

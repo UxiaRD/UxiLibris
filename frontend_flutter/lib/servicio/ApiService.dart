@@ -7,23 +7,25 @@ import 'package:http/http.dart' as http;
 import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 
 class ApiService {
-  // Se detecta la plataforma automáticamente para no tener que cambiar
-  // el host a mano cada vez que se cambia entre web y emulador Android:
+  // URL del backend inyectada en tiempo de compilación con --dart-define.
+  // Si no se pasa, se usa la lógica de detección automática de entorno.
   //
-  //  · Web (kIsWeb = true)        → localhost
-  //  · Emulador Android           → 10.0.2.2
-  //  · Dispositivo físico Android → 192.168.1.200
+  // Ejemplos de uso:
+  //   flutter run  --dart-define=BACKEND_URL=https://mi-app.onrender.com
+  //   flutter build web --release --dart-define=BACKEND_URL=https://mi-app.onrender.com
+  static const String _backendUrl =
+      String.fromEnvironment('BACKEND_URL', defaultValue: '');
 
-  static String get _host {
-    if (kIsWeb) return 'localhost';
-    return '192.168.1.200'; // emular en dispositivo físico
-    //return '10.0.2.2'; // emulador Android
+  // Cuando no hay BACKEND_URL definida, se detecta el entorno:
+  //  · Web (kIsWeb = true)        → localhost (Docker local)
+  //  · Dispositivo físico Android → 192.168.1.200 (cambiar por tu IP local)
+  //  · Emulador Android           → descomentar 10.0.2.2
+  static String get baseUrl {
+    if (_backendUrl.isNotEmpty) return '$_backendUrl/api';
+    if (kIsWeb) return 'http://localhost:8080/api';
+    return 'http://192.168.1.200:8080/api';
+    // return 'http://10.0.2.2:8080/api'; // emulador Android
   }
-
-  static const String _puerto = '8080';
-
-  // baseUrl es un getter porque _host también lo es
-  static String get baseUrl => 'http://$_host:$_puerto/api';
 
   // ── Libros ──────────────────────────────────────────────────────────────────
 

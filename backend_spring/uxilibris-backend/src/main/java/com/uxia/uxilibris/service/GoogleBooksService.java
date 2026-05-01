@@ -14,21 +14,49 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Servicio que actúa como cliente de la <a href="https://developers.google.com/books">Google Books API</a>.
+ *
+ * <p>Proporciona dos modos de búsqueda:</p>
+ * <ul>
+ *   <li><strong>Por ISBN:</strong> devuelve un único resultado o vacío.</li>
+ *   <li><strong>Por texto libre:</strong> devuelve hasta 10 resultados.</li>
+ * </ul>
+ *
+ * <p>Si se configura una clave de API propia en {@code google.books.api.key},
+ * se dispone de 1 000 peticiones diarias propias. Sin clave, se comparte la
+ * cuota anónima de Google, que se agota fácilmente.</p>
+ *
+ * <p>Los errores de cuota (HTTP 429) se propagan como {@code 429 Too Many Requests}
+ * al cliente. Los errores de red se propagan como {@code 503 Service Unavailable}.</p>
+ */
 @Service
 public class GoogleBooksService {
 
+    /** URL base de la Google Books API para búsqueda de volúmenes. */
     private static final String GOOGLE_BOOKS_URL =
             "https://www.googleapis.com/books/v1/volumes";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    /**
+     * Clave de API de Google Books inyectada desde {@code application.properties}.
+     * Si no está configurada, la propiedad toma el valor vacío {@code ""}.
+     */
     @Value("${google.books.api.key:}")
     private String apiKey;
 
     /**
-     * Busca un libro por ISBN en Google Books.
-     * @return Optional vacío si no se encuentra resultado.
-     * @throws ResponseStatusException 429 si se agotó la cuota de Google Books.
+     * Busca un libro por su código ISBN en Google Books.
+     *
+     * <p>Añade la clave de API a la petición si está configurada. Devuelve
+     * los datos del primer resultado que tenga título válido.</p>
+     *
+     * @param isbn código ISBN-10 o ISBN-13 del libro
+     * @return {@code Optional} con los datos del libro si se encontró resultado;
+     *         vacío si no hay coincidencias o el título es nulo
+     * @throws ResponseStatusException con código 429 si se agotó la cuota de Google Books
+     * @throws ResponseStatusException con código 503 si Google Books no está disponible
      */
     @SuppressWarnings("unchecked")
     public Optional<IsbnResultDto> buscarPorISBN(String isbn) {
@@ -36,7 +64,6 @@ public class GoogleBooksService {
                 .fromHttpUrl(GOOGLE_BOOKS_URL)
                 .queryParam("q", "isbn:" + isbn);
 
-        // Añadir API key si está configurada en application.properties
         if (apiKey != null && !apiKey.isBlank()) {
             builder.queryParam("key", apiKey);
         }
@@ -51,10 +78,8 @@ public class GoogleBooksService {
                         "Cuota de Google Books agotada. Espera unas horas o configura una API key propia."
                 );
             }
-            // Cualquier otro error HTTP lo tratamos como "no encontrado"
             return Optional.empty();
         } catch (RestClientException e) {
-            // Error de red o servidor Google no disponible
             throw new ResponseStatusException(
                     HttpStatus.SERVICE_UNAVAILABLE,
                     "Google Books no está disponible en este momento."
@@ -96,7 +121,15 @@ public class GoogleBooksService {
 
     /**
      * Busca libros por texto libre (título, autor, etc.) en Google Books.
-     * Devuelve hasta 10 resultados o lista vacía si no hay coincidencias.
+     *
+     * <p>Devuelve hasta 10 resultados con título válido. Los resultados sin
+     * título se descartan mediante {@link #parsearItem}.</p>
+     *
+     * @param query texto de búsqueda introducido por el usuario
+     * @return lista de hasta 10 resultados; lista vacía si no hay coincidencias
+     *         o si ocurre un error HTTP no crítico
+     * @throws ResponseStatusException con código 429 si se agotó la cuota de Google Books
+     * @throws ResponseStatusException con código 503 si Google Books no está disponible
      */
     @SuppressWarnings("unchecked")
     public List<IsbnResultDto> buscarPorTexto(String query) {
@@ -141,6 +174,16 @@ public class GoogleBooksService {
         return resultados;
     }
 
+    /**
+     * Extrae los datos relevantes de un elemento de la respuesta JSON de Google Books.
+     *
+     * <p>Descarta el elemento si no tiene título válido, ya que el título es
+     * el único campo imprescindible para el formulario de alta de libro.</p>
+     *
+     * @param item mapa JSON que representa un volumen de Google Books
+     * @return {@link IsbnResultDto} con los datos extraídos, o {@code null}
+     *         si el elemento no tiene título o {@code volumeInfo}
+     */
     private IsbnResultDto parsearItem(Map<String, Object> item) {
         @SuppressWarnings("unchecked")
         Map<String, Object> volumeInfo = (Map<String, Object>) item.get("volumeInfo");

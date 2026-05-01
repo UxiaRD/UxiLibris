@@ -10,69 +10,141 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controlador REST que gestiona las operaciones sobre los libros de la biblioteca,
+ * incluyendo CRUD, asignación de sagas, favoritos y búsqueda en Google Books.
+ *
+ * <p>Base URL: {@code /api/libros}</p>
+ */
 @RestController
 @RequestMapping("/api/libros")
-@CrossOrigin(origins = "*") // Para permitir peticiones desde el emulador de Flutter
+@CrossOrigin(origins = "*")
 public class LibroController {
+
     @Autowired
     private LibroService libroService;
 
     @Autowired
     private GoogleBooksService googleBooksService;
 
-    // GET /api/libros?usuarioId=1 → devuelve los libros del usuario indicado
+    /**
+     * Devuelve todos los libros pertenecientes al usuario indicado.
+     *
+     * <p>{@code GET /api/libros?usuarioId=X}</p>
+     *
+     * @param usuarioId identificador del usuario propietario
+     * @return lista de libros del usuario
+     */
     @GetMapping
     public List<Libro> listarTodos(@RequestParam Long usuarioId) {
         return libroService.listarTodosLosLibros(usuarioId);
     }
-    // POST /api/libros → guarda o actualiza un libro
-    // Si el JSON incluye 'id', Spring hace UPDATE. Si no, hace INSERT.
+
+    /**
+     * Crea un nuevo libro.
+     *
+     * <p>{@code POST /api/libros}</p>
+     *
+     * <p>Si el JSON incluye un {@code id}, el servicio intenta hacer UPDATE;
+     * si no, INSERT. Se auto-crea la saga si es necesario.</p>
+     *
+     * @param libro datos del libro a crear
+     * @return {@code 200 OK} con el libro creado, incluyendo el {@code id} generado
+     */
     @PostMapping
     public ResponseEntity<Libro> guardar(@RequestBody Libro libro) {
         return ResponseEntity.ok(libroService.guardarLibro(libro));
     }
 
-    // PUT /api/libros/{id} → actualiza un libro existente
+    /**
+     * Actualiza completamente un libro existente.
+     *
+     * <p>{@code PUT /api/libros/{id}}</p>
+     *
+     * @param id    identificador del libro a actualizar
+     * @param libro datos actualizados del libro
+     * @return {@code 200 OK} con el libro actualizado
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Libro> actualizar(@PathVariable Long id, @RequestBody Libro libro) {
         libro.setId(id);
         return ResponseEntity.ok(libroService.guardarLibro(libro));
     }
 
-    // DELETE /api/libros/{id} → elimina un libro por su id
+    /**
+     * Elimina un libro por su identificador.
+     *
+     * <p>{@code DELETE /api/libros/{id}}</p>
+     *
+     * @param id identificador del libro a eliminar
+     * @return {@code 204 No Content}
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         libroService.eliminarLibro(id);
-        return ResponseEntity.noContent().build(); // devuelve 204
+        return ResponseEntity.noContent().build();
     }
 
-    // GET /api/libros/volumenes?saga=NombreSaga
+    /**
+     * Devuelve los números de volumen ya registrados para una saga.
+     *
+     * <p>{@code GET /api/libros/volumenes?saga=NombreSaga}</p>
+     *
+     * @param saga nombre de la saga
+     * @return {@code 200 OK} con la lista de volúmenes registrados
+     */
     @GetMapping("/volumenes")
-    public ResponseEntity<List<Double>> getVolumenesPorSaga(
-            @RequestParam String saga) {
-        List<Double> volumenes = libroService.obtenerVolumenesDeSaga(saga);
-        return ResponseEntity.ok(volumenes);
+    public ResponseEntity<List<Double>> getVolumenesPorSaga(@RequestParam String saga) {
+        return ResponseEntity.ok(libroService.obtenerVolumenesDeSaga(saga));
     }
 
-    // GET /api/libros/sagas
+    /**
+     * Devuelve los nombres de saga únicos para el autocompletado del formulario.
+     *
+     * <p>{@code GET /api/libros/sagas}</p>
+     *
+     * @return lista de nombres de saga ordenada alfabéticamente
+     */
     @GetMapping("/sagas")
     public List<String> getSagas() {
         return libroService.listarSagasExistentes();
     }
 
-    // GET /api/libros/autores
+    /**
+     * Devuelve los nombres de autor únicos para el autocompletado del formulario.
+     *
+     * <p>{@code GET /api/libros/autores}</p>
+     *
+     * @return lista de nombres de autor ordenada alfabéticamente
+     */
     @GetMapping("/autores")
     public List<String> getAutores() {
         return libroService.listarAutoresExistentes();
     }
 
-    // GET /api/libros/sugerir-volumen?saga=NombreSaga
+    /**
+     * Sugiere el siguiente número de volumen disponible para una saga.
+     *
+     * <p>{@code GET /api/libros/sugerir-volumen?saga=NombreSaga}</p>
+     *
+     * @param saga nombre de la saga
+     * @return número de volumen sugerido (máximo actual + 1, o 1.0 si no hay volúmenes)
+     */
     @GetMapping("/sugerir-volumen")
     public Double getSugerencia(@RequestParam String saga) {
         return libroService.sugerirSiguienteVolumen(saga);
     }
 
-    // PATCH /api/libros/{id}/saga → asigna saga y volumen sin tocar el resto
+    /**
+     * Asigna o reasigna una saga a un libro existente sin modificar el resto de sus datos.
+     *
+     * <p>{@code PATCH /api/libros/{id}/saga?saga=NombreSaga&numLibroSaga=N}</p>
+     *
+     * @param id           identificador del libro
+     * @param saga         nombre de la nueva saga
+     * @param numLibroSaga número de volumen dentro de la saga (opcional)
+     * @return {@code 200 OK} con el libro actualizado
+     */
     @PatchMapping("/{id}/saga")
     public ResponseEntity<Libro> asignarSaga(
             @PathVariable Long id,
@@ -81,7 +153,15 @@ public class LibroController {
         return ResponseEntity.ok(libroService.asignarSaga(id, saga, numLibroSaga));
     }
 
-    // PATCH /api/libros/{id}/favorito?valor=true|false → marca/desmarca como favorito
+    /**
+     * Marca o desmarca un libro como favorito.
+     *
+     * <p>{@code PATCH /api/libros/{id}/favorito?valor=true|false}</p>
+     *
+     * @param id    identificador del libro
+     * @param valor {@code true} para marcar como favorito; {@code false} para desmarcarlo
+     * @return {@code 200 OK} con el libro actualizado
+     */
     @PatchMapping("/{id}/favorito")
     public ResponseEntity<Libro> toggleFavorito(
             @PathVariable Long id,
@@ -89,13 +169,28 @@ public class LibroController {
         return ResponseEntity.ok(libroService.toggleFavorito(id, valor));
     }
 
-    // GET /api/libros/buscar?q=... → busca por título/autor en Google Books
+    /**
+     * Busca libros por texto libre en Google Books y devuelve hasta 10 resultados.
+     *
+     * <p>{@code GET /api/libros/buscar?q=texto}</p>
+     *
+     * @param q texto de búsqueda (título, autor, etc.)
+     * @return {@code 200 OK} con lista de resultados; lista vacía si no hay coincidencias
+     */
     @GetMapping("/buscar")
     public ResponseEntity<List<IsbnResultDto>> buscarPorTexto(@RequestParam String q) {
         return ResponseEntity.ok(googleBooksService.buscarPorTexto(q));
     }
 
-    // GET /api/libros/isbn/{isbn}
+    /**
+     * Busca un libro por su código ISBN en Google Books.
+     *
+     * <p>{@code GET /api/libros/isbn/{isbn}}</p>
+     *
+     * @param isbn código ISBN-10 o ISBN-13
+     * @return {@code 200 OK} con los datos del libro si se encontró;
+     *         {@code 404 Not Found} si no hay resultados
+     */
     @GetMapping("/isbn/{isbn}")
     public ResponseEntity<IsbnResultDto> buscarPorISBN(@PathVariable String isbn) {
         return googleBooksService.buscarPorISBN(isbn)
