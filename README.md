@@ -12,9 +12,11 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
 2. [Tecnologías utilizadas](#tecnologías-utilizadas)
 3. [Estructura del proyecto](#estructura-del-proyecto)
 4. [Instalación y ejecución](#instalación-y-ejecución)
-   - [Opción A — Docker en el navegador (recomendado)](#opción-a--docker-en-el-navegador-recomendado)
-   - [Opción B — App móvil Android (APK)](#opción-b--app-móvil-android-apk)
-   - [Opción C — Entorno de desarrollo local](#opción-c--entorno-de-desarrollo-local)
+   - [Comparativa de opciones](#comparativa-de-opciones)
+   - [Opción A — Despliegue en la nube (Render + Neon)](#opción-a--despliegue-en-la-nube-render--neon)
+   - [Opción B — Docker en el navegador](#opción-b--docker-en-el-navegador)
+   - [Opción C — APK móvil con backend local](#opción-c--apk-móvil-con-backend-local)
+   - [Opción D — Entorno de desarrollo local](#opción-d--entorno-de-desarrollo-local)
 5. [Limitaciones de la versión web](#limitaciones-de-la-versión-web)
 6. [Autora](#autora)
 
@@ -82,7 +84,8 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
 |---|---|
 | **Frontend** | Flutter 3 & Dart |
 | **Backend** | Java 21, Spring Boot 3.2, Spring Data JPA |
-| **Base de datos** | MySQL 8.0 |
+| **Base de datos (local)** | MySQL 8.0 |
+| **Base de datos (nube)** | PostgreSQL vía Neon |
 | **Comunicación** | API REST (JSON), CORS global |
 | **APIs externas** | Google Books API (ISBN y búsqueda por texto) |
 | **Escaneo** | mobile_scanner (códigos de barras) |
@@ -90,6 +93,8 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
 | **Sesión segura** | flutter_secure_storage |
 | **Estado** | provider |
 | **Contenedores** | Docker, Docker Compose, nginx |
+| **Despliegue backend** | Render |
+| **Despliegue base de datos** | Neon (PostgreSQL gratuito y permanente) |
 
 ---
 
@@ -141,25 +146,98 @@ uxilibris_project/
 
 ## Instalación y ejecución
 
-Hay tres formas de ejecutar UxiLibris según el caso de uso. Escoge la que mejor se adapte:
+### Comparativa de opciones
 
-| | Opción A — Docker | Opción B — APK | Opción C — Desarrollo |
-|---|---|---|---|
-| **Uso** | Demo / presentación en navegador | Demo en móvil Android | Desarrollo activo |
-| **Instalar** | Docker Desktop | Android (sideload APK) | Flutter, Java 21, MySQL |
-| **Tiempo de setup** | ~5 min | ~2 min | ~20 min |
+| | Opción A — Nube | Opción B — Docker | Opción C — APK local | Opción D — Desarrollo |
+|---|---|---|---|---|
+| **Uso** | App permanente desde móvil | Demo / presentación en navegador | Demo en móvil con backend local | Desarrollo activo |
+| **Backend** | Render (cloud, gratuito) | Docker local | Docker o local | Local |
+| **Base de datos** | Neon (cloud, gratuito y permanente) | MySQL (Docker) | MySQL (Docker/local) | MySQL local |
+| **Qué instalar** | Cuenta Render + Neon | Docker Desktop | Docker Desktop + Flutter | Flutter, Java 21, MySQL |
+| **Tiempo de setup** | ~15 min | ~5 min | ~10 min | ~20 min |
+| **Datos persistentes** | Siempre (Neon) | Solo mientras Docker corre | Solo mientras el backend corre | Solo mientras MySQL corre |
 
 ---
 
-### Opción A — Docker en el navegador (recomendado)
+### Opción A — Despliegue en la nube (Render + Neon)
 
-Levanta toda la infraestructura (base de datos, backend y frontend) con un solo comando. Solo necesitas **Docker Desktop** instalado en el ordenador.
+El backend se despliega en **Render** y la base de datos en **Neon**. Una vez configurado, la app móvil (APK) funciona desde cualquier dispositivo y en cualquier momento sin necesidad de tener el ordenador encendido.
+
+> **Aviso:** Render free tier duerme el backend tras 15 minutos de inactividad. La primera petición después de un periodo de inactividad tarda ~30 segundos en despertar. Los datos en Neon son permanentes.
+
+#### Paso 1 — Crear la base de datos en Neon
+
+1. Crea una cuenta gratuita en [neon.tech](https://neon.tech).
+2. Crea un nuevo proyecto → Neon genera automáticamente una base de datos PostgreSQL.
+3. En el panel de Neon, ve a **Connection Details** y anota:
+   - **Host** (formato `ep-xxxx.region.aws.neon.tech`)
+   - **Database** (por defecto `neondb`)
+   - **Username**
+   - **Password**
+
+#### Paso 2 — Desplegar el backend en Render
+
+1. Crea una cuenta gratuita en [render.com](https://render.com).
+2. **New → Web Service** → conecta tu repositorio de GitHub.
+3. Configura el servicio:
+   - **Environment:** Docker
+   - **Root Directory:** `backend_spring/uxilibris-backend`
+   - **Plan:** Free
+4. En la sección **Environment Variables**, añade las siguientes variables:
+
+| Variable | Valor |
+|---|---|
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://ep-xxxx.region.aws.neon.tech/neondb?sslmode=require` |
+| `SPRING_DATASOURCE_USERNAME` | (usuario de Neon) |
+| `SPRING_DATASOURCE_PASSWORD` | (contraseña de Neon) |
+| `SPRING_JPA_HIBERNATE_DDL_AUTO` | `update` |
+| `SPRING_JACKSON_SERIALIZATION_WRITE_DATES_AS_TIMESTAMPS` | `false` |
+| `SPRING_JPA_OPEN_IN_VIEW` | `false` |
+| `GOOGLE_BOOKS_API_KEY` | (tu clave de Google Books API, opcional) |
+
+5. Pulsa **Deploy**. La primera compilación tarda ~5 minutos.
+6. Una vez desplegado, copia la URL del servicio (formato `https://tu-servicio.onrender.com`).
+
+> **URL de Neon sin pooler:** en `SPRING_DATASOURCE_URL` asegúrate de que el host **no contiene `-pooler`** (por ejemplo `ep-billowing-flower-a12345.eu-west-2.aws.neon.tech`, no `ep-billowing-flower-a12345-pooler.eu-west-2.aws.neon.tech`). El pooler impide que Hibernate cree las tablas.
+
+#### Paso 3 — Compilar e instalar el APK
+
+Con el backend en la nube, compila el APK apuntando a la URL de Render:
+
+```bash
+cd frontend_flutter
+flutter pub get
+flutter build apk --dart-define=BACKEND_URL=https://tu-servicio.onrender.com
+```
+
+El APK queda en:
+```
+frontend_flutter/build/app/outputs/flutter-apk/app-release.apk
+```
+
+Instálalo en el móvil transfiriendo el fichero (cable, Google Drive, etc.) y abriéndolo. Si el sistema pide confirmación para instalar desde fuentes desconocidas, acéptala.
+
+También puedes instalar directamente con el móvil conectado por USB:
+
+```bash
+flutter install
+```
+
+#### Primera vez: registrar un usuario
+
+Abre la app, pulsa **Registrarse** y crea tu cuenta. Las tablas se habrán creado automáticamente al arrancar el backend por primera vez.
+
+---
+
+### Opción B — Docker en el navegador
+
+Levanta toda la infraestructura (base de datos, backend y frontend) con un solo comando en local. Solo necesitas **Docker Desktop** instalado.
 
 #### Requisitos
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, Mac o Linux)
 - Git
-- Flutter SDK — **solo para compilar el frontend web**
+- Flutter SDK — **solo para compilar el frontend web** (una vez)
 
 #### Paso 1 — Clonar el repositorio
 
@@ -170,7 +248,7 @@ cd uxilibris_project
 
 #### Paso 2 — Compilar el frontend web
 
-> Este paso se hace **una sola vez** en cualquier ordenador que tenga Flutter instalado. El resultado (la carpeta `build/web/`) se lleva junto con el proyecto.
+> Este paso se hace **una sola vez** en cualquier ordenador que tenga Flutter instalado.
 
 ```bash
 cd frontend_flutter
@@ -181,25 +259,29 @@ cd ..
 
 Los ficheros compilados quedan en `frontend_flutter/build/web/`. Docker los servirá automáticamente.
 
-#### Paso 3 — Levantar todos los servicios
+#### Paso 3 — Crear el fichero de contraseñas
+
+Copia el fichero de ejemplo y establece una contraseña para la base de datos:
+
+```bash
+cp .env.example .env
+```
+
+Edita `.env` y cambia el valor de `MYSQL_ROOT_PASSWORD`.
+
+#### Paso 4 — Levantar todos los servicios
 
 ```bash
 docker compose up --build
 ```
 
-La primera vez tarda entre 5 y 10 minutos (descarga las imágenes de MySQL y Maven, compila el backend). Las siguientes arrancará en unos segundos porque las capas quedan en caché.
-
-Verás los siguientes servicios activos:
+La primera vez tarda entre 5 y 10 minutos (descarga imágenes y compila el backend). Las siguientes arrancará en segundos gracias a la caché.
 
 | Servicio | URL |
 |---|---|
 | **App en el navegador** | http://localhost |
 | **API Backend** | http://localhost:8080/api |
 | **MySQL** | localhost:3306 |
-
-#### Paso 4 — Primera vez: registrar un usuario
-
-La base de datos arranca vacía. Abre http://localhost en el navegador, pulsa **Registrarse** y crea tu cuenta. A partir de ahí puedes añadir libros con normalidad.
 
 #### Parar los servicios
 
@@ -213,41 +295,31 @@ docker compose down -v
 
 ---
 
-### Opción B — App móvil Android (APK)
+### Opción C — APK móvil con backend local
 
-Instala la app directamente en un dispositivo Android sin necesidad de compilar ni tener Flutter en el ordenador de destino.
+Instala la app en un dispositivo Android que se conecta al backend corriendo en tu ordenador. Útil para demos en móvil sin necesidad de despliegue en la nube.
 
 #### Requisitos
 
-- Un ordenador con Flutter SDK instalado (para compilar el APK una sola vez).
-- Un dispositivo Android con **Instalar desde fuentes desconocidas** activado.
-- El backend debe estar en ejecución (con Docker según la Opción A, o manualmente según la Opción C).
+- Un ordenador con Flutter SDK y Docker Desktop instalados.
+- El backend corriendo localmente (con Docker según la Opción B, o manualmente según la Opción D).
+- El móvil y el ordenador en la **misma red Wi-Fi**.
+- Android con **Instalar desde fuentes desconocidas** activado.
 
-#### Paso 1 — Configurar la IP del backend
+#### Paso 1 — Obtener la IP local del ordenador
 
-Abre `frontend_flutter/lib/servicio/ApiService.dart` y ajusta la IP en la línea 19:
+- **Windows:** ejecuta `ipconfig` → busca "Dirección IPv4"
+- **Mac/Linux:** ejecuta `ip addr` o `ifconfig`
 
-```dart
-static String get _host {
-  if (kIsWeb) return 'localhost';
-  return '192.168.X.X';   // ← IP local del ordenador donde corre el backend
-  // return '10.0.2.2';   // ← usa esta línea si usas el emulador Android
-}
-```
-
-Para conocer la IP local del ordenador con el backend:
-- **Windows**: ejecuta `ipconfig` → busca "Dirección IPv4"
-- **Mac/Linux**: ejecuta `ip addr` o `ifconfig`
-
-El móvil y el ordenador deben estar en la **misma red Wi-Fi**.
-
-#### Paso 2 — Compilar el APK
+#### Paso 2 — Compilar el APK apuntando al backend local
 
 ```bash
 cd frontend_flutter
 flutter pub get
-flutter build apk --release
+flutter build apk --dart-define=BACKEND_URL=http://192.168.X.X:8080
 ```
+
+Sustituye `192.168.X.X` por la IP local de tu ordenador.
 
 El APK queda en:
 ```
@@ -256,11 +328,15 @@ frontend_flutter/build/app/outputs/flutter-apk/app-release.apk
 
 #### Paso 3 — Instalar en el móvil
 
-Transfiere el fichero `app-release.apk` al dispositivo (por cable, correo, Google Drive, etc.) y ábrelo para instalarlo. Si el sistema pide confirmación para instalar desde fuentes desconocidas, acéptala.
+Transfiere el fichero al dispositivo y ábrelo para instalarlo, o con el móvil conectado por USB:
+
+```bash
+flutter install
+```
 
 ---
 
-### Opción C — Entorno de desarrollo local
+### Opción D — Entorno de desarrollo local
 
 Para desarrollo activo con recarga en caliente (`hot reload`).
 
@@ -281,19 +357,26 @@ Inicia MySQL y crea la base de datos:
 CREATE DATABASE UxiLibrisDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Spring Boot creará las tablas automáticamente al arrancar gracias a `spring.jpa.hibernate.ddl-auto=update`.
+Spring Boot creará las tablas automáticamente al arrancar.
 
 #### Paso 2 — Backend
 
-1. Abre `backend_spring/uxilibris-backend/src/main/resources/application.properties` y ajusta las credenciales si difieren de las predeterminadas:
+1. Copia el fichero de configuración de ejemplo:
+
+   ```bash
+   cp backend_spring/uxilibris-backend/src/main/resources/application.properties.example \
+      backend_spring/uxilibris-backend/src/main/resources/application.properties
+   ```
+
+2. Edita `application.properties` y ajusta las credenciales de MySQL si difieren:
 
    ```properties
    spring.datasource.url=jdbc:mysql://localhost:3306/UxiLibrisDB?createDatabaseIfNotExists=true
    spring.datasource.username=root
-   spring.datasource.password=abc123.
+   spring.datasource.password=tu_contraseña
    ```
 
-2. Lanza el servidor desde tu IDE o con Maven:
+3. Lanza el servidor:
 
    ```bash
    cd backend_spring/uxilibris-backend
@@ -303,20 +386,22 @@ Spring Boot creará las tablas automáticamente al arrancar gracias a `spring.jp
 
    El backend arranca en `http://localhost:8080`.
 
-> **API de Google Books:** la clave incluida en `application.properties` es de uso personal. Para evitar agotar la cuota, obtén la tuya gratis en [Google Cloud Console](https://console.cloud.google.com) → APIs → Books API → Credenciales.
+> **API de Google Books:** obtén una clave gratuita en [Google Cloud Console](https://console.cloud.google.com) → APIs → Books API → Credenciales y añádela a `application.properties`. Sin clave, la cuota anónima se agota fácilmente.
 
 #### Paso 3 — Frontend Flutter
 
-1. Configura la IP del backend en `frontend_flutter/lib/servicio/ApiService.dart` (ver [Paso 1 de la Opción B](#paso-1--configurar-la-ip-del-backend)).
+```bash
+cd frontend_flutter
+flutter pub get
+flutter run               # en dispositivo o emulador conectado
+flutter run -d chrome     # en el navegador
+```
 
-2. Instala dependencias y lanza la app:
+Para conectar la app móvil al backend local, pasa la IP de tu ordenador:
 
-   ```bash
-   cd frontend_flutter
-   flutter pub get
-   flutter run               # en dispositivo o emulador conectado
-   flutter run -d chrome     # en el navegador
-   ```
+```bash
+flutter run --dart-define=BACKEND_URL=http://192.168.X.X:8080
+```
 
 ---
 
