@@ -90,6 +90,38 @@ class ApiService {
     }
   }
 
+  /// Busca libros por texto libre en Google Books vía el backend.
+  /// Lanza [Exception] con mensaje legible si hay error de cuota o red.
+  static Future<List<Libro>> buscarLibrosPorTexto(String query) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/libros/buscar?q=${Uri.encodeComponent(query)}'),
+    );
+    if (response.statusCode == 429) {
+      throw Exception(
+        'Cuota de Google Books agotada por hoy. '
+        'Espera unas horas o configura una API key propia en el backend.',
+      );
+    }
+    if (response.statusCode == 503) {
+      throw Exception('Google Books no está disponible. Inténtalo más tarde.');
+    }
+    if (response.statusCode != 200) {
+      throw Exception('Error del servidor (${response.statusCode}) al buscar.');
+    }
+
+    final List<dynamic> data = json.decode(response.body);
+    return data.map((item) => Libro(
+      titulo: item['titulo'] as String,
+      autorNombre: item['autor'] as String? ?? '',
+      sagaNombre: item['saga'] as String?,
+      numLibroSaga: (item['numLibroSaga'] as num?)?.toDouble(),
+      estado: EstadoLibro.pendiente,
+      puntuacion: 0.0,
+      rutaImagen: item['portada'] as String? ?? 'assets/images/fondos/libro.png',
+      almacen: AlmacenPropiedades(propiedades: []),
+    )).toList();
+  }
+
   /// Devuelve la lista de números de volumen ya ocupados para una saga.
   static Future<List<double>> fetchVolumenesOcupados(String saga) async {
     try {

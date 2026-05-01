@@ -49,13 +49,20 @@ class WidgetsFormulario {
           .map(
             (estado) => DropdownMenuItem(
               value: estado,
-              child: Text(estado.name.toUpperCase()),
+              child: Text(_labelEstado(estado)),
             ),
           )
           .toList(),
       onChanged: onChanged,
     );
   }
+
+  static String _labelEstado(EstadoLibro estado) => switch (estado) {
+    EstadoLibro.pendiente => 'PENDIENTE',
+    EstadoLibro.leyendo   => 'LEYENDO',
+    EstadoLibro.leido     => 'LEÍDO',
+    EstadoLibro.deseo     => 'QUIERO LEERLO',
+  };
 
   // MÉTODO PARA EL SELECTOR DE PUNTUACIÓN
   static Widget buildSelectorPuntuacion(

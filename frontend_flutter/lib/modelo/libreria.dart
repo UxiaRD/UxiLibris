@@ -64,17 +64,14 @@ class Libreria {
 
   // Método para filtrar por el estado del libro (leyendo, pendiente, leido)
   List<Libro> filtrarPorEstado(String filtroEstado) {
-    List<Libro> librosPorPestana = [];
+    // Los libros en lista de deseos nunca aparecen en la colección principal
+    final sinDeseos = libros.where((l) => l.estado != EstadoLibro.deseo);
 
-    if (filtroEstado == "todos") {
-      librosPorPestana = libros;
-    } else {
-      // Se filtra comparando el nombre del enum con el String que viene de la pestaña
-      librosPorPestana = libros.where((libro) {
-        return libro.estado.name == filtroEstado;
-      }).toList();
-    }
-    return librosPorPestana;
+    if (filtroEstado == "todos") return sinDeseos.toList();
+
+    return sinDeseos
+        .where((libro) => libro.estado.name == filtroEstado)
+        .toList();
   }
 
   // Método para filtrar por el texto de la barra de búsqueda

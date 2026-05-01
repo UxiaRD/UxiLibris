@@ -89,6 +89,12 @@ public class LibroController {
         return ResponseEntity.ok(libroService.toggleFavorito(id, valor));
     }
 
+    // GET /api/libros/buscar?q=... → busca por título/autor en Google Books
+    @GetMapping("/buscar")
+    public ResponseEntity<List<IsbnResultDto>> buscarPorTexto(@RequestParam String q) {
+        return ResponseEntity.ok(googleBooksService.buscarPorTexto(q));
+    }
+
     // GET /api/libros/isbn/{isbn}
     @GetMapping("/isbn/{isbn}")
     public ResponseEntity<IsbnResultDto> buscarPorISBN(@PathVariable String isbn) {

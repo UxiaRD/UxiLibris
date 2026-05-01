@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 
 const Color _colorDigital = Color(0xFF7B2FBE);
+const Color _colorDeseo = Color(0xFFE91E8C);
 
 class Cardlibro extends StatelessWidget {
   final String rutaImagen;
   final String titulo;
   final double puntuacion;
   final FormatoLibro formato;
+  final bool esDeseo;
 
   const Cardlibro({
     super.key,
@@ -17,6 +19,7 @@ class Cardlibro extends StatelessWidget {
     required this.titulo,
     required this.puntuacion,
     this.formato = FormatoLibro.fisico,
+    this.esDeseo = false,
   });
 
   // El método _buildImagen va aquí dentro, como método PRIVADO del propio
@@ -63,12 +66,19 @@ class Cardlibro extends StatelessWidget {
   Widget build(BuildContext context) {
     final esDigital = formato == FormatoLibro.digital;
 
+    // Deseo tiene prioridad en el borde; digital solo si no es deseo
+    final BorderSide? borde = esDeseo
+        ? const BorderSide(color: _colorDeseo, width: 2)
+        : esDigital
+        ? const BorderSide(color: _colorDigital, width: 2)
+        : null;
+
     return Card(
       clipBehavior: Clip.antiAlias,
-      shape: esDigital
+      shape: borde != null
           ? RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: _colorDigital, width: 2),
+              side: borde,
             )
           : null,
       child: Column(
@@ -78,18 +88,19 @@ class Cardlibro extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 _buildImagen(),
-                if (esDigital)
+                // Icono corazón (arriba-izquierda) para libros deseados
+                if (esDeseo)
                   Positioned(
                     top: 6,
-                    right: 6,
+                    left: 6,
                     child: Container(
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: _colorDigital.withValues(alpha: 0.88),
+                        color: _colorDeseo.withValues(alpha: 0.88),
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: const Icon(
-                        Icons.tablet_android_rounded,
+                        Icons.favorite_rounded,
                         color: Colors.white,
                         size: 13,
                       ),

@@ -1,5 +1,6 @@
 package com.uxia.uxilibris.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,6 +19,7 @@ public class PropiedadValor {
     // Relación con el Libro (Muchos valores pertenecen a un Libro)
     @ManyToOne
     @JoinColumn(name = "libro_id")
+    @JsonIgnore
     private Libro libro;
 
     // Relación con la Definición (Saber si este valor es del ISBN, Editorial, etc.)

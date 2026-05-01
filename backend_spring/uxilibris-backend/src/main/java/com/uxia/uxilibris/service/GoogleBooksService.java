@@ -93,4 +93,81 @@ public class GoogleBooksService {
 
         return Optional.of(new IsbnResultDto(titulo, autor, portada, saga, numLibroSaga));
     }
+
+    /**
+     * Busca libros por texto libre (título, autor, etc.) en Google Books.
+     * Devuelve hasta 10 resultados o lista vacía si no hay coincidencias.
+     */
+    @SuppressWarnings("unchecked")
+    public List<IsbnResultDto> buscarPorTexto(String query) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl(GOOGLE_BOOKS_URL)
+                .queryParam("q", query)
+                .queryParam("maxResults", 10);
+
+        if (apiKey != null && !apiKey.isBlank()) {
+            builder.queryParam("key", apiKey);
+        }
+
+        Map<String, Object> respuesta;
+        try {
+            respuesta = restTemplate.getForObject(builder.toUriString(), Map.class);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                throw new ResponseStatusException(
+                        HttpStatus.TOO_MANY_REQUESTS,
+                        "Cuota de Google Books agotada. Espera unas horas o configura una API key propia.");
+            }
+            return List.of();
+        } catch (RestClientException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Google Books no está disponible en este momento.");
+        }
+
+        if (respuesta == null) return List.of();
+
+        Integer totalItems = (Integer) respuesta.get("totalItems");
+        if (totalItems == null || totalItems == 0) return List.of();
+
+        List<Map<String, Object>> items = (List<Map<String, Object>>) respuesta.get("items");
+        if (items == null) return List.of();
+
+        List<IsbnResultDto> resultados = new java.util.ArrayList<>();
+        for (Map<String, Object> item : items) {
+            IsbnResultDto dto = parsearItem(item);
+            if (dto != null) resultados.add(dto);
+        }
+        return resultados;
+    }
+
+    private IsbnResultDto parsearItem(Map<String, Object> item) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> volumeInfo = (Map<String, Object>) item.get("volumeInfo");
+        if (volumeInfo == null) return null;
+
+        String titulo = (String) volumeInfo.get("title");
+        if (titulo == null || titulo.isBlank()) return null;
+
+        @SuppressWarnings("unchecked")
+        List<String> autores = (List<String>) volumeInfo.get("authors");
+        String autor = (autores != null && !autores.isEmpty()) ? autores.get(0) : "";
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> imageLinks = (Map<String, Object>) volumeInfo.get("imageLinks");
+        String portada = (imageLinks != null) ? (String) imageLinks.get("thumbnail") : null;
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> seriesInfo = (Map<String, Object>) item.get("seriesInfo");
+        String saga = null;
+        Double numLibroSaga = null;
+        if (seriesInfo != null) {
+            saga = (String) seriesInfo.get("shortSeriesBookTitle");
+            String numStr = (String) seriesInfo.get("bookDisplayNumber");
+            if (numStr != null && !numStr.isBlank()) {
+                try { numLibroSaga = Double.parseDouble(numStr); } catch (NumberFormatException ignored) {}
+            }
+        }
+        return new IsbnResultDto(titulo, autor, portada, saga, numLibroSaga);
+    }
 }

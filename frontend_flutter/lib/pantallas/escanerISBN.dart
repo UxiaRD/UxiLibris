@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:frontend_flutter/controladores/escanerController.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
+import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 
 class PantallaEscanerISBN extends StatefulWidget {
-  const PantallaEscanerISBN({super.key});
+  final EstadoLibro? estadoInicial;
+
+  const PantallaEscanerISBN({super.key, this.estadoInicial});
 
   @override
   State<PantallaEscanerISBN> createState() => _PantallaEscanerISBNState();
@@ -84,7 +87,11 @@ class _PantallaEscanerISBNState extends State<PantallaEscanerISBN>
         await Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => PantallaGestionLibro(libroPrerellenado: libro),
+            builder: (_) => PantallaGestionLibro(
+              libroPrerellenado: widget.estadoInicial != null
+                  ? libro.withEstado(widget.estadoInicial!)
+                  : libro,
+            ),
           ),
         );
       } else {

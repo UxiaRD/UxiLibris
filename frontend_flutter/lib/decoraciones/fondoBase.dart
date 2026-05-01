@@ -3,18 +3,23 @@ import 'package:flutter/material.dart';
 // WIDGET que gestiona los fondos de las distintas ventanas
 
 class FondoBase extends StatelessWidget {
-  final Widget child; // Contenido de la página
-  final String rutaImagen; // Ruta de la imagen de fondo
+  final Widget child;
+  final String? rutaImagen; // null = sin imagen de fondo
 
   const FondoBase({
-    super.key, 
-    required this.rutaImagen,
+    super.key,
+    this.rutaImagen,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Se detecta el brillo para el filtro dinámico (colorFilter)
+    final safeChild = SafeArea(child: child);
+
+    if (rutaImagen == null || rutaImagen!.isEmpty) {
+      return SizedBox(width: double.infinity, height: double.infinity, child: safeChild);
+    }
+
     final bool esClaro = Theme.of(context).brightness == Brightness.light;
 
     return Container(
@@ -22,22 +27,17 @@ class FondoBase extends StatelessWidget {
       height: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage(rutaImagen), // Uso de la variable que se recibe
+          image: AssetImage(rutaImagen!),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            esClaro 
-                ? Colors.white.withValues(alpha: 0.85) 
+            esClaro
+                ? Colors.white.withValues(alpha: 0.85)
                 : Colors.black.withValues(alpha: 0.70),
             BlendMode.srcOver,
           ),
         ),
       ),
-
-      /* El SafeArea evita que los textos o los iconos queden escondidos debajo de la cámara
-      o barra de batería del movil */
-      child: SafeArea(
-        child: child,
-      ),
+      child: safeChild,
     );
   }
 }

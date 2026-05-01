@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
+import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/cardLibro.dart';
 
@@ -52,6 +53,7 @@ class GridColeccion extends StatelessWidget {
             titulo: libro.titulo,
             puntuacion: libro.puntuacion,
             formato: libro.formato,
+            esDeseo: libro.estado == EstadoLibro.deseo,
           ),
         );
       },

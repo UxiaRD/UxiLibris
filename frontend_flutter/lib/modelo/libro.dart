@@ -5,7 +5,7 @@ import 'package:frontend_flutter/modelo/lectura.dart';
 
 export 'package:frontend_flutter/modelo/lectura.dart';
 
-enum EstadoLibro { leyendo, pendiente, leido }
+enum EstadoLibro { leyendo, pendiente, leido, deseo }
 
 enum FormatoLibro { fisico, digital }
 
@@ -81,6 +81,23 @@ class Libro {
       almacen: AlmacenPropiedades.fromJson(json['propiedades'] ?? []),
     );
   }
+
+  Libro withEstado(EstadoLibro nuevoEstado) => Libro(
+    id: id,
+    usuarioId: usuarioId,
+    titulo: titulo,
+    autorNombre: autorNombre,
+    sagaId: sagaId,
+    sagaNombre: sagaNombre,
+    numLibroSaga: numLibroSaga,
+    puntuacion: puntuacion,
+    estado: nuevoEstado,
+    formato: formato,
+    lecturas: List.from(lecturas),
+    favorito: favorito,
+    rutaImagen: rutaImagen,
+    almacen: almacen,
+  );
 
   // Enviar el Libro con JSON
   Map<String, dynamic> toJson() {

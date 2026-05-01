@@ -181,6 +181,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                         titulo: libro.titulo,
                         puntuacion: libro.puntuacion,
                         formato: libro.formato,
+                        esDeseo: libro.estado == EstadoLibro.deseo,
                       ),
                     );
                   },
