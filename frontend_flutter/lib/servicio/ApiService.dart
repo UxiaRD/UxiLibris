@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 
 class ApiService {
+  static const _timeout = Duration(seconds: 90);
+
   // URL del backend inyectada en tiempo de compilación con --dart-define.
   // Si no se pasa, se usa la lógica de detección automática de entorno.
   //
@@ -34,9 +36,9 @@ class ApiService {
     try {
       final usuarioId = SessionManager.usuarioId;
       if (usuarioId == null) return [];
-      final response = await http.get(
-        Uri.parse('$baseUrl/libros?usuarioId=$usuarioId'),
-      );
+      final response = await http
+          .get(Uri.parse('$baseUrl/libros?usuarioId=$usuarioId'))
+          .timeout(_timeout);
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);
         return body.map((dynamic item) => Libro.fromJson(item)).toList();
@@ -212,11 +214,13 @@ class ApiService {
 
   // Login: devuelve true si OK y guarda la sesión; false si las credenciales son incorrectas
   static Future<bool> login(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      body: jsonEncode({'username': username, 'password': password}),
-      headers: {'Content-Type': 'application/json'},
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/auth/login'),
+          body: jsonEncode({'username': username, 'password': password}),
+          headers: {'Content-Type': 'application/json'},
+        )
+        .timeout(_timeout);
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as Map<String, dynamic>;
       SessionManager.iniciar(

@@ -344,7 +344,7 @@ class _FormularioLibroState extends State<FormularioLibro> {
         // Una fila por cada lectura
         ...List.generate(_lecturas.length, (i) {
           final lec = _lecturas[i];
-          final puedeEliminar = _lecturas.length > 1 || _estadoSeleccionado == EstadoLibro.leido;
+          final puedeEliminar = _lecturas.length > 1 || _estadoSeleccionado == EstadoLibro.leido || lec.estaCompletada;
           return _FilaLectura(
             numero: i + 1,
             lectura: lec,
