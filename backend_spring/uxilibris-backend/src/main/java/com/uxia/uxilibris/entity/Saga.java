@@ -46,5 +46,6 @@ public class Saga {
      * <p>Las sagas abandonadas se muestran con fondo rojo claro en la lista
      * y sus libros pendientes aparecen tachados en la pantalla de detalle.</p>
      */
+    @Column(nullable = false, columnDefinition = "boolean DEFAULT false")
     private boolean abandonada = false;
 }
