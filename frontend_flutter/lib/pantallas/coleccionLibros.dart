@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
@@ -34,6 +35,8 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
 
   bool _estaCargando = true;
   bool _errorCarga = false;
+  bool _mostrarMensajeEspera = false;
+  Timer? _timerEspera;
   String _letraActiva = '';
   Map<String, int> _indicePorLetra = {};
 
@@ -52,19 +55,25 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
 
   @override
   void dispose() {
+    _timerEspera?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
 
   Future<void> _cargarYFiltrar() async {
-    setState(() { _estaCargando = true; _errorCarga = false; });
+    setState(() { _estaCargando = true; _errorCarga = false; _mostrarMensajeEspera = false; });
+    _timerEspera?.cancel();
+    _timerEspera = Timer(const Duration(seconds: 8), () {
+      if (mounted && _estaCargando) setState(() => _mostrarMensajeEspera = true);
+    });
     try {
       await ColeccionController.cargarLibros();
       _buscarLibros(_controladorDeBusqueda.text);
     } catch (e) {
       if (mounted) setState(() => _errorCarga = true);
     } finally {
-      if (mounted) setState(() => _estaCargando = false);
+      _timerEspera?.cancel();
+      if (mounted) setState(() { _estaCargando = false; _mostrarMensajeEspera = false; });
     }
   }
 
@@ -154,7 +163,23 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
       body: FondoBase(
         rutaImagen: 'assets/images/fondos/estanteria.png',
         child: _estaCargando
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    if (_mostrarMensajeEspera) ...[
+                      const SizedBox(height: 20),
+                      const Icon(Icons.cloud_outlined, size: 36),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'El servidor está arrancando.\nEsto puede tardar hasta 2 minutos\nla primera vez del día.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              )
             : _errorCarga
                 ? Center(
                     child: Column(

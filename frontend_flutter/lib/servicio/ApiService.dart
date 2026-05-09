@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 
 class ApiService {
-  static const _timeout = Duration(seconds: 90);
+  static const _timeout = Duration(seconds: 180);
 
   // URL del backend inyectada en tiempo de compilación con --dart-define.
   // Si no se pasa, se usa la lógica de detección automática de entorno.
