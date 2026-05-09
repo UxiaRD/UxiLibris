@@ -6,21 +6,11 @@ services:
     dockerContext: ./backend_spring/uxilibris-backend
     plan: free
     envVars:
-      # Usuario y contraseña se rellenan automáticamente desde la base de datos
-      - key: SPRING_DATASOURCE_USERNAME
-        fromDatabase:
-          name: uxilibris-db
-          property: user
-      - key: SPRING_DATASOURCE_PASSWORD
-        fromDatabase:
-          name: uxilibris-db
-          property: password
-      # La URL JDBC la introduces tú a mano en el dashboard de Render
-      # con el formato: jdbc:postgresql://HOST:PORT/NOMBRE_BD
+      # Las tres variables de conexión se configuran manualmente en el dashboard de Render
+      # con las credenciales de Neon (Project → Connection Details)
       - key: SPRING_DATASOURCE_URL
         sync: false
-
-databases:
-  - name: uxilibris-db
-    databaseName: uxilibrisdb
-    plan: free
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false

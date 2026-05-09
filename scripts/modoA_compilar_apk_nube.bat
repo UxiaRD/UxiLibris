@@ -5,8 +5,8 @@
 ::  Resultado:  frontend_flutter\build\app\outputs\flutter-apk\app-release.apk
 :: ============================================================
 
-:: ► Cambia esta URL por la de tu servicio en Render
-SET RENDER_URL=https://TU-SERVICIO.onrender.com
+:: ► URL del servicio en Render
+SET RENDER_URL=https://uxilibris-backend.onrender.com
 
 :: ── Moverse a la raíz del proyecto ──────────────────────────
 cd /d "%~dp0.."
