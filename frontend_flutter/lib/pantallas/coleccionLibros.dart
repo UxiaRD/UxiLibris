@@ -66,15 +66,27 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
     _timerEspera = Timer(const Duration(seconds: 8), () {
       if (mounted && _estaCargando) setState(() => _mostrarMensajeEspera = true);
     });
-    try {
-      await ColeccionController.cargarLibros();
-      _buscarLibros(_controladorDeBusqueda.text);
-    } catch (e) {
-      if (mounted) setState(() => _errorCarga = true);
-    } finally {
-      _timerEspera?.cancel();
-      if (mounted) setState(() { _estaCargando = false; _mostrarMensajeEspera = false; });
+
+    const maxIntentos = 8;
+    const pausaEntreIntentos = Duration(seconds: 8);
+
+    for (int intento = 0; intento < maxIntentos; intento++) {
+      if (!mounted) return;
+      try {
+        await ColeccionController.cargarLibros();
+        if (!mounted) return;
+        _buscarLibros(_controladorDeBusqueda.text);
+        _timerEspera?.cancel();
+        setState(() { _estaCargando = false; _mostrarMensajeEspera = false; });
+        return;
+      } catch (_) {
+        if (!mounted) return;
+        if (intento < maxIntentos - 1) await Future.delayed(pausaEntreIntentos);
+      }
     }
+
+    _timerEspera?.cancel();
+    if (mounted) setState(() { _estaCargando = false; _errorCarga = true; _mostrarMensajeEspera = false; });
   }
 
   @override

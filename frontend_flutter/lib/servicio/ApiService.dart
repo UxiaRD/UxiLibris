@@ -7,7 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 
 class ApiService {
-  static const _timeout = Duration(seconds: 180);
+  static const _timeoutLogin = Duration(seconds: 30);
+  static const _timeoutFetch = Duration(seconds: 90);
 
   // URL del backend inyectada en tiempo de compilación con --dart-define.
   // Si no se pasa, se usa la lógica de detección automática de entorno.
@@ -38,7 +39,7 @@ class ApiService {
       if (usuarioId == null) return [];
       final response = await http
           .get(Uri.parse('$baseUrl/libros?usuarioId=$usuarioId'))
-          .timeout(_timeout);
+          .timeout(_timeoutFetch);
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);
         return body.map((dynamic item) => Libro.fromJson(item)).toList();
@@ -230,7 +231,7 @@ class ApiService {
           body: jsonEncode({'username': username, 'password': password}),
           headers: {'Content-Type': 'application/json'},
         )
-        .timeout(_timeout);
+        .timeout(_timeoutLogin);
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as Map<String, dynamic>;
       SessionManager.iniciar(
