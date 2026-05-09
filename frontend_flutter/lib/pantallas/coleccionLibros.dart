@@ -5,6 +5,7 @@ import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/pantallas/seleccionMetodoCarga.dart';
 import 'package:frontend_flutter/utilidades/barraBusqueda.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/gridViewColeccion.dart';
+import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/barraLetras.dart';
 import 'package:frontend_flutter/controladores/coleccionController.dart';
 
 // WIDGET que gestiona la Colección de Libros
@@ -32,6 +33,7 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
   final ScrollController _scrollController = ScrollController();
 
   bool _estaCargando = true;
+  bool _errorCarga = false;
   String _letraActiva = '';
   Map<String, int> _indicePorLetra = {};
 
@@ -55,12 +57,12 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
   }
 
   Future<void> _cargarYFiltrar() async {
-    setState(() => _estaCargando = true);
+    setState(() { _estaCargando = true; _errorCarga = false; });
     try {
       await ColeccionController.cargarLibros();
       _buscarLibros(_controladorDeBusqueda.text);
     } catch (e) {
-      print("Error al cargar libros: $e");
+      if (mounted) setState(() => _errorCarga = true);
     } finally {
       if (mounted) setState(() => _estaCargando = false);
     }
@@ -153,7 +155,24 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
         rutaImagen: 'assets/images/fondos/estanteria.png',
         child: _estaCargando
             ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
+            : _errorCarga
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.cloud_off, size: 48),
+                        const SizedBox(height: 12),
+                        const Text('No se pudo conectar con el servidor'),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: _cargarYFiltrar,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Reintentar'),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
                 onRefresh: _cargarYFiltrar,
                 child: Column(
                   children: [
@@ -178,7 +197,7 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
                                   _buscarLibros(_controladorDeBusqueda.text),
                             ),
                           ),
-                          _BarraLetras(
+                          BarraLetras(
                             letras: _indicePorLetra.keys.toList(),
                             letraActiva: _letraActiva,
                             alSeleccionar: _irALetra,
@@ -203,51 +222,6 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
         },
         backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add, color: Colors.white, size: 30),
-      ),
-    );
-  }
-}
-
-// Barra lateral de letras (Opción 2: siempre visible, letra activa resaltada)
-class _BarraLetras extends StatelessWidget {
-  final List<String> letras;
-  final String letraActiva;
-  final void Function(String) alSeleccionar;
-
-  const _BarraLetras({
-    required this.letras,
-    required this.letraActiva,
-    required this.alSeleccionar,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colores = Theme.of(context).colorScheme;
-    if (letras.isEmpty) return const SizedBox.shrink();
-
-    return SizedBox(
-      width: 28,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: letras.map((letra) {
-          final activa = letra == letraActiva;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => alSeleccionar(letra),
-              behavior: HitTestBehavior.opaque,
-              child: Center(
-                child: Text(
-                  letra,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: activa ? FontWeight.bold : FontWeight.normal,
-                    color: activa ? colores.primary : colores.outline,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
       ),
     );
   }

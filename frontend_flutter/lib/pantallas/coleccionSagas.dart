@@ -10,6 +10,7 @@ import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/utilidades/barraBusqueda.dart';
 import 'package:frontend_flutter/utilidades/drawerPrincipal.dart';
+import 'package:frontend_flutter/pantallas/widgetsColeccionSagas/sectionHeader.dart';
 
 // ── Clasificación de sagas ────────────────────────────────────────────────────
 
@@ -191,7 +192,7 @@ class _PantallaColeccionSagasState extends State<PantallaColeccionSagas> {
                               itemBuilder: (context, index) {
                                 final item = items[index];
                                 if (item is _HeaderItem) {
-                                  return _SectionHeader(
+                                  return SectionHeader(
                                     titulo: item.titulo,
                                     color: item.color,
                                   );
@@ -224,36 +225,6 @@ class _PantallaColeccionSagasState extends State<PantallaColeccionSagas> {
                   ),
                 ],
               ),
-      ),
-    );
-  }
-}
-
-// ── Widgets auxiliares ────────────────────────────────────────────────────────
-
-class _SectionHeader extends StatelessWidget {
-  final String titulo;
-  final Color color;
-
-  const _SectionHeader({required this.titulo, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
-      child: Row(
-        children: [
-          Container(width: 4, height: 18, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
-          const SizedBox(width: 8),
-          Text(
-            titulo,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:frontend_flutter/controladores/escanerController.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
+import 'package:frontend_flutter/pantallas/widgetsEscanerISBN/scanOverlayPainter.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 
@@ -209,7 +210,7 @@ class _PantallaEscanerISBNState extends State<PantallaEscanerISBN>
           AnimatedBuilder(
             animation: _scanAnimation,
             builder: (context, _) => CustomPaint(
-              painter: _ScanOverlayPainter(
+              painter: ScanOverlayPainter(
                 scanProgress: _scanAnimation.value,
                 color: colores.primary,
               ),
@@ -271,86 +272,4 @@ class _PantallaEscanerISBNState extends State<PantallaEscanerISBN>
       ),
     );
   }
-}
-
-/// Dibuja el overlay oscuro con el rectángulo de escaneo y la línea animada.
-class _ScanOverlayPainter extends CustomPainter {
-  final double scanProgress;
-  final Color color;
-
-  const _ScanOverlayPainter({required this.scanProgress, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const radius = Radius.circular(12);
-    final frameW = size.width * 0.75;
-    final frameH = frameW * 0.45; // proporción apaisada para código de barras
-    final left = (size.width - frameW) / 2;
-    final top = (size.height - frameH) / 2;
-    final frameRect = Rect.fromLTWH(left, top, frameW, frameH);
-
-    // Capa oscura con hueco transparente
-    canvas.drawPath(
-      Path()
-        ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
-        ..addRRect(RRect.fromRectAndRadius(frameRect, radius))
-        ..fillType = PathFillType.evenOdd,
-      Paint()..color = Colors.black.withOpacity(0.65),
-    );
-
-    // Borde del marco
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(frameRect, radius),
-      Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5,
-    );
-
-    // Esquinas destacadas
-    const double c = 22;
-    final cp = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
-
-    _drawCorner(canvas, cp, Offset(left, top), c, 1, 1);
-    _drawCorner(canvas, cp, Offset(left + frameW, top), c, -1, 1);
-    _drawCorner(canvas, cp, Offset(left, top + frameH), c, 1, -1);
-    _drawCorner(canvas, cp, Offset(left + frameW, top + frameH), c, -1, -1);
-
-    // Línea de escaneo animada
-    final scanY = top + scanProgress * frameH;
-    canvas.drawLine(
-      Offset(left + 8, scanY),
-      Offset(left + frameW - 8, scanY),
-      Paint()
-        ..shader = LinearGradient(
-          colors: [
-            color.withOpacity(0),
-            color.withOpacity(0.9),
-            color.withOpacity(0),
-          ],
-        ).createShader(Rect.fromLTWH(left, scanY, frameW, 2))
-        ..strokeWidth = 2.5
-        ..style = PaintingStyle.stroke,
-    );
-  }
-
-  void _drawCorner(
-    Canvas c,
-    Paint p,
-    Offset origin,
-    double len,
-    double dx,
-    double dy,
-  ) {
-    c.drawLine(origin, origin + Offset(len * dx, 0), p);
-    c.drawLine(origin, origin + Offset(0, len * dy), p);
-  }
-
-  @override
-  bool shouldRepaint(_ScanOverlayPainter old) =>
-      old.scanProgress != scanProgress;
 }

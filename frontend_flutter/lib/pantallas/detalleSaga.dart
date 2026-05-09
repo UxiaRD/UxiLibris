@@ -9,6 +9,8 @@ import 'package:frontend_flutter/pantallas/detalleLibro.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 import 'package:frontend_flutter/pantallas/gestionSaga.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/cardLibro.dart';
+import 'package:frontend_flutter/pantallas/widgetsDetalleSaga/lineaRoja.dart';
+import 'package:frontend_flutter/pantallas/widgetsDetalleSaga/cardHueco.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/dialogoAsignarSaga.dart';
 import 'package:frontend_flutter/utilidades/dialogos.dart';
@@ -22,21 +24,6 @@ class PantallaDetalleSaga extends StatefulWidget {
   State<PantallaDetalleSaga> createState() => _PantallaDetalleSagaState();
 }
 
-// Dibuja una línea diagonal roja sobre libros pendientes en sagas abandonadas
-class _LineaRoja extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.red.withValues(alpha: 0.75)
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(Offset(0, size.height * 0.1), Offset(size.width, size.height * 0.9), paint);
-    canvas.drawLine(Offset(size.width, size.height * 0.1), Offset(0, size.height * 0.9), paint);
-  }
-
-  @override
-  bool shouldRepaint(_LineaRoja _) => false;
-}
 
 class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
   List<Libro> _libros() {
@@ -209,7 +196,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                     if (libro == null) {
                       return GestureDetector(
                         onTap: () => _anadirNuevoLibro(index + 1),
-                        child: _CardHueco(volumen: index + 1),
+                        child: CardHueco(volumen: index + 1),
                       );
                     }
                     final tachada = widget.saga.abandonada &&
@@ -243,7 +230,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                           if (tachada)
                             Positioned.fill(
                               child: IgnorePointer(
-                                child: CustomPaint(painter: _LineaRoja()),
+                                child: CustomPaint(painter: LineaRoja()),
                               ),
                             ),
                         ],
@@ -252,38 +239,6 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                   },
                 ),
               ),
-      ),
-    );
-  }
-}
-
-class _CardHueco extends StatelessWidget {
-  final int volumen;
-
-  const _CardHueco({required this.volumen});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[400]!, width: 1.5),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.add, size: 32, color: Colors.grey[600]),
-          const SizedBox(height: 8),
-          Text(
-            'Vol. $volumen',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }
