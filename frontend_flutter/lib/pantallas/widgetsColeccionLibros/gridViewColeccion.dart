@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
-import 'package:frontend_flutter/pantallas/gestionLibro.dart';
+import 'package:frontend_flutter/pantallas/detalleLibro.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/cardLibro.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 
@@ -38,15 +38,14 @@ class GridColeccion extends StatelessWidget {
         // GestureDetector es necesario para abrir la pantalla de edición del libro cuando haces clic en el
         return GestureDetector(
           onTap: () async {
-            // Se navega a la pantalla de edición y se espera el resultado
+            FocusManager.instance.primaryFocus?.unfocus();
             await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    PantallaGestionLibro(libroExistente: libro),
+                builder: (context) => PantallaDetalleLibro(libro: libro),
               ),
             );
-            alCambiar(); // Refrescamos al volver de editar
+            alCambiar();
           },
 
           child: Cardlibro(

@@ -5,6 +5,9 @@ import 'package:frontend_flutter/pantallas/login.dart';
 import 'package:frontend_flutter/decoraciones/themeProvider.dart';
 import 'package:provider/provider.dart';
 
+final RouteObserver<PageRoute<dynamic>> routeObserver =
+    RouteObserver<PageRoute<dynamic>>();
+
 class UxiLibrisApp extends StatelessWidget {
   const UxiLibrisApp({super.key});
 
@@ -16,6 +19,8 @@ class UxiLibrisApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "UxiLibris",
+
+      navigatorObservers: [routeObserver],
 
       // Localización en español (fechas en formato dd/mm/aaaa)
       locale: const Locale('es', 'ES'),

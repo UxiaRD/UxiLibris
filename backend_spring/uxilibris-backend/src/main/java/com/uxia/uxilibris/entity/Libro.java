@@ -108,6 +108,9 @@ public class Libro {
     /** Ruta de la portada: URL de Google Books, ruta local del dispositivo o asset de la app. */
     private String rutaImagen;
 
+    /** Ruta de la imagen de fondo de la pantalla de detalle. Nulo = usar la portada. */
+    private String rutaFondo;
+
     /**
      * Indica si el usuario ha marcado el libro como favorito.
      *
@@ -123,7 +126,7 @@ public class Libro {
      * el libro se eliminan automáticamente todos sus valores de propiedad.</p>
      */
     @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<PropiedadValor> propiedades;
+    private List<PropiedadValor> propiedades = new java.util.ArrayList<>();
 
     /**
      * Historial de lecturas del libro (puede haber varias si el usuario lo releyó).

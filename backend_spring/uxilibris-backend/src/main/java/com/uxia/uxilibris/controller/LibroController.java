@@ -170,6 +170,24 @@ public class LibroController {
     }
 
     /**
+     * Actualiza la imagen de fondo de la pantalla de detalle de un libro.
+     *
+     * <p>{@code PATCH /api/libros/{id}/fondo}</p>
+     *
+     * @param id   identificador del libro
+     * @param body mapa JSON con la clave {@code rutaFondo} (puede ser null)
+     * @return {@code 200 OK} si se actualizó, {@code 404} si no existe el libro
+     */
+    @PatchMapping("/{id}/fondo")
+    public ResponseEntity<Void> actualizarFondo(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, Object> body) {
+        String rutaFondo = body != null ? (String) body.get("rutaFondo") : null;
+        boolean ok = libroService.actualizarFondo(id, rutaFondo);
+        return ok ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    }
+
+    /**
      * Busca libros por texto libre en Google Books y devuelve hasta 10 resultados.
      *
      * <p>{@code GET /api/libros/buscar?q=texto}</p>

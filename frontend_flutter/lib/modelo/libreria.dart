@@ -54,6 +54,7 @@ class Libreria {
     original.lecturas = modificado.lecturas;
     original.favorito = modificado.favorito;
     original.rutaImagen = modificado.rutaImagen;
+    // rutaFondo no se edita desde el formulario — se preserva el valor existente
     original.almacen = modificado.almacen;
   }
 

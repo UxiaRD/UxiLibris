@@ -53,6 +53,21 @@ public class SagaService {
     }
 
     /**
+     * Marca o desmarca una saga como abandonada.
+     *
+     * @param id    identificador de la saga
+     * @param valor {@code true} para abandonar, {@code false} para retomar
+     * @return la saga actualizada, o {@code null} si no existe
+     */
+    @Transactional
+    public Saga toggleAbandonada(Long id, boolean valor) {
+        return sagaRepository.findById(id).map(saga -> {
+            saga.setAbandonada(valor);
+            return sagaRepository.save(saga);
+        }).orElse(null);
+    }
+
+    /**
      * Elimina una saga y desasocia todos los libros que la referenciaban.
      *
      * <p>Primero se ejecuta un UPDATE masivo que pone a {@code null} el campo

@@ -186,7 +186,17 @@ class ApiService {
     return response.statusCode == 200;
   }
 
-  // 7. Eliminar un libro
+  // 7. Actualizar imagen de fondo de la pantalla de detalle
+  static Future<bool> actualizarFondoLibro(int id, String? rutaFondo) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/libros/$id/fondo'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'rutaFondo': rutaFondo}),
+    );
+    return response.statusCode == 200;
+  }
+
+  // 8. Eliminar un libro
   static Future<bool> eliminarLibro(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/libros/$id'));
     return response.statusCode == 200 || response.statusCode == 204;
@@ -302,7 +312,15 @@ class ApiService {
     return null;
   }
 
-  // 3. Eliminar Saga
+  // 3. Abandonar / retomar saga
+  static Future<bool> toggleAbandonadaSaga(int id, bool valor) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/sagas/$id/abandonada?valor=$valor'),
+    );
+    return response.statusCode == 200;
+  }
+
+  // 4. Eliminar Saga
   static Future<bool> eliminarSaga(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/sagas/$id'));
     return response.statusCode == 204;

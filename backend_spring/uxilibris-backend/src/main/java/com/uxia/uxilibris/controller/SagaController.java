@@ -50,6 +50,23 @@ public class SagaController {
     }
 
     /**
+     * Marca o desmarca una saga como abandonada.
+     *
+     * <p>{@code PATCH /api/sagas/{id}/abandonada?valor=true|false}</p>
+     *
+     * @param id    identificador de la saga
+     * @param valor {@code true} para abandonar, {@code false} para retomar
+     * @return {@code 200 OK} con la saga actualizada, o {@code 404} si no existe
+     */
+    @PatchMapping("/{id}/abandonada")
+    public ResponseEntity<Saga> toggleAbandonada(
+            @PathVariable Long id,
+            @RequestParam boolean valor) {
+        Saga saga = sagaService.toggleAbandonada(id, valor);
+        return saga != null ? ResponseEntity.ok(saga) : ResponseEntity.notFound().build();
+    }
+
+    /**
      * Elimina la saga indicada y desasocia todos sus libros.
      *
      * <p>{@code DELETE /api/sagas/{id}}</p>

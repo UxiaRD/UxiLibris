@@ -49,21 +49,28 @@ class CardSaga extends StatelessWidget {
     return relevantes.every((l) => l.estado == EstadoLibro.leido);
   }
 
+  Color? _colorFondo() {
+    if (saga.abandonada) return Colors.red.withValues(alpha: 0.12);
+    if (_estaCompleta()) return AppThemes.moradoClaro.withValues(alpha: 0.55);
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colores = Theme.of(context).colorScheme;
-    final completa = _estaCompleta();
 
     return GestureDetector(
       onTap: onTap,
       child: Card(
         margin: const EdgeInsets.only(bottom: 16),
-        color: completa ? AppThemes.moradoClaro.withValues(alpha: 0.55) : null,
+        color: _colorFondo(),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: _todosDigitales
-              ? const BorderSide(color: _colorDigital, width: 2)
-              : BorderSide.none,
+          side: saga.abandonada
+              ? BorderSide(color: Colors.red.withValues(alpha: 0.4), width: 1.5)
+              : _todosDigitales
+                  ? const BorderSide(color: _colorDigital, width: 2)
+                  : BorderSide.none,
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
@@ -100,9 +107,27 @@ class CardSaga extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
-              Text(
-                _subtitulo(),
-                style: TextStyle(color: colores.onSurfaceVariant, fontSize: 13),
+              Row(
+                children: [
+                  Text(
+                    _subtitulo(),
+                    style: TextStyle(color: colores.onSurfaceVariant, fontSize: 13),
+                  ),
+                  if (saga.abandonada) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'Abandonada',
+                        style: TextStyle(fontSize: 11, color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),

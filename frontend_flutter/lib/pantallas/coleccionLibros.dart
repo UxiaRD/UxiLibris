@@ -194,6 +194,7 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
       // BOTÓN FLOTANTE (+)
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          FocusManager.instance.primaryFocus?.unfocus();
           await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => SeleccionMetodoCarga()),

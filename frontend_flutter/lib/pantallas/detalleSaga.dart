@@ -5,6 +5,7 @@ import 'package:frontend_flutter/modelo/almacenPropiedades.dart';
 import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/modelo/saga.dart';
+import 'package:frontend_flutter/pantallas/detalleLibro.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 import 'package:frontend_flutter/pantallas/gestionSaga.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/cardLibro.dart';
@@ -19,6 +20,22 @@ class PantallaDetalleSaga extends StatefulWidget {
 
   @override
   State<PantallaDetalleSaga> createState() => _PantallaDetalleSagaState();
+}
+
+// Dibuja una línea diagonal roja sobre libros pendientes en sagas abandonadas
+class _LineaRoja extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.red.withValues(alpha: 0.75)
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(Offset(0, size.height * 0.1), Offset(size.width, size.height * 0.9), paint);
+    canvas.drawLine(Offset(size.width, size.height * 0.1), Offset(0, size.height * 0.9), paint);
+  }
+
+  @override
+  bool shouldRepaint(_LineaRoja _) => false;
 }
 
 class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
@@ -83,8 +100,16 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
       MaterialPageRoute(builder: (_) => PantallaGestionSaga(saga: widget.saga)),
     );
     if (resultado == true && mounted) {
-      // Volvemos a la pantalla anterior para que recargue la lista de sagas
       Navigator.pop(context, true);
+    }
+  }
+
+  Future<void> _toggleAbandonada() async {
+    if (widget.saga.id == null) return;
+    final nuevoValor = !widget.saga.abandonada;
+    final ok = await ApiService.toggleAbandonadaSaga(widget.saga.id!, nuevoValor);
+    if (ok && mounted) {
+      setState(() => widget.saga.abandonada = nuevoValor);
     }
   }
 
@@ -127,12 +152,34 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         actions: [
-          IconButton(
-            icon: Icon(Icons.edit_outlined, color: colores.primary),
-            tooltip: 'Editar saga',
-            onPressed: _editarSaga,
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: colores.primary),
+            onSelected: (value) {
+              if (value == 'editar') _editarSaga();
+              if (value == 'abandonar') _toggleAbandonada();
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'editar',
+                child: ListTile(
+                  leading: Icon(Icons.edit_outlined),
+                  title: Text('Editar saga'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'abandonar',
+                child: ListTile(
+                  leading: Icon(
+                    widget.saga.abandonada ? Icons.replay : Icons.block,
+                    color: widget.saga.abandonada ? Colors.green : Colors.red,
+                  ),
+                  title: Text(widget.saga.abandonada ? 'Retomar saga' : 'Abandonar saga'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -165,30 +212,41 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                         child: _CardHueco(volumen: index + 1),
                       );
                     }
+                    final tachada = widget.saga.abandonada &&
+                        libro.estado == EstadoLibro.pendiente;
                     return GestureDetector(
                       onTap: () async {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                PantallaGestionLibro(libroExistente: libro),
+                            builder: (_) => PantallaDetalleLibro(libro: libro, saga: widget.saga),
                           ),
                         );
                         if (mounted) setState(() {});
                       },
                       onLongPress: () => _confirmarEliminarLibro(libro),
-                      child: Cardlibro(
-                        rutaImagen: libro.rutaImagen,
-                        titulo: libro.titulo,
-                        puntuacion: libro.puntuacion,
-                        formato: libro.formato,
-                        esDeseo: libro.estado == EstadoLibro.deseo,
-                        favorito: libro.favorito,
-                        onFavoritoToggle: libro.id == null ? null : () async {
-                          libro.favorito = !libro.favorito;
-                          setState(() {});
-                          await ApiService.toggleFavorito(libro.id!, libro.favorito);
-                        },
+                      child: Stack(
+                        children: [
+                          Cardlibro(
+                            rutaImagen: libro.rutaImagen,
+                            titulo: libro.titulo,
+                            puntuacion: libro.puntuacion,
+                            formato: libro.formato,
+                            esDeseo: libro.estado == EstadoLibro.deseo,
+                            favorito: libro.favorito,
+                            onFavoritoToggle: libro.id == null ? null : () async {
+                              libro.favorito = !libro.favorito;
+                              setState(() {});
+                              await ApiService.toggleFavorito(libro.id!, libro.favorito);
+                            },
+                          ),
+                          if (tachada)
+                            Positioned.fill(
+                              child: IgnorePointer(
+                                child: CustomPaint(painter: _LineaRoja()),
+                              ),
+                            ),
+                        ],
                       ),
                     );
                   },

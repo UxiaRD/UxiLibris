@@ -5,12 +5,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 /**
- * Valor concreto de una propiedad dinámica para un libro específico.
+ * Propiedad dinámica con su valor para un libro específico.
  *
- * <p>Une {@link Libro} con {@link DefinicionPropiedad}: almacena el valor
- * que el usuario ha introducido para una propiedad concreta de un libro
- * concreto. Todos los tipos de dato ({@link com.uxia.uxilibris.model.TipoDato})
- * se serializan como cadena de texto en la columna {@code valor_texto}.</p>
+ * <p>Estructura plana que almacena en una sola fila el nombre, tipo y valor
+ * de una propiedad personalizada. Corresponde 1:1 con el modelo {@code Propiedad}
+ * del cliente Flutter.</p>
  *
  * <p>Mapeada a la tabla {@code libro_propiedades_valores}.</p>
  */
@@ -19,36 +18,25 @@ import lombok.Data;
 @Data
 public class PropiedadValor {
 
-    /** Identificador único generado automáticamente por la base de datos. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    /**
-     * Valor de la propiedad almacenado como texto.
-     *
-     * <p>El cliente es responsable de interpretar el valor según el
-     * {@link com.uxia.uxilibris.model.TipoDato} declarado en {@link #definicion}.</p>
-     */
+    /** Nombre descriptivo de la propiedad (p. ej. "ISBN", "Editorial"). */
+    private String nombre;
+
+    /** Tipo de dato tal como lo envía el cliente (p. ej. "texto", "numero"). */
+    private String tipo;
+
+    /** Indica si la propiedad es optativa. Por defecto {@code true}. */
+    private Boolean esOptativa = true;
+
+    /** Valor almacenado como cadena de texto. */
     @Column(name = "valor_texto")
     private String valor;
 
-    /**
-     * Libro al que pertenece este valor.
-     *
-     * <p>No se serializa en JSON ({@code @JsonIgnore}) para evitar la
-     * referencia circular {@code Libro → PropiedadValor → Libro}.</p>
-     */
     @ManyToOne
     @JoinColumn(name = "libro_id")
     @JsonIgnore
     private Libro libro;
-
-    /**
-     * Definición de propiedad que describe el significado y tipo de este valor
-     * (p. ej. «ISBN», tipo {@code TEXTO}).
-     */
-    @ManyToOne
-    @JoinColumn(name = "propiedad_id")
-    private DefinicionPropiedad definicion;
 }

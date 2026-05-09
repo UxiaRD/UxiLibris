@@ -159,13 +159,14 @@ public class LibroService {
                 if (libro.getFavorito() != null) existente.setFavorito(libro.getFavorito());
                 if (libro.getFormato() != null) existente.setFormato(libro.getFormato());
                 sincronizarLecturas(existente, libro.getLecturas());
+                sincronizarPropiedades(existente, libro.getPropiedades());
                 Libro saved = libroRepository.save(existente);
                 propagarTransientes(saved);
                 return saved;
             }).orElseGet(() -> {
                 libro.setSaga(saga);
                 libro.setUsuario(usuario);
-                if (libro.getPropiedades() == null) libro.setPropiedades(new java.util.ArrayList<>());
+                sincronizarPropiedades(libro, libro.getPropiedades());
                 sincronizarLecturas(libro, libro.getLecturas());
                 Libro saved = libroRepository.save(libro);
                 propagarTransientes(saved);
@@ -175,7 +176,7 @@ public class LibroService {
 
         libro.setSaga(saga);
         libro.setUsuario(usuario);
-        if (libro.getPropiedades() == null) libro.setPropiedades(new java.util.ArrayList<>());
+        sincronizarPropiedades(libro, libro.getPropiedades());
         sincronizarLecturas(libro, libro.getLecturas());
         Libro saved = libroRepository.save(libro);
         propagarTransientes(saved);
@@ -197,6 +198,23 @@ public class LibroService {
      * @param destino        entidad cuya lista de lecturas se va a reemplazar
      * @param entradasCliente lecturas recibidas del cliente; puede ser {@code null}
      */
+    private void sincronizarPropiedades(Libro destino, java.util.List<com.uxia.uxilibris.entity.PropiedadValor> entradasCliente) {
+        java.util.List<com.uxia.uxilibris.entity.PropiedadValor> copia = entradasCliente != null
+                ? new java.util.ArrayList<>(entradasCliente)
+                : new java.util.ArrayList<>();
+        if (destino.getPropiedades() == null) destino.setPropiedades(new java.util.ArrayList<>());
+        destino.getPropiedades().clear();
+        for (com.uxia.uxilibris.entity.PropiedadValor pv : copia) {
+            com.uxia.uxilibris.entity.PropiedadValor nueva = new com.uxia.uxilibris.entity.PropiedadValor();
+            nueva.setLibro(destino);
+            nueva.setNombre(pv.getNombre());
+            nueva.setTipo(pv.getTipo());
+            nueva.setEsOptativa(pv.getEsOptativa() != null ? pv.getEsOptativa() : true);
+            nueva.setValor(pv.getValor());
+            destino.getPropiedades().add(nueva);
+        }
+    }
+
     private void sincronizarLecturas(Libro destino, java.util.List<LecturaLibro> entradasCliente) {
         java.util.List<LecturaLibro> copia = entradasCliente != null
                 ? new java.util.ArrayList<>(entradasCliente)
@@ -258,6 +276,22 @@ public class LibroService {
             throw new jakarta.persistence.EntityNotFoundException("Libro no encontrado con id: " + id);
         }
         libroRepository.deleteById(id);
+    }
+
+    /**
+     * Actualiza la imagen de fondo de la pantalla de detalle de un libro.
+     *
+     * @param id       identificador del libro
+     * @param rutaFondo ruta local de la imagen, o {@code null} para usar la portada
+     * @return {@code true} si el libro existe y se actualizó; {@code false} si no existe
+     */
+    @Transactional
+    public boolean actualizarFondo(Long id, String rutaFondo) {
+        return libroRepository.findById(id).map(libro -> {
+            libro.setRutaFondo(rutaFondo);
+            libroRepository.save(libro);
+            return true;
+        }).orElse(false);
     }
 
     /**

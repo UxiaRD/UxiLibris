@@ -25,6 +25,7 @@ class Libro {
   List<Lectura> lecturas;
   bool favorito;
   String rutaImagen;
+  String? rutaFondo;
 
   // Base para la personalización
   AlmacenPropiedades almacen;
@@ -45,6 +46,7 @@ class Libro {
     List<Lectura>? lecturas,
     this.favorito = false,
     required this.rutaImagen,
+    this.rutaFondo,
     required this.almacen,
   }) : lecturas = lecturas ?? [];
 
@@ -76,8 +78,7 @@ class Libro {
           .toList(),
       favorito: json['favorito'] as bool? ?? false,
       rutaImagen: json['rutaImagen'] ?? "assets/images/fondos/libro.png",
-
-      // Se carga el almacén desde la lista de propiedades del JSON
+      rutaFondo: json['rutaFondo'] as String?,
       almacen: AlmacenPropiedades.fromJson(json['propiedades'] ?? []),
     );
   }
@@ -114,6 +115,8 @@ class Libro {
       'lecturas': lecturas.map((l) => l.toJson()).toList(),
       'favorito': favorito,
       'rutaImagen': rutaImagen,
+      if (rutaFondo != null) 'rutaFondo': rutaFondo,
+      'propiedades': almacen.propiedades.map((p) => p.toJson()).toList(),
     };
   }
 }

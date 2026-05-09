@@ -30,12 +30,23 @@ class Propiedad {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+    'nombre': nombre,
+    'tipo': tipo.name,
+    'esOptativa': esOptativa,
+    if (valor != null) 'valor': valor,
+    if (opciones != null) 'opciones': opciones,
+  };
+
   // Crea una Propiedad desde un mapa del JSON
   factory Propiedad.fromJson(Map<String, dynamic> json) {
     return Propiedad(
-      nombre: json['nombre'],
-      tipo: TipoDato.values.firstWhere((e) => e.name == json['tipo']),
-      esOptativa: json['esOptativa'] ?? true,
+      nombre: json['nombre'] as String? ?? '',
+      tipo: TipoDato.values.firstWhere(
+        (e) => e.name.toLowerCase() == (json['tipo'] as String? ?? '').toLowerCase(),
+        orElse: () => TipoDato.texto,
+      ),
+      esOptativa: json['esOptativa'] as bool? ?? true,
       valor: json['valor'],
       opciones: json['opciones'] != null
           ? List<String>.from(json['opciones'])

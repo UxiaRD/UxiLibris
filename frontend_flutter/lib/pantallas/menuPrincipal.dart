@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_flutter/pantallas/uxiLibrisApp.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/pantallas/coleccionLibros.dart';
 import 'package:frontend_flutter/utilidades/drawerPrincipal.dart';
@@ -12,7 +13,7 @@ class MenuPrincipal extends StatefulWidget {
   State<MenuPrincipal> createState() => _MenuPrincipalState();
 }
 
-class _MenuPrincipalState extends State<MenuPrincipal> {
+class _MenuPrincipalState extends State<MenuPrincipal> with RouteAware {
   int _indiceActual = 0;
 
   final List<Widget> _paginas = [
@@ -23,12 +24,30 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
   ];
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) routeObserver.subscribe(this, route);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  // Se llama cuando una nueva ruta se pone encima de esta
+  @override
+  void didPushNext() {
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ColorScheme colores = Theme.of(context).colorScheme;
 
     return Scaffold(
-      extendBodyBehindAppBar:
-          true, // Extensión del body por detrás de al appBar
+      extendBodyBehindAppBar: true,
 
       appBar: AppBar(
         title: Text("UxiLibris"),
@@ -38,12 +57,14 @@ class _MenuPrincipalState extends State<MenuPrincipal> {
 
       drawer: DrawerPrincipal(pantallaActual: PantallaDrawer.libros),
 
-      // Llamada a la lista con el índice para el BottomNavigationBar
       body: _paginas[_indiceActual],
 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _indiceActual,
-        onTap: (index) => setState(() => _indiceActual = index),
+        onTap: (index) {
+          FocusManager.instance.primaryFocus?.unfocus();
+          setState(() => _indiceActual = index);
+        },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: colores.primary,
         unselectedItemColor: colores.outline,
