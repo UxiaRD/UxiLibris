@@ -34,6 +34,78 @@ class FilaLectura extends StatelessWidget {
         ),
       );
 
+  Future<void> _onPickInicio(BuildContext context) async {
+    final d = await _pickDate(context, lectura.fechaInicio);
+    if (d == null) return;
+
+    final fin = lectura.fechaFin;
+    if (!lectura.estaActiva && fin != null && d.isAfter(fin)) {
+      if (!context.mounted) return;
+      final ajustar = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Fechas incompatibles'),
+          content: Text(
+            'La fecha de inicio (${_formatDate(d)}) es posterior a la '
+            'fecha de fin (${_formatDate(fin)}).',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Ajustar fecha de fin'),
+            ),
+          ],
+        ),
+      );
+      if (ajustar == true) {
+        onFechaInicio(d);
+        onFechaFin(d);
+      }
+    } else {
+      onFechaInicio(d);
+    }
+  }
+
+  Future<void> _onPickFin(BuildContext context) async {
+    final d = await _pickDate(context, lectura.fechaFin);
+    if (d == null) return;
+
+    final inicio = lectura.fechaInicio;
+    if (inicio != null && d.isBefore(inicio)) {
+      if (!context.mounted) return;
+      final ajustar = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Fechas incompatibles'),
+          content: Text(
+            'La fecha de fin (${_formatDate(d)}) es anterior a la '
+            'fecha de inicio (${_formatDate(inicio)}).',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Ajustar fecha de inicio'),
+            ),
+          ],
+        ),
+      );
+      if (ajustar == true) {
+        onFechaFin(d);
+        onFechaInicio(d);
+      }
+    } else {
+      onFechaFin(d);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colores = Theme.of(context).colorScheme;
@@ -71,10 +143,7 @@ class FilaLectura extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                  onTap: () async {
-                    final d = await _pickDate(context, lectura.fechaInicio);
-                    if (d != null) onFechaInicio(d);
-                  },
+                  onTap: () => _onPickInicio(context),
                   child: Row(
                     children: [
                       Icon(Icons.play_arrow_rounded, size: 14, color: colores.primary),
@@ -88,12 +157,7 @@ class FilaLectura extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 GestureDetector(
-                  onTap: editarFinPermitido
-                      ? () async {
-                          final d = await _pickDate(context, lectura.fechaFin);
-                          if (d != null) onFechaFin(d);
-                        }
-                      : null,
+                  onTap: editarFinPermitido ? () => _onPickFin(context) : null,
                   child: Row(
                     children: [
                       Icon(
