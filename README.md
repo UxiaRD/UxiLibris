@@ -2,7 +2,7 @@
 
 Una aplicación para amantes de la lectura que permite llevar un registro detallado de su colección, lecturas en curso, lista de deseos y hábitos de lectura con estadísticas visuales.
 
-[![CI](https://github.com/UxiaRD/uxilibris_project/actions/workflows/ci.yml/badge.svg)](https://github.com/UxiaRD/uxilibris_project/actions/workflows/ci.yml)
+[![CI](https://github.com/UxiaRD/UxiLibris/actions/workflows/ci.yml/badge.svg)](https://github.com/UxiaRD/UxiLibris/actions/workflows/ci.yml)
 
 <p align="center">
 <img src="frontend_flutter/assets/images/icono.png" alt="Icono UxiLibris" width="150">
