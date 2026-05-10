@@ -2,6 +2,8 @@
 
 Una aplicación para amantes de la lectura que permite llevar un registro detallado de su colección, lecturas en curso, lista de deseos y hábitos de lectura con estadísticas visuales.
 
+[![CI](https://github.com/UxiaRD/uxilibris_project/actions/workflows/ci.yml/badge.svg)](https://github.com/UxiaRD/uxilibris_project/actions/workflows/ci.yml)
+
 <p align="center">
 <img src="frontend_flutter/assets/images/icono.png" alt="Icono UxiLibris" width="150">
 </p>
@@ -17,8 +19,9 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
    - [Opción B — Docker en el navegador](#opción-b--docker-en-el-navegador)
    - [Opción C — APK móvil con backend local](#opción-c--apk-móvil-con-backend-local)
    - [Opción D — Entorno de desarrollo local](#opción-d--entorno-de-desarrollo-local)
-5. [Limitaciones de la versión web](#limitaciones-de-la-versión-web)
-6. [Autora](#autora)
+5. [Tests](#tests)
+6. [Limitaciones de la versión web](#limitaciones-de-la-versión-web)
+7. [Autora](#autora)
 
 ---
 
@@ -95,6 +98,7 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
 | **Contenedores** | Docker, Docker Compose, nginx |
 | **Despliegue backend** | Render |
 | **Despliegue base de datos** | Neon (PostgreSQL gratuito y permanente) |
+| **CI** | GitHub Actions |
 
 ---
 
@@ -102,44 +106,40 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
 
 ```text
 uxilibris_project/
-├── docker-compose.yml              # Orquesta backend + BD + frontend web
-├── nginx.conf                      # Configuración del servidor web (frontend)
-├── Vagrantfile                     # Alternativa: VM Ubuntu con Docker preinstalado
+├── .github/workflows/ci.yml           # Pipeline CI (tests backend + frontend)
+├── docker-compose.yml                 # Orquesta backend + BD + frontend web
+├── nginx.conf                         # Configuración del servidor web (frontend)
+├── Vagrantfile                        # Alternativa: VM Ubuntu con Docker preinstalado
 │
-├── frontend_flutter/               # App Flutter (móvil y web)
+├── scripts/
+│   ├── modoA_compilar_apk_nube.bat    # Compila APK apuntando a Render
+│   └── modoA_actualizar_apk_nube.bat  # Compila y actualiza APK vía ADB (sin desinstalar)
+│
+├── frontend_flutter/                  # App Flutter (móvil y web)
+│   ├── test/
+│   │   └── modelo/                   # Tests unitarios de modelos Dart
 │   └── lib/
-│       ├── controladores/          # Lógica de negocio desacoplada de la UI
-│       ├── decoraciones/           # Temas, fondos y estilos globales
-│       ├── modelo/                 # Entidades: Libro, Saga, Libreria…
-│       ├── servicio/               # ApiService y SessionManager
-│       ├── pantallas/              # Pantallas de la aplicación
-│       │   ├── coleccionLibros/    # Grid principal con filtros y barra de letras
-│       │   ├── coleccionSagas/     # Grid de sagas con buscador
-│       │   ├── widgetsColeccionLibros/ # CardLibro y GridColeccion
-│       │   ├── detalleSaga         # Volúmenes de una saga y slots vacíos
-│       │   ├── estadisticas        # Gráficas y favoritos
-│       │   ├── gestionLibro        # Añadir / editar libro
-│       │   ├── gestionSaga         # Añadir / editar saga
-│       │   ├── escanerISBN         # Escáner de código de barras
-│       │   ├── busquedaLibros      # Búsqueda por texto en Google Books
-│       │   ├── listaDeseos         # Libros marcados como deseo
-│       │   ├── login / registro    # Autenticación
-│       │   └── seleccionMetodoCarga # Selector de método de carga
-│       └── utilidades/             # Componentes compartidos (drawer, diálogos…)
+│       ├── controladores/            # Lógica de negocio desacoplada de la UI
+│       ├── decoraciones/             # Temas, fondos y estilos globales
+│       ├── modelo/                   # Entidades: Libro, Saga, Libreria…
+│       ├── servicio/                 # ApiService y SessionManager
+│       ├── pantallas/                # Pantallas de la aplicación
+│       └── utilidades/               # Componentes compartidos (drawer, diálogos…)
 │
-├── backend_spring/                 # API REST (Java Spring Boot)
+├── backend_spring/                   # API REST (Java Spring Boot)
 │   └── uxilibris-backend/
-│       ├── Dockerfile              # Imagen Docker del backend
-│       └── src/main/java/.../
-│           ├── config/             # CORS
-│           ├── controller/         # Endpoints: libros, sagas, auth, ISBN
-│           ├── service/            # Lógica de negocio
-│           ├── repository/         # Acceso a datos (JPA)
-│           ├── entity/             # Entidades JPA: Libro, Saga, Usuario…
-│           └── dto/                # Objetos de transferencia de datos
+│       ├── Dockerfile                # Imagen Docker del backend
+│       └── src/
+│           ├── main/java/.../
+│           │   ├── config/           # CORS
+│           │   ├── controller/       # Endpoints: libros, sagas, auth, ISBN
+│           │   ├── service/          # Lógica de negocio
+│           │   ├── repository/       # Acceso a datos (JPA)
+│           │   ├── entity/           # Entidades JPA: Libro, Saga, Usuario…
+│           │   └── dto/              # Objetos de transferencia de datos
+│           └── test/                 # Tests unitarios e integración
 │
-├── casos de uso/                   # Diagramas de secuencia UC-01…UC-09
-└── documentación/                  # Memoria, diagramas ER, clases y relacional
+└── documentación/                    # Memoria, diagramas ER, clases y relacional
 ```
 
 ---
@@ -163,7 +163,7 @@ uxilibris_project/
 
 El backend se despliega en **Render** y la base de datos en **Neon**. Una vez configurado, la app móvil (APK) funciona desde cualquier dispositivo y en cualquier momento sin necesidad de tener el ordenador encendido.
 
-> **Aviso:** Render free tier duerme el backend tras 15 minutos de inactividad. La primera petición después de un periodo de inactividad tarda ~30 segundos en despertar. Los datos en Neon son permanentes.
+> **Aviso:** Render free tier duerme el backend tras 15 minutos de inactividad. La primera petición después de un periodo de inactividad puede tardar **hasta 2 minutos** en despertar. La app reintenta automáticamente durante ese tiempo y muestra un mensaje informativo; no es necesaria ninguna acción por parte del usuario.
 
 #### Paso 1 — Crear la base de datos en Neon
 
@@ -222,6 +222,15 @@ También puedes instalar directamente con el móvil conectado por USB:
 ```bash
 flutter install
 ```
+
+#### Scripts de compilación rápida
+
+Si tienes Flutter y ADB disponibles en el PATH, los scripts de la carpeta `scripts/` automatizan el proceso:
+
+| Script | Qué hace |
+|---|---|
+| `modoA_compilar_apk_nube.bat` | Compila el APK apuntando a `uxilibris-backend.onrender.com` y muestra la ruta del fichero resultante |
+| `modoA_actualizar_apk_nube.bat` | Compila el APK y lo instala/actualiza directamente en el dispositivo conectado por USB vía ADB (`adb install -r`), conservando los datos de la app |
 
 #### Primera vez: registrar un usuario
 
@@ -402,6 +411,53 @@ Para conectar la app móvil al backend local, pasa la IP de tu ordenador:
 ```bash
 flutter run --dart-define=BACKEND_URL=http://192.168.X.X:8080
 ```
+
+---
+
+## Tests
+
+El proyecto incluye tests unitarios para el frontend (Dart) y el backend (Java), integrados en un pipeline de **GitHub Actions** que se ejecuta automáticamente en cada push.
+
+### Frontend — Tests unitarios de modelos (Dart)
+
+Ubicados en `frontend_flutter/test/modelo/`. No requieren dispositivo ni emulador; prueban la lógica pura de los modelos.
+
+| Fichero | Qué prueba |
+|---|---|
+| `lectura_test.dart` | `Lectura.fromJson` (formatos string ISO y array), `toJson`, `estaActiva`/`estaCompletada`, `withFechaInicio`/`withFechaFin` (inmutabilidad) |
+| `libro_test.dart` | `Libro.fromJson` (campos completos, valores por defecto, estado desconocido, estado en mayúsculas, lecturas anidadas), `toJson` (round-trip), `withEstado` (inmutabilidad y preservación de campos) |
+| `libreria_test.dart` | `filtrarPorEstado` (excluye deseos en "todos", estado concreto, vacío), `filtrarPorBusqueda` (case-insensitive, por título/autor/saga, sin duplicados) |
+
+```bash
+cd frontend_flutter
+flutter test
+```
+
+### Backend — Tests unitarios e integración (Java)
+
+Ubicados en `backend_spring/uxilibris-backend/src/test/java/`.
+
+| Fichero | Tipo | Qué prueba |
+|---|---|---|
+| `service/UsuarioServiceTest.java` | Unitario (Mockito) | `guardar` (nuevo usuario, email duplicado, username duplicado) y `verificar` (credenciales correctas, contraseña incorrecta, usuario inexistente) |
+| `repository/UsuarioRepositoryTest.java` | Integración (`@DataJpaTest` + H2) | `findByUsername`, `findByEmail` (existente y no existente), `save` asigna ID |
+
+Los tests de backend usan H2 en memoria (perfil `test`). La configuración está en `src/test/resources/application-test.properties`.
+
+```bash
+cd backend_spring/uxilibris-backend
+./mvnw test -Dspring.profiles.active=test       # Mac / Linux
+mvnw.cmd test -Dspring.profiles.active=test     # Windows
+```
+
+### CI — GitHub Actions
+
+El workflow `.github/workflows/ci.yml` se lanza en cualquier push o pull request. Ejecuta en paralelo:
+
+- **Job `backend`**: compila y lanza los tests de Maven con el perfil `test`.
+- **Job `flutter`**: instala dependencias, analiza el código con `flutter analyze` y ejecuta `flutter test`.
+
+El estado del pipeline se muestra en el badge al inicio de este README.
 
 ---
 
