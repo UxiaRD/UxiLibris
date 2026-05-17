@@ -35,7 +35,8 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
 ### 📖 Colección de libros
 - Añadir libros **manualmente**, mediante **escáner de código de barras ISBN** o mediante **búsqueda por título/autor en Google Books**.
   - El escáner y la búsqueda consultan la **API de Google Books** y rellenan automáticamente título, autor, portada y datos de saga.
-  - Detección de duplicados: aviso si el ISBN ya está registrado.
+  - La búsqueda por texto ejecuta en paralelo una consulta general y una consulta específica por autor (`inauthor:`), fusiona y deduplica los resultados, devolviendo hasta ~30 libros por búsqueda con mejor precisión para búsquedas por nombre de autor.
+  - Detección de duplicados: aviso si el título ya está registrado en la biblioteca.
 - Editar y eliminar libros de la biblioteca.
 - Filtrado por estado de lectura: *Todos*, *Leyendo*, *Pendientes*, *Leídos*.
 - Barra de búsqueda por título, autor o saga.
@@ -78,6 +79,7 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
 ### 🧭 Navegación
 - **Drawer principal unificado** compartido por todas las pantallas: Libros, Sagas, Estadísticas y Lista de Deseos.
 - La pantalla activa se resalta; las demás navegan directamente a su destino.
+- La pila de navegación se mantiene siempre limpia (`[MenuPrincipal, <sección>]`) mediante `pushAndRemoveUntil`, evitando acumulación de rutas al cambiar de sección repetidamente.
 
 ---
 
