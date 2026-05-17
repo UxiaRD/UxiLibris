@@ -7,6 +7,7 @@ import 'package:frontend_flutter/pantallas/seleccionMetodoCarga.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/gridViewColeccion.dart';
 import 'package:frontend_flutter/utilidades/drawerPrincipal.dart';
 
+/// Pantalla que muestra la lista de libros con estado 'deseo' ordenada alfabéticamente.
 class PantallaListaDeseos extends StatefulWidget {
   const PantallaListaDeseos({super.key});
 
@@ -24,6 +25,7 @@ class _PantallaListaDeseosState extends State<PantallaListaDeseos> {
     _cargar();
   }
 
+  /// Carga todos los libros y filtra los que tienen estado 'deseo'.
   Future<void> _cargar() async {
     setState(() => _estaCargando = true);
     try {
@@ -35,6 +37,7 @@ class _PantallaListaDeseosState extends State<PantallaListaDeseos> {
     }
   }
 
+  /// Extrae y ordena alfabéticamente los libros con estado 'deseo' de la lista global.
   void _aplicarFiltro() {
     final deseos =
         Libreria.todosLosLibros

@@ -5,32 +5,45 @@ import 'package:frontend_flutter/pantallas/listaDeseos.dart';
 
 enum PantallaDrawer { libros, sagas, estadisticas, deseos }
 
+/// Menú lateral de navegación principal de la aplicación.
+/// Gestiona las transiciones entre Libros, Sagas, Estadísticas y Lista de Deseos
+/// manteniendo siempre una pila de navegación limpia: [MenuPrincipal, <sección>].
 class DrawerPrincipal extends StatelessWidget {
   final PantallaDrawer pantallaActual;
 
   const DrawerPrincipal({super.key, required this.pantallaActual});
 
+  /// Navega a la sección indicada con una pila limpia para evitar acumulación de rutas.
   void _navegar(BuildContext context, PantallaDrawer destino) {
-    Navigator.pop(context); // cierra el drawer
-    if (destino == pantallaActual) return;
+    // Misma sección: solo cerrar el drawer
+    if (destino == pantallaActual) {
+      Navigator.pop(context);
+      return;
+    }
 
     switch (destino) {
+      // Libros es la raíz: desapila todo (incluido el drawer) hasta ella
       case PantallaDrawer.libros:
-        Navigator.pop(context); // vuelve a la colección de libros
+        Navigator.popUntil(context, (route) => route.isFirst);
+      // El resto reemplaza la sección actual mantiendo la raíz limpia:
+      // [Libros, <sección>] sin importar desde dónde se navegue
       case PantallaDrawer.sagas:
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const PantallaColeccionSagas()),
+          (route) => route.isFirst,
         );
       case PantallaDrawer.estadisticas:
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const PantallaEstadisticas()),
+          (route) => route.isFirst,
         );
       case PantallaDrawer.deseos:
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const PantallaListaDeseos()),
+          (route) => route.isFirst,
         );
     }
   }

@@ -6,6 +6,8 @@ import 'package:frontend_flutter/pantallas/portadasApiladas.dart';
 
 const Color _colorDigital = Color(0xFF7B2FBE);
 
+/// Tarjeta que representa una saga en la lista: muestra las portadas apiladas,
+/// el nombre, el progreso de lectura y el estado (completada / abandonada).
 class CardSaga extends StatelessWidget {
   final Saga saga;
   final List<Libro> libros;
@@ -20,6 +22,8 @@ class CardSaga extends StatelessWidget {
     required this.onEditar,
   });
 
+  // Excluye libros con volumen > totalLibros para que los bonus/spin-offs
+  // no afecten al progreso ni al estado de completado de la saga.
   List<Libro> get _librosEnRango {
     final total = saga.totalLibros;
     if (total == null || total <= 0) return libros;
@@ -28,6 +32,7 @@ class CardSaga extends StatelessWidget {
         .toList();
   }
 
+  /// Genera el texto de progreso: "X de Y libros" o "X libros registrados".
   String _subtitulo() {
     final total = saga.totalLibros;
     final registrados = _librosEnRango.length;
@@ -41,6 +46,7 @@ class CardSaga extends StatelessWidget {
       libros.isNotEmpty &&
       libros.every((l) => l.formato == FormatoLibro.digital);
 
+  /// Devuelve true si todos los libros en rango tienen estado 'leído'.
   bool _estaCompleta() {
     final total = saga.totalLibros;
     final relevantes = _librosEnRango;
@@ -49,6 +55,7 @@ class CardSaga extends StatelessWidget {
     return relevantes.every((l) => l.estado == EstadoLibro.leido);
   }
 
+  /// Devuelve el color de fondo de la tarjeta según el estado de la saga.
   Color? _colorFondo() {
     if (saga.abandonada) return Colors.red.withValues(alpha: 0.12);
     if (_estaCompleta()) return AppThemes.moradoClaro.withValues(alpha: 0.55);

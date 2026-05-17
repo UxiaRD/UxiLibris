@@ -11,6 +11,8 @@ import 'package:frontend_flutter/pantallas/widgetsDetalleLibro/propiedadesDetall
 import 'package:frontend_flutter/pantallas/widgetsDetalleLibro/tablaLecturas.dart';
 import 'package:frontend_flutter/pantallas/widgetsDetalleLibro/tituloSeccion.dart';
 
+/// Pantalla de detalle de un libro: portada con fondo difuminado, título, autor,
+/// saga, estrellas, badges de estado/formato y secciones de propiedades y lecturas.
 class PantallaDetalleLibro extends StatefulWidget {
   final Libro libro;
   final Saga? saga;
@@ -30,6 +32,7 @@ class _PantallaDetalleLibroState extends State<PantallaDetalleLibro> {
     _libro = widget.libro;
   }
 
+  /// Abre la pantalla de edición y refresca la vista cuando regresa.
   Future<void> _irAEditar() async {
     await Navigator.push<bool>(
       context,
@@ -38,12 +41,14 @@ class _PantallaDetalleLibroState extends State<PantallaDetalleLibro> {
     if (mounted) setState(() {});
   }
 
+  /// Abre la galería para elegir un fondo personalizado y lo sube al servidor.
   Future<void> _seleccionarFondo() async {
     if (_libro.id == null) return;
     final nuevaRuta = await DetalleLibroController.seleccionarFondo(_libro.id!);
     if (nuevaRuta != null && mounted) setState(() => _libro.rutaFondo = nuevaRuta);
   }
 
+  /// Elimina el fondo personalizado del libro en el servidor.
   Future<void> _quitarFondo() async {
     if (_libro.rutaFondo == null || _libro.id == null) return;
     final ok = await DetalleLibroController.quitarFondo(_libro.id!);
@@ -114,12 +119,14 @@ class _PantallaDetalleLibroState extends State<PantallaDetalleLibro> {
       ),
       body: Stack(
         children: [
+          // ── FONDO (imagen de portada desenfocada o fondo personalizado) ──
           Positioned.fill(
             child: FondoDetalle(
               rutaFondo: _libro.rutaFondo,
               rutaImagen: _libro.rutaImagen,
             ),
           ),
+          // ── CONTENIDO SCROLLABLE ──────────────────────────────────────
           SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: mq.size.height),

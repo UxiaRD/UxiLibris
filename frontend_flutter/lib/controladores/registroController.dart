@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 
+/// Controlador estático que gestiona el flujo de registro de nuevos usuarios.
 class RegistroController {
+  /// Valida los campos del formulario, llama al backend y navega de vuelta al login si hay éxito.
   static Future<void> registrarUsuario({
     required BuildContext context,
     required String username,
@@ -10,20 +12,17 @@ class RegistroController {
     required String confirmPassword,
     required Function(bool) setCargando,
   }) async {
-    // 1. Validaciones de formato
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
       _mostrarError(context, "Todos los campos son obligatorios");
       return;
     }
 
-    // Validación de Email (debe contener @ y .)
     if (!email.contains('@') || !email.contains('.')) {
       _mostrarError(context, "El formato del email no es válido");
       return;
     }
 
-    // Validación de Contraseña (mínimo 8 caracteres y una mayúscula)
-    bool tieneMayuscula = password.contains(RegExp(r'[A-Z]'));
+    final tieneMayuscula = password.contains(RegExp(r'[A-Z]'));
     if (password.length < 8 || !tieneMayuscula) {
       _mostrarError(
         context,
@@ -32,7 +31,6 @@ class RegistroController {
       return;
     }
 
-    // Validación de coincidencia
     if (password != confirmPassword) {
       _mostrarError(context, "Las contraseñas no coinciden");
       return;
@@ -41,7 +39,6 @@ class RegistroController {
     setCargando(true);
 
     try {
-      // Llamada al backend (Spring Boot comprobará si el usuario existe en MySQL)
       bool exito = await ApiService.registrarUsuario(
         username.trim(),
         email.trim(),

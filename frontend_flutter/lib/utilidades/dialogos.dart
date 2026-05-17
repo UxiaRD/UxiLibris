@@ -26,8 +26,8 @@ class DialogosApp {
               elevation: 0,
             ),
             onPressed: () {
-              Navigator.pop(context); // Cierra el diálogo
-              alConfirmar(); // Ejecuta la lógica de borrado
+              Navigator.pop(context);
+              alConfirmar();
             },
             child: const Text("ELIMINAR"),
           ),

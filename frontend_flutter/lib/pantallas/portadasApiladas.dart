@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
 
+/// Widget que muestra las portadas de una saga apiladas en perspectiva.
+/// Los huecos (null en la lista de slots) se renderizan como una tarjeta vacía con un "+".
 class PortadasApiladas extends StatelessWidget {
   final List<Libro> libros;
   final int? totalLibros;
@@ -13,6 +15,8 @@ class PortadasApiladas extends StatelessWidget {
   static const double _bookHeight = 82.0;
   static const double _offset = 22.0;
 
+  // Los null representan huecos: volúmenes que aún no están registrados en la saga.
+  // Ej: saga de 5 libros con solo vols. 1, 3 y 5 → [libro, null, libro, null, libro].
   List<Libro?> _construirSlots() {
     if (libros.isEmpty && (totalLibros == null || totalLibros == 0)) return [];
 
@@ -40,6 +44,7 @@ class PortadasApiladas extends StatelessWidget {
     });
   }
 
+  /// Renderiza la portada de un libro distinguiendo entre asset, URL remota y fichero local.
   Widget _buildPortada(Libro libro) {
     final ruta = libro.rutaImagen;
     Widget imagen;
@@ -63,6 +68,7 @@ class PortadasApiladas extends StatelessWidget {
     return ClipRRect(borderRadius: BorderRadius.circular(4), child: imagen);
   }
 
+  /// Renderiza el placeholder gris para un volumen aún no registrado.
   Widget _buildHueco() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(4),

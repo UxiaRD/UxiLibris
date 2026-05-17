@@ -3,8 +3,11 @@ import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/pantallas/menuPrincipal.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 
+/// Controlador estático que gestiona el flujo de inicio de sesión.
 class LoginController {
-  // Lógica de inicio de sesión movida fuera de la vista
+  /// Valida que los campos no estén vacíos, llama al backend y navega
+  /// a [MenuPrincipal] si las credenciales son correctas.
+  /// Muestra un SnackBar con el error correspondiente en caso de fallo.
   static Future<void> iniciarSesion({
     required BuildContext context,
     required String username,
@@ -21,7 +24,6 @@ class LoginController {
     setCargando(true);
 
     try {
-      // Conexión con el backend de Java
       bool exito = await ApiService.login(username.trim(), password.trim());
       setCargando(false);
 
@@ -41,8 +43,7 @@ class LoginController {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text("Error de conexión:")));
-        print("Error durante el login: $e");
+        ).showSnackBar(SnackBar(content: Text("Error de conexión: $e")));
       }
     }
   }

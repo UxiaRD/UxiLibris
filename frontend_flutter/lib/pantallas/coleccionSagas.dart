@@ -43,6 +43,8 @@ class _SagaItem extends _ListItem {
 
 // ── Pantalla ──────────────────────────────────────────────────────────────────
 
+/// Pantalla de sagas agrupadas en tres secciones: en lectura, completadas y abandonadas.
+/// Incluye barra de búsqueda para filtrar por nombre de saga.
 class PantallaColeccionSagas extends StatefulWidget {
   const PantallaColeccionSagas({super.key});
 
@@ -71,6 +73,7 @@ class _PantallaColeccionSagasState extends State<PantallaColeccionSagas> {
     super.dispose();
   }
 
+  /// Descarga todas las sagas del servidor con sus libros asociados.
   Future<void> _cargar() async {
     setState(() => _cargando = true);
     final sagas = await ApiService.fetchSagasCompletas();
@@ -78,6 +81,7 @@ class _PantallaColeccionSagasState extends State<PantallaColeccionSagas> {
     if (mounted) setState(() { _sagas = sagas; _cargando = false; });
   }
 
+  /// Devuelve los libros de la saga con ese nombre, ordenados por volumen.
   List<Libro> _librosDeNombre(String nombre) {
     return Libreria.todosLosLibros
         .where((l) => l.sagaNombre == nombre)
@@ -130,6 +134,7 @@ class _PantallaColeccionSagasState extends State<PantallaColeccionSagas> {
     return items;
   }
 
+  /// Abre el formulario de creación o edición de saga y recarga si se guardaron cambios.
   Future<void> _abrirFormulario([Saga? saga]) async {
     FocusScope.of(context).unfocus();
     final resultado = await Navigator.push<bool>(

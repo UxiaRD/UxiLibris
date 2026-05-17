@@ -19,7 +19,6 @@ class Propiedad {
     this.opciones,
   });
 
-  // Método para facilitar la copia de la propiedad al editar
   Propiedad copyWith({dynamic nuevoValor}) {
     return Propiedad(
       nombre: nombre,
@@ -38,7 +37,6 @@ class Propiedad {
     if (opciones != null) 'opciones': opciones,
   };
 
-  // Crea una Propiedad desde un mapa del JSON
   factory Propiedad.fromJson(Map<String, dynamic> json) {
     return Propiedad(
       nombre: json['nombre'] as String? ?? '',

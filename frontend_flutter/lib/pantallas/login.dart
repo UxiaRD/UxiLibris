@@ -6,8 +6,8 @@ import 'package:frontend_flutter/decoraciones/fondoBase.dart';
 import 'package:frontend_flutter/pantallas/menuPrincipal.dart';
 import 'package:frontend_flutter/pantallas/registro.dart';
 
-// WIDGET que gestiona la pantalla de Inicio de Sesión de la App
-
+/// Pantalla de inicio de sesión. Comprueba si hay una sesión guardada en el dispositivo
+/// y, si la hay, navega directamente a [MenuPrincipal] sin pedir credenciales.
 class PantallaLogin extends StatefulWidget {
   const PantallaLogin({super.key});
 
@@ -17,7 +17,6 @@ class PantallaLogin extends StatefulWidget {
 
 class _PantallaLoginState extends State<PantallaLogin> {
   bool _ocultarContrasena = true;
-  // CONTROLADORES
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
   bool _cargando = false;
@@ -48,12 +47,10 @@ class _PantallaLoginState extends State<PantallaLogin> {
 
   @override
   Widget build(BuildContext context) {
-    // Se extrae el esquema de colores para que sea más facil de llamar
     final ColorScheme colores = Theme.of(context).colorScheme;
 
     return Scaffold(
-      extendBodyBehindAppBar:
-          true, // Extensión del body por detrás de al appBar
+      extendBodyBehindAppBar: true,
 
       appBar: AppBar(actions: ActionsAppBar.obtenerAcciones(context)),
 
@@ -71,12 +68,11 @@ class _PantallaLoginState extends State<PantallaLogin> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // El icono usa el morado principal del tema
+              // ── LOGO Y TÍTULO ──────────────────────────────────────────
               Icon(Icons.library_books, size: 80, color: colores.primary),
 
               SizedBox(height: 20),
 
-              // El texto usa el estilo 'displayLarge' (TITULOS) que se define en AppThemes
               Text(
                 "UxiLibris",
                 style: Theme.of(context).textTheme.displayLarge,
@@ -84,11 +80,9 @@ class _PantallaLoginState extends State<PantallaLogin> {
 
               SizedBox(height: 40),
 
-              // CAMPO: USUARIO
-              // El TextFormField se usa para introducir texto en un formulario
+              // ── CAMPO: NOMBRE DE USUARIO ───────────────────────────────
               TextFormField(
                 controller: _usernameController,
-                // No es necesario incluir el style ya que lo toma el textTheme
                 decoration: InputDecoration(
                   labelText: "Usuario",
                   prefixIcon: Icon(Icons.person, color: colores.primary),
@@ -97,7 +91,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
 
               SizedBox(height: 20),
 
-              // CAMPO: CONTRASEÑA
+              // ── CAMPO: CONTRASEÑA ──────────────────────────────────────
               TextFormField(
                 controller: _passController,
                 obscureText: _ocultarContrasena,
@@ -122,8 +116,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
 
               SizedBox(height: 20),
 
-              // BOTÓN DE INICIAR SESIÓN
-              // En este caso se añade el botón dentro de un SizedBox para darle el tamaño requerido
+              // ── BOTÓN DE INICIAR SESIÓN ────────────────────────────────
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -140,7 +133,6 @@ class _PantallaLoginState extends State<PantallaLogin> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          // onPrimary es el color de texto que se define para ir SOBRE el morado
                           backgroundColor: colores.primary,
                           foregroundColor: colores.onPrimary,
                         ),
@@ -150,7 +142,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
 
               SizedBox(height: 20),
 
-              // Texto para el Registro de Usuario
+              // ── ENLACE A REGISTRO ──────────────────────────────────────
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

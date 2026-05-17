@@ -23,16 +23,15 @@ class BotonMetodoCarga extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      clipBehavior: Clip.antiAlias, // Para que la imagen respete las esquinas
+      clipBehavior: Clip.antiAlias, // Para que la imagen respete las esquinas redondeadas
       child: InkWell(
         onTap: onTap,
         child: Container(
-          height: 180, // Altura fija para el diseño vertical
+          height: 180,
           width: double.infinity,
           decoration: BoxDecoration(color: colorFondo),
           child: Stack(
             children: [
-              // Imagen de fondo con opacidad o alineada a la derecha
               Positioned(
                 right: -20,
                 bottom: -20,
@@ -42,18 +41,17 @@ class BotonMetodoCarga extends StatelessWidget {
                     rutaImagen,
                     width: 150,
                     fit: BoxFit.contain,
-                    // Si la imagen falla, muestra un icono blanco transparente para no romper la UI
+                    // Fallback si el asset no existe — evita romper la tarjeta
                     errorBuilder: (context, error, stackTrace) {
                       return Icon(
                         Icons.image_not_supported,
                         size: 100,
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                       );
                     },
                   ),
                 ),
               ),
-              // Contenido del texto
               Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
@@ -79,7 +77,6 @@ class BotonMetodoCarga extends StatelessWidget {
                   ],
                 ),
               ),
-              // Icono pequeño decorativo al final
               const Positioned(
                 right: 150,
                 top: 0,

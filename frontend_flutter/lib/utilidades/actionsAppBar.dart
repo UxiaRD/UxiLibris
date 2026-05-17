@@ -8,14 +8,11 @@ class ActionsAppBar {
     alEliminar, // Si se pasa una función, aparece el botón eliminar
   }) {
     return [
-      // BOTÓN ELIMINAR (Solo si se pasa la función alEliminar)
       if (alEliminar != null)
         IconButton(
           icon: const Icon(Icons.delete_forever, color: Colors.red),
           onPressed: alEliminar,
         ),
-
-      // BOTÓN AJUSTES
       IconButton(
         icon: const Icon(Icons.settings),
         tooltip: "Ajustes",

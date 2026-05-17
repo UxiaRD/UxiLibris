@@ -8,6 +8,8 @@ import 'package:frontend_flutter/utilidades/formularioLibro.dart';
 
 import 'package:frontend_flutter/modelo/libro.dart';
 
+/// Pantalla para crear un libro nuevo o editar uno existente.
+/// El modo se detecta automáticamente: si [libroExistente] no es null, es edición.
 class PantallaGestionLibro extends StatefulWidget {
   final Libro?
   libroExistente; // Si existe el libro los editamos, si no lo añadimos
@@ -23,16 +25,13 @@ class PantallaGestionLibro extends StatefulWidget {
 }
 
 class _PantallaGestionLibroState extends State<PantallaGestionLibro> {
-  // Instanciamos la lógica
   final Libreria libreria = Libreria();
 
-  // Variable booleana para saber si estamos editando o añadiendo
   bool get esModoEdicion => widget.libroExistente != null;
 
-  // El problema era que la función alConfirmar del diálogo era una función
-  // normal (no async), por lo que no podía usar await ni acceder a 'mounted'.
-  // La solución es extraer la lógica async FUERA del callback y pasarle
-  // solo una función síncrona al diálogo que llame a ese método async.
+  /// Ejecuta la eliminación del libro en el servidor y vuelve a la pantalla anterior.
+  // El callback del diálogo es síncrono (VoidCallback), así que esta lógica async
+  // se extrae aquí para poder usar await y comprobar 'mounted' con seguridad.
   Future<void> _confirmarEliminacion() async {
     if (widget.libroExistente == null) return;
     try {
@@ -50,6 +49,7 @@ class _PantallaGestionLibroState extends State<PantallaGestionLibro> {
     }
   }
 
+  /// Muestra el diálogo de confirmación y, si el usuario acepta, llama a [_confirmarEliminacion].
   void _eliminarLibro() {
     // El diálogo recibe una función SÍNCRONA (VoidCallback).
     // Esa función llama al método async de arriba con el operador 'unawaited'.
@@ -70,11 +70,9 @@ class _PantallaGestionLibroState extends State<PantallaGestionLibro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar:
-          true, // Extensión del body por detrás de al appBar
+      extendBodyBehindAppBar: true,
 
       appBar: AppBar(
-        // El título cambia dinámicamente
         title: Text(esModoEdicion ? "Editar Libro" : "Añadir a la Estantería"),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -91,10 +89,8 @@ class _PantallaGestionLibroState extends State<PantallaGestionLibro> {
           libroParaEditar: widget.libroExistente ?? widget.libroPrerellenado,
           alGuardar: (libroRecibido) {
             if (esModoEdicion) {
-              // LLAMADA A LÓGICA DE EDICIÓN
               libreria.editarLibro(widget.libroExistente!, libroRecibido);
             } else {
-              // LLAMADA A LÓGICA DE CREACIÓN
               libreria.agregarLibro(libroRecibido);
             }
             // El pop lo gestiona formularioLibro.dart con Navigator.pop(context, true)

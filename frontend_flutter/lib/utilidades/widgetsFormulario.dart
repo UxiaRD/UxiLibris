@@ -8,15 +8,16 @@ import 'package:frontend_flutter/utilidades/searchField.dart';
 // Color distintivo para libros digitales (usado en selector y badge)
 const Color _colorDigital = Color(0xFF7B2FBE);
 
+/// Colección de métodos estáticos que construyen los widgets reutilizables del formulario de libro.
 class WidgetsFormulario {
-  // MÉTODO PARA CAMPOS DE TEXTO
+  /// Campo de texto estándar del formulario, con soporte para teclado numérico y mensaje de error.
   static Widget buildTextField(
     TextEditingController controller,
     String label,
     IconData icon,
     ColorScheme colores, {
     bool esNumerico = false,
-    String? errorText, // Añadido para mostrar avisos de duplicados
+    String? errorText,
   }) {
     return TextFormField(
       controller: controller,
@@ -32,7 +33,7 @@ class WidgetsFormulario {
     );
   }
 
-  // MÉTODO PARA EL DESPLEGABLE DE ESTADO
+  /// Selector desplegable para el estado de lectura (pendiente, leyendo, leído, deseo).
   static Widget buildDropdownEstado(
     EstadoLibro valorActual,
     ColorScheme colores,
@@ -64,7 +65,7 @@ class WidgetsFormulario {
     EstadoLibro.deseo     => 'QUIERO LEERLO',
   };
 
-  // MÉTODO PARA EL SELECTOR DE PUNTUACIÓN
+  /// Slider de puntuación de 0 a 5 en pasos de 0.5. Solo activo si el estado es 'leído'.
   static Widget buildSelectorPuntuacion(
     double puntuacion,
     bool esLeido,
@@ -74,7 +75,7 @@ class WidgetsFormulario {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Puntuación: $puntuacion", // Mostramos el valor actual (ej: 3.5)
+          "Puntuación: $puntuacion",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: esLeido ? Colors.black : Colors.grey,
@@ -84,7 +85,7 @@ class WidgetsFormulario {
           value: puntuacion,
           min: 0,
           max: 5,
-          divisions: 10, // <--- Esto permite los pasos de 0.5
+          divisions: 10, // 10 divisiones → incrementos de 0.5 entre 0 y 5
           label: puntuacion.toString(),
           activeColor: Colors.amber,
           onChanged: esLeido ? onChanged : null,
@@ -93,7 +94,7 @@ class WidgetsFormulario {
     );
   }
 
-  // MÉTODO PARA AÑADIR LOS CAMPOS DINÁMICAMENTE
+  /// Campo de texto para una propiedad personalizada. Escribe el valor directamente en el objeto.
   static Widget buildCampoDinamico(Propiedad prop, ColorScheme colores) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
@@ -104,13 +105,12 @@ class WidgetsFormulario {
           prefixIcon: Icon(Icons.add_comment_outlined, color: colores.primary),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),
-        // Actualiza el valor directamente en el objeto propiedad
         onChanged: (nuevoValor) => prop.valor = nuevoValor,
       ),
     );
   }
 
-  // MÉTODO PARA EL SELECTOR DE FECHA
+  /// Selector de fecha con diálogo de calendario nativo de Flutter.
   static Widget buildDatePicker(
     BuildContext context,
     String label,
@@ -123,7 +123,6 @@ class WidgetsFormulario {
       padding: const EdgeInsets.only(bottom: 15),
       child: InkWell(
         onTap: () async {
-          // Abre el calendario nativo de Flutter
           DateTime? picked = await showDialog<DateTime>(
             context: context,
             builder: (context) => DatePickerDialog(
@@ -155,7 +154,7 @@ class WidgetsFormulario {
     );
   }
 
-  // MÉTODO PARA CAMPO DE TEXTO CON AUTOCOMPLETADO
+  /// Campo de texto con autocompletado de sugerencias (autores o sagas existentes).
   static Widget buildSearchField({
     required TextEditingController controller,
     required List<String> opciones,
@@ -174,7 +173,7 @@ class WidgetsFormulario {
     );
   }
 
-  // MÉTODO PARA LA BUSQUEDA DE IMAGEN
+  /// Widget de portada con botón de cámara para seleccionar imagen desde la galería.
   static Widget buildSelectorImagen({
     required File? imagenArchivo,
     required String? rutaImagenInicial,
@@ -219,7 +218,7 @@ class WidgetsFormulario {
     );
   }
 
-  // MÉTODO PARA SELECCIONAR EL FORMATO (físico / digital)
+  /// Botón segmentado para elegir entre formato físico y digital.
   static Widget buildSelectorFormato(
     FormatoLibro valorActual,
     ColorScheme colores,
@@ -262,7 +261,7 @@ class WidgetsFormulario {
   }
 
   static Widget _renderizarImagen(File? archivo, String? rutaInicial) {
-    // 1. Prioridad: Imagen recién seleccionada por el usuario
+    // 1. Prioridad: imagen recién seleccionada por el usuario
     if (archivo != null) {
       return Image.file(
         archivo,

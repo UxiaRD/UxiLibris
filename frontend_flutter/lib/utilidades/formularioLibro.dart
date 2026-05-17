@@ -8,6 +8,8 @@ import 'package:frontend_flutter/utilidades/filaLectura.dart';
 import 'package:frontend_flutter/utilidades/widgetsFormulario.dart';
 import '../../modelo/libro.dart';
 
+/// Formulario completo para crear o editar un libro: portada, campos de texto,
+/// estado, formato, historial de lecturas, puntuación y propiedades personalizadas.
 class FormularioLibro extends StatefulWidget {
   final Libro? libroParaEditar;
   final Function(Libro)? alGuardar;
@@ -89,6 +91,7 @@ class _FormularioLibroState extends State<FormularioLibro> {
     }
   }
 
+  /// Al seleccionar una saga existente, actualiza automáticamente el número de volumen sugerido.
   Future<void> _actualizarSugerenciaSaga(String nombreSaga) async {
     if (nombreSaga.isEmpty) return;
     final (siguiente, ocupados) =
@@ -100,11 +103,13 @@ class _FormularioLibroState extends State<FormularioLibro> {
     });
   }
 
+  /// Abre la galería del dispositivo y guarda la imagen seleccionada en estado local.
   Future<void> _seleccionarImagen() async {
     final imagen = await FormularioLibroController.seleccionarImagen();
     if (imagen != null && mounted) setState(() => _imagenSeleccionada = imagen);
   }
 
+  /// Actualiza el estado del libro y recalcula automáticamente las lecturas asociadas.
   void _cambiarEstado(EstadoLibro nuevoEstado) {
     final nuevasLecturas = FormularioLibroController.calcularLecturasAutomaticas(
       nuevoEstado: nuevoEstado,
@@ -116,6 +121,7 @@ class _FormularioLibroState extends State<FormularioLibro> {
     });
   }
 
+  /// Valida, construye y envía el libro al servidor a través del controlador.
   Future<void> _guardarLibro() async {
     try {
       final libro = await FormularioLibroController.guardarLibro(
@@ -153,6 +159,7 @@ class _FormularioLibroState extends State<FormularioLibro> {
 
   // ── Métodos que siguen en el widget (interacción pura con UI) ─────────────
 
+  /// Abre el diálogo para crear un campo personalizado y lo añade a la lista dinámica.
   void _gestionarNuevaPropiedad() async {
     final nuevaProp = await DialogosConfiguracion.mostrarDialogoNuevaPropiedad(
       context,
@@ -342,7 +349,6 @@ class _FormularioLibroState extends State<FormularioLibro> {
             ),
           ),
 
-        // Una fila por cada lectura
         ...List.generate(_lecturas.length, (i) {
           final lec = _lecturas[i];
           final puedeEliminar = _lecturas.length > 1 || _estadoSeleccionado == EstadoLibro.leido || lec.estaCompletada;

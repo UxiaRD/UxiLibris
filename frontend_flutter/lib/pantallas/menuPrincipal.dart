@@ -4,8 +4,9 @@ import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/pantallas/coleccionLibros.dart';
 import 'package:frontend_flutter/utilidades/drawerPrincipal.dart';
 
-// WIDGET base para las pestañas de la Colección de Libros
-
+/// Pantalla raíz de la aplicación (después del login).
+/// Gestiona las cuatro pestañas de la colección (Todos, Leyendo, Pendientes, Leídos)
+/// y aloja el [DrawerPrincipal] para navegar al resto de secciones.
 class MenuPrincipal extends StatefulWidget {
   const MenuPrincipal({super.key});
 

@@ -6,6 +6,8 @@ import 'package:frontend_flutter/modelo/libro.dart';
 const Color _colorDigital = Color(0xFF7B2FBE);
 const Color _colorDeseo = Color(0xFFE91E8C);
 
+/// Tarjeta visual de un libro en la cuadrícula: portada, título, estrellas de puntuación
+/// y badges de favorito, deseo y formato digital con sus colores identificativos.
 class Cardlibro extends StatelessWidget {
   final String rutaImagen;
   final String titulo;
@@ -26,14 +28,7 @@ class Cardlibro extends StatelessWidget {
     this.onFavoritoToggle,
   });
 
-  // El método _buildImagen va aquí dentro, como método PRIVADO del propio
-  // widget. No hace falta un archivo aparte ni pasarlo como children.
-  // Se llama directamente desde el build() igual que cualquier otro método.
-  //
-  // La lógica es:
-  //   1. Si la ruta empieza por 'assets/' → Image.asset  (bundle de la app)
-  //   2. Si no                            → Image.file   (galería / disco)
-  //      con un errorBuilder de seguridad por si el archivo fue borrado.
+  /// Carga la imagen de portada desde el bundle (assets/), una URL remota o un fichero local.
   Widget _buildImagen() {
     if (rutaImagen.startsWith('assets/')) {
       return Image.asset(rutaImagen, fit: BoxFit.cover, width: double.infinity);
@@ -92,7 +87,6 @@ class Cardlibro extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 _buildImagen(),
-                // Icono corazón (arriba-izquierda) para libros deseados
                 if (esDeseo)
                   Positioned(
                     top: 6,
@@ -110,7 +104,6 @@ class Cardlibro extends StatelessWidget {
                       ),
                     ),
                   ),
-                // Estrella de favorito (arriba-derecha), siempre visible
                 Positioned(
                   top: 4,
                   right: 4,
@@ -134,7 +127,7 @@ class Cardlibro extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  titulo, // Se saca el título del objeto
+                  titulo,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -144,7 +137,7 @@ class Cardlibro extends StatelessWidget {
                     return Icon(
                       starIndex < puntuacion
                           ? Icons.star
-                          : Icons.star_border, // Se saca la puntuacion
+                          : Icons.star_border,
                       color: Colors.amber,
                       size: 16,
                     );

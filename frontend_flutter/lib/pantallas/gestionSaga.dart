@@ -4,6 +4,8 @@ import 'package:frontend_flutter/modelo/saga.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/dialogos.dart';
 
+/// Formulario para crear o editar una saga: nombre y número total de libros.
+/// Si [saga] es null se crea una nueva; si no, se edita la existente.
 class PantallaGestionSaga extends StatefulWidget {
   final Saga? saga;
 
@@ -35,6 +37,7 @@ class _PantallaGestionSagaState extends State<PantallaGestionSaga> {
     super.dispose();
   }
 
+  /// Valida el nombre, construye el objeto Saga y lo envía al servidor (crear o actualizar).
   Future<void> _guardar() async {
     final nombre = _nombreController.text.trim();
     if (nombre.isEmpty) {
@@ -62,6 +65,7 @@ class _PantallaGestionSagaState extends State<PantallaGestionSaga> {
     }
   }
 
+  /// Muestra confirmación y elimina la saga del servidor (los libros no se borran).
   Future<void> _eliminar() async {
     final id = widget.saga?.id;
     if (id == null) return;

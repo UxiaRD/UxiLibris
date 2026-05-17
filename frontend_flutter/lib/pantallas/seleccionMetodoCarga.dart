@@ -7,6 +7,8 @@ import 'package:frontend_flutter/pantallas/gestionLibro.dart';
 import 'package:frontend_flutter/utilidades/botonMetodoCarga.dart';
 import 'package:frontend_flutter/pantallas/escanerISBN.dart';
 
+/// Pantalla intermedia que ofrece tres métodos para añadir un libro:
+/// manual, escáner ISBN y búsqueda por título/autor en Google Books.
 class SeleccionMetodoCarga extends StatelessWidget {
   /// Cuando no es null, todos los métodos pre-rellenan el estado del libro.
   final EstadoLibro? estadoInicial;

@@ -5,7 +5,9 @@ import 'package:frontend_flutter/modelo/libro.dart';
 import 'package:frontend_flutter/modelo/saga.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 
+/// Controlador estático con la lógica de presentación de la pantalla de detalle de libro.
 class DetalleLibroController {
+  /// Calcula el estado textual de la saga asociada al libro ('Completada', 'Abandonada', 'En lectura').
   static String? estadoSaga(Saga? saga) {
     if (saga == null) return null;
     if (saga.abandonada) return 'Abandonada';
@@ -47,9 +49,11 @@ class DetalleLibroController {
         FormatoLibro.digital => 'Digital',
       };
 
+  /// Formatea el número de volumen: entero si no tiene decimales (1.0 → "1"), float si los tiene (1.5 → "1.5").
   static String volumenStr(double v) =>
       v % 1 == 0 ? v.toInt().toString() : v.toString();
 
+  /// Formatea una fecha en DD/MM/YYYY, o '—' si es null.
   static String formatDate(DateTime? d) => d == null
       ? '—'
       : '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';

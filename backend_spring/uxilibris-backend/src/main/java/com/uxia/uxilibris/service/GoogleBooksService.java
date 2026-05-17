@@ -120,23 +120,54 @@ public class GoogleBooksService {
     }
 
     /**
-     * Busca libros por texto libre (título, autor, etc.) en Google Books.
+     * Busca libros por texto libre en Google Books combinando una búsqueda
+     * general y una búsqueda específica por autor ({@code inauthor:query}).
      *
-     * <p>Devuelve hasta 10 resultados con título válido. Los resultados sin
-     * título se descartan mediante {@link #parsearItem}.</p>
+     * <p>Lanza dos peticiones en secuencia: la primera busca en todos los campos
+     * (hasta 20 resultados); la segunda busca exclusivamente en el campo de autor
+     * (hasta 10 resultados). Los resultados se mezclan y deduplicamos por título
+     * (insensible a mayúsculas), de modo que el buscador funciona bien tanto
+     * cuando el usuario escribe un título como cuando escribe el nombre de un autor.</p>
      *
      * @param query texto de búsqueda introducido por el usuario
-     * @return lista de hasta 10 resultados; lista vacía si no hay coincidencias
-     *         o si ocurre un error HTTP no crítico
+     * @return lista de hasta 30 resultados únicos; lista vacía si no hay coincidencias
      * @throws ResponseStatusException con código 429 si se agotó la cuota de Google Books
      * @throws ResponseStatusException con código 503 si Google Books no está disponible
      */
-    @SuppressWarnings("unchecked")
     public List<IsbnResultDto> buscarPorTexto(String query) {
+        // Búsqueda general — puede lanzar excepción si hay error de red/cuota
+        List<IsbnResultDto> generales = buscarItems(query, 20);
+
+        // Búsqueda por autor — falla silenciosamente para no ocultar los generales
+        List<IsbnResultDto> porAutor;
+        try {
+            porAutor = buscarItems("inauthor:" + query, 10);
+        } catch (Exception e) {
+            porAutor = List.of();
+        }
+
+        // Mezclar deduplicando por título en minúsculas
+        java.util.Set<String> vistos = new java.util.HashSet<>();
+        List<IsbnResultDto> combinados = new java.util.ArrayList<>();
+        for (IsbnResultDto dto : generales) {
+            if (vistos.add(dto.titulo().toLowerCase())) combinados.add(dto);
+        }
+        for (IsbnResultDto dto : porAutor) {
+            if (vistos.add(dto.titulo().toLowerCase())) combinados.add(dto);
+        }
+        return combinados;
+    }
+
+    /**
+     * Ejecuta una petición a Google Books con el parámetro {@code q} y
+     * {@code maxResults} indicados. Extrae y devuelve los ítems válidos.
+     */
+    @SuppressWarnings("unchecked")
+    private List<IsbnResultDto> buscarItems(String q, int maxResults) {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromHttpUrl(GOOGLE_BOOKS_URL)
-                .queryParam("q", query)
-                .queryParam("maxResults", 10);
+                .queryParam("q", q)
+                .queryParam("maxResults", maxResults);
 
         if (apiKey != null && !apiKey.isBlank()) {
             builder.queryParam("key", apiKey);

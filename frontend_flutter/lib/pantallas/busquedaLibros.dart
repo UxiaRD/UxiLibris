@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_flutter/controladores/busquedaLibrosControlador.dart';
 import 'package:frontend_flutter/modelo/libro.dart';
-import 'package:frontend_flutter/modelo/libreria.dart';
 import 'package:frontend_flutter/pantallas/gestionLibro.dart';
-import 'package:frontend_flutter/servicio/ApiService.dart';
+import 'package:frontend_flutter/utilidades/cardResultadoBusqueda.dart';
 
 class PantallaBusquedaLibros extends StatefulWidget {
   final EstadoLibro? estadoInicial;
@@ -34,7 +34,7 @@ class _PantallaBusquedaLibrosState extends State<PantallaBusquedaLibros> {
       _buscadoAlguna = true;
     });
     try {
-      final resultados = await ApiService.buscarLibrosPorTexto(query);
+      final resultados = await BusquedaLibrosControlador.buscar(query);
       if (mounted) setState(() => _resultados = resultados);
     } on Exception catch (e) {
       if (!mounted) return;
@@ -47,10 +47,7 @@ class _PantallaBusquedaLibrosState extends State<PantallaBusquedaLibros> {
   }
 
   Future<void> _seleccionar(Libro libro) async {
-    final duplicado = Libreria.todosLosLibros.any(
-      (l) => l.titulo.toLowerCase() == libro.titulo.toLowerCase(),
-    );
-    if (duplicado && mounted) {
+    if (BusquedaLibrosControlador.tieneDuplicado(libro) && mounted) {
       final continuar = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -98,7 +95,6 @@ class _PantallaBusquedaLibrosState extends State<PantallaBusquedaLibros> {
       ),
       body: Column(
         children: [
-          // Barra de búsqueda
           Container(
             color: colores.surface,
             padding: EdgeInsets.only(
@@ -132,8 +128,6 @@ class _PantallaBusquedaLibrosState extends State<PantallaBusquedaLibros> {
               ],
             ),
           ),
-
-          // Resultados
           Expanded(
             child: _buscando
                 ? const Center(child: CircularProgressIndicator())
@@ -151,13 +145,15 @@ class _PantallaBusquedaLibrosState extends State<PantallaBusquedaLibros> {
                           )
                         : ListView.separated(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             itemCount: _resultados.length,
                             separatorBuilder: (_, _) =>
                                 const SizedBox(height: 8),
                             itemBuilder: (context, index) {
                               final libro = _resultados[index];
-                              return _CardResultado(
+                              return CardResultadoBusqueda(
                                 libro: libro,
                                 onTap: () => _seleccionar(libro),
                               );
@@ -196,106 +192,6 @@ class _EstadoVacio extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _CardResultado extends StatelessWidget {
-  final Libro libro;
-  final VoidCallback onTap;
-
-  const _CardResultado({required this.libro, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final colores = Theme.of(context).colorScheme;
-
-    return Card(
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Portada
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: libro.rutaImagen.startsWith('http')
-                    ? Image.network(
-                        libro.rutaImagen,
-                        width: 56,
-                        height: 80,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            _portadaVacia(colores),
-                      )
-                    : Image.asset(
-                        'assets/images/fondos/libro.png',
-                        width: 56,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-              ),
-              const SizedBox(width: 14),
-
-              // Título + autor + saga
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      libro.titulo,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (libro.autorNombre.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        libro.autorNombre,
-                        style: TextStyle(
-                          color: colores.onSurfaceVariant,
-                          fontSize: 13,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    if (libro.sagaNombre != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        libro.sagaNombre!,
-                        style: TextStyle(
-                          color: colores.primary,
-                          fontSize: 12,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              Icon(Icons.chevron_right, color: colores.onSurfaceVariant),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _portadaVacia(ColorScheme colores) {
-    return Container(
-      width: 56,
-      height: 80,
-      color: colores.surfaceContainerHighest,
-      child: Icon(Icons.book, color: colores.onSurfaceVariant, size: 28),
     );
   }
 }

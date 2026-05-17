@@ -15,6 +15,8 @@ import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/dialogoAsignarSaga.dart';
 import 'package:frontend_flutter/utilidades/dialogos.dart';
 
+/// Pantalla de detalle de una saga: muestra el grid de libros con sus huecos,
+/// permite añadir libros nuevos o existentes, y marcar la saga como abandonada.
 class PantallaDetalleSaga extends StatefulWidget {
   final Saga saga;
 
@@ -26,6 +28,7 @@ class PantallaDetalleSaga extends StatefulWidget {
 
 
 class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
+  /// Devuelve los libros de esta saga desde la lista global, ordenados por volumen.
   List<Libro> _libros() {
     return Libreria.todosLosLibros
         .where((l) => l.sagaNombre == widget.saga.nombre)
@@ -54,6 +57,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
     });
   }
 
+  /// Abre el formulario de libro pre-rellenado con el número de volumen del hueco pulsado.
   Future<void> _anadirNuevoLibro(int volumen) async {
     final prerellenado = Libro(
       titulo: '',
@@ -73,6 +77,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
     if (mounted) setState(() {});
   }
 
+  /// Abre el diálogo para asignar un libro existente a esta saga.
   Future<void> _anadirLibroExistente() async {
     final cambiado = await DialogoAsignarSaga.mostrar(
       context: context,
@@ -81,6 +86,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
     if (cambiado && mounted) setState(() {});
   }
 
+  /// Navega al formulario de edición de saga. Si se guardaron cambios, cierra esta pantalla también.
   Future<void> _editarSaga() async {
     final resultado = await Navigator.push<bool>(
       context,
@@ -91,6 +97,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
     }
   }
 
+  /// Alterna el estado 'abandonada' de la saga y lo sincroniza con el servidor.
   Future<void> _toggleAbandonada() async {
     if (widget.saga.id == null) return;
     final nuevoValor = !widget.saga.abandonada;
@@ -100,6 +107,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
     }
   }
 
+  /// Muestra el diálogo de confirmación y elimina el libro de la saga si el usuario acepta.
   Future<void> _confirmarEliminarLibro(Libro libro) async {
     DialogosApp.confirmarEliminacion(
       context: context,

@@ -5,7 +5,6 @@ class AlmacenPropiedades {
 
   AlmacenPropiedades({required this.propiedades});
 
-  // Método para buscar un valor específico por el nombre de la propiedad
   dynamic obtenerValor(String nombrePropiedad) {
     return propiedades
         .firstWhere(

@@ -3,8 +3,8 @@ import 'package:frontend_flutter/controladores/registroController.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/decoraciones/fondoBase.dart';
 
-// WIDGET que gestiona el Registro de la app
-
+/// Formulario de registro de nuevos usuarios con validación de formato de email
+/// y requisitos de contraseña (mínimo 8 caracteres y una mayúscula).
 class PantallaRegistro extends StatefulWidget {
   const PantallaRegistro({super.key});
 
@@ -16,7 +16,6 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
   bool _ocultarContrasena = true;
   bool _ocultarConfContrasena = true;
 
-  // CONTROLADORES
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
@@ -38,8 +37,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
     final ColorScheme colores = Theme.of(context).colorScheme;
 
     return Scaffold(
-      extendBodyBehindAppBar:
-          true, // Extensión del body por detrás de al appBar
+      extendBodyBehindAppBar: true,
 
       appBar: AppBar(actions: ActionsAppBar.obtenerAcciones(context)),
 
@@ -60,7 +58,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
 
               const SizedBox(height: 40),
 
-              // CAMPO: NOMBRE DE USUARIO
+              // ── CAMPO: NOMBRE DE USUARIO ───────────────────────────────
               TextFormField(
                 controller: _userController,
                 decoration: InputDecoration(
@@ -71,10 +69,10 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
 
               const SizedBox(height: 20),
 
-              // CAMPO: EMAIL
+              // ── CAMPO: EMAIL ───────────────────────────────────────────
               TextFormField(
                 controller: _emailController,
-                // El atributo keyboardType es para que en el teclado aparezca la @ automáticamente
+                // muestra la @ automáticamente en el teclado móvil
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: "Correo electrónico",
@@ -84,7 +82,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
 
               const SizedBox(height: 20),
 
-              // CAMPO: CONTRASEÑA
+              // ── CAMPO: CONTRASEÑA ──────────────────────────────────────
               TextFormField(
                 controller: _passController,
                 obscureText: _ocultarContrasena,
@@ -106,7 +104,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
 
               const SizedBox(height: 20),
 
-              // CAMPO: CONFIRMACIÓN CONTRASEÑA
+              // ── CAMPO: CONFIRMAR CONTRASEÑA ────────────────────────────
               TextFormField(
                 controller: _passConfirmController,
                 obscureText: _ocultarConfContrasena,
@@ -128,12 +126,11 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
 
               const SizedBox(height: 40),
 
-              // BOTÓN DE REGISTRO
+              // ── BOTÓN DE REGISTRO ──────────────────────────────────────
               ElevatedButton(
                 onPressed: _cargando
-                    ? null // Si está cargando, el botón se deshabilita
+                    ? null
                     : () async {
-                        // Llamamos directamente al controlador
                         await RegistroController.registrarUsuario(
                           context: context,
                           username: _userController.text,
@@ -147,8 +144,7 @@ class _PantallaRegistroState extends State<PantallaRegistro> {
                       },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 55),
-                  backgroundColor:
-                      colores.primary, // Usando tus variables de color
+                  backgroundColor: colores.primary,
                   foregroundColor: colores.onPrimary,
                 ),
                 child: _cargando

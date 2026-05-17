@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// CLASE que define las características de los temas
-
 class AppThemes {
-  // Definimos los colores personalizados
   static const Color moradoPrincipal = Colors.deepPurple;
   static const Color moradoClaro = Color.fromARGB(255, 190, 177, 212);
   static const Color fondoOscuro = Color(0xFF121212);
@@ -25,9 +22,9 @@ class AppThemes {
           color: moradoPrincipal,
           fontSize: 32,
           fontWeight: FontWeight.bold,
-        ), // Textos de titulo
-        bodyLarge: TextStyle(color: Colors.black87), // Textos largos
-        bodyMedium: TextStyle(color: Colors.black), // Texto estándar
+        ),
+        bodyLarge: TextStyle(color: Colors.black87),
+        bodyMedium: TextStyle(color: Colors.black),
       ),
     ),
     appBarTheme: AppBarTheme(

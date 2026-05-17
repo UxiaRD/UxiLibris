@@ -16,6 +16,8 @@ import 'package:frontend_flutter/servicio/ApiService.dart';
 import 'package:frontend_flutter/utilidades/actionsAppBar.dart';
 import 'package:frontend_flutter/utilidades/drawerPrincipal.dart';
 
+/// Pantalla de estadísticas de lectura: resumen anual, gráficas mensual y comparativa,
+/// top de autores, libros mejor puntuados y sección de favoritos.
 class PantallaEstadisticas extends StatefulWidget {
   const PantallaEstadisticas({super.key});
 
@@ -33,12 +35,14 @@ class _PantallaEstadisticasState extends State<PantallaEstadisticas> {
     _cargar();
   }
 
+  /// Descarga los libros del servidor y activa la visualización de estadísticas.
   Future<void> _cargar() async {
     final libros = await ApiService.fetchLibros();
     Libreria.todosLosLibros = libros;
     if (mounted) setState(() => _cargando = false);
   }
 
+  /// Alterna el estado favorito del libro en local y lo sincroniza con el servidor.
   Future<void> _toggleFavorito(Libro libro) async {
     setState(() => libro.favorito = !libro.favorito);
     await ApiService.toggleFavorito(libro.id!, libro.favorito);
@@ -76,7 +80,6 @@ class _PantallaEstadisticasState extends State<PantallaEstadisticas> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Selector de año global
                     SelectorAnio(
                       anios: anios,
                       anioSeleccionado: _anioSeleccionado,

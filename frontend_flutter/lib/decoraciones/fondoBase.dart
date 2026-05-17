@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-// WIDGET que gestiona los fondos de las distintas ventanas
-
 class FondoBase extends StatelessWidget {
   final Widget child;
   final String? rutaImagen; // null = sin imagen de fondo

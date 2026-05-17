@@ -5,9 +5,11 @@ import 'package:frontend_flutter/pantallas/detalleLibro.dart';
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/cardLibro.dart';
 import 'package:frontend_flutter/servicio/ApiService.dart';
 
+/// Grid responsivo de tarjetas de libro. Cada celda mide como máximo 150 px de ancho
+/// y se adapta automáticamente al tamaño de pantalla gracias a [SliverGridDelegateWithMaxCrossAxisExtent].
 class GridColeccion extends StatelessWidget {
   final Libreria librosPantalla;
-  final VoidCallback alCambiar; // Para avisar a la pantalla principal
+  final VoidCallback alCambiar;
   final ScrollController? scrollController;
 
   const GridColeccion({
@@ -24,18 +26,15 @@ class GridColeccion extends StatelessWidget {
     return GridView.builder(
       controller: scrollController,
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        // Sirve para que los libros se ajusten en función del tamaño de pantalla
-        maxCrossAxisExtent:
-            150, // Cada libro medirá como mucho 150 píxeles de ancho
-        crossAxisSpacing: 15, // Espacio horizontal entre libros
-        mainAxisSpacing: 15, // Espacio vertical entre libros
-        childAspectRatio: 0.60, // Proporción de la portada (alto > ancho)
+        maxCrossAxisExtent: 150,
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
+        childAspectRatio: 0.60,
       ),
       itemCount: librosPantalla.obtenerTodos().length,
 
       itemBuilder: (context, index) {
         final libro = librosPantalla.obtenerTodos()[index];
-        // GestureDetector es necesario para abrir la pantalla de edición del libro cuando haces clic en el
         return GestureDetector(
           onTap: () async {
             FocusManager.instance.primaryFocus?.unfocus();

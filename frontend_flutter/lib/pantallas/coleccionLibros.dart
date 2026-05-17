@@ -9,8 +9,8 @@ import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/gridViewColecc
 import 'package:frontend_flutter/pantallas/widgetsColeccionLibros/barraLetras.dart';
 import 'package:frontend_flutter/controladores/coleccionController.dart';
 
-// WIDGET que gestiona la Colección de Libros
-
+/// Pestaña de la colección de libros filtrada por [filtro] (todos/leyendo/pendiente/leido).
+/// Incluye barra de búsqueda por texto, grid de portadas y barra lateral de letras para saltar.
 class PantallaColeccion extends StatefulWidget {
   final String filtro;
   const PantallaColeccion({super.key, required this.filtro});
@@ -20,15 +20,8 @@ class PantallaColeccion extends StatefulWidget {
 }
 
 class _PantallaColeccionState extends State<PantallaColeccion> {
-  /*Lista de libros
-  Instancia para usar los métodos de filtrado
-  Al no pasarle parámetros, esta instancia se inicializa con la lista estática*/
   Libreria libreria = Libreria();
-
-  // Lista que se mostrará en el Grid (inicialmente vacía hasta que initState ejecute el filtro)
   late Libreria librosFiltrados = Libreria(libros: []);
-
-  /* Los TextFormField y TextField no guardan texto, necesitan un controlador que lo haga por ellos */
   final TextEditingController _controladorDeBusqueda = TextEditingController();
 
   final ScrollController _scrollController = ScrollController();
@@ -60,6 +53,9 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
     super.dispose();
   }
 
+  /// Descarga los libros del servidor y aplica el filtro activo.
+  /// Reintenta hasta 8 veces con pausas de 8 s para tolerar el cold start de Render.
+  /// Tras 8 s de espera muestra un mensaje informativo al usuario.
   Future<void> _cargarYFiltrar() async {
     setState(() { _estaCargando = true; _errorCarga = false; _mostrarMensajeEspera = false; });
     _timerEspera?.cancel();
@@ -98,7 +94,8 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
     }
   }
 
-  // Función que maneja AMBOS filtros (El de pestaña y el de texto)
+  /// Aplica el filtro de pestaña (estado) y el filtro de texto en cascada,
+  /// ordena el resultado alfabéticamente y actualiza el índice letra → posición.
   void _buscarLibros(String consulta) {
     setState(() {
       // 1. Siempre partimos de la lista estática
@@ -213,7 +210,7 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
                 onRefresh: _cargarYFiltrar,
                 child: Column(
                   children: [
-                    // BARRA BÚSQUEDA
+                    // ── BARRA DE BÚSQUEDA ─────────────────────────────────
                     BarraBusqueda(
                       controladorBusqueda: _controladorDeBusqueda,
                       hintText: 'Buscar libro...',
@@ -222,7 +219,7 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
 
                     const SizedBox(height: 20),
 
-                    // LIBROS + BARRA DE LETRAS
+                    // ── GRID DE LIBROS + BARRA DE LETRAS ─────────────────
                     Expanded(
                       child: Row(
                         children: [
@@ -247,7 +244,7 @@ class _PantallaColeccionState extends State<PantallaColeccion> {
               ),
       ),
 
-      // BOTÓN FLOTANTE (+)
+      // ── BOTÓN FLOTANTE: ir a la pantalla de selección de método de carga ──
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           FocusManager.instance.primaryFocus?.unfocus();
