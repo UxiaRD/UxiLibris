@@ -137,12 +137,11 @@ public class GoogleBooksService {
      * @throws ResponseStatusException con código 503 si Google Books no está disponible
      */
     public List<IsbnResultDto> buscarPorTexto(String query) {
-        // Búsqueda por autor primero: resultados más precisos cuando se escribe un nombre de autor.
-        // Comillas en nombres compuestos para que Google trate el nombre como frase exacta en el campo autor
-        // (sin comillas, "Jay Kristoff" se interpretaría como inauthor:Jay AND Kristoff_en_cualquier_campo).
-        String inauthorQuery = query.contains(" ")
-                ? "inauthor:\"" + query + "\""
-                : "inauthor:" + query;
+        // Búsqueda por autor primero: cada palabra del query se convierte en un término inauthor:
+        // independiente ("regine abel" → "inauthor:regine inauthor:abel"), lo que exige que todas
+        // las palabras aparezcan en el campo autor sin requerir frase exacta (más tolerante a acentos
+        // y variantes de nombre que inauthor:"regine abel").
+        String inauthorQuery = "inauthor:" + query.trim().replace(" ", " inauthor:");
         List<IsbnResultDto> porAutor = List.of();
         try {
             porAutor = buscarItems(inauthorQuery, 20);
@@ -179,7 +178,8 @@ public class GoogleBooksService {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromHttpUrl(GOOGLE_BOOKS_URL)
                 .queryParam("q", q)
-                .queryParam("maxResults", maxResults);
+                .queryParam("maxResults", maxResults)
+                .queryParam("printType", "books");
 
         if (apiKey != null && !apiKey.isBlank()) {
             builder.queryParam("key", apiKey);
