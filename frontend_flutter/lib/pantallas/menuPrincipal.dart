@@ -16,6 +16,7 @@ class MenuPrincipal extends StatefulWidget {
 
 class _MenuPrincipalState extends State<MenuPrincipal> with RouteAware {
   int _indiceActual = 0;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<Widget> _paginas = [
     const PantallaColeccion(filtro: "todos"),
@@ -43,11 +44,20 @@ class _MenuPrincipalState extends State<MenuPrincipal> with RouteAware {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
+  // El drawer puede quedar abierto si el usuario navegó desde aquí a otra sección
+  // (via pushAndRemoveUntil, que mantiene MenuPrincipal en el stack con su estado).
+  // Al volver con popUntil(isFirst), el Scaffold revela ese estado con el drawer abierto.
+  @override
+  void didPopNext() {
+    _scaffoldKey.currentState?.closeDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colores = Theme.of(context).colorScheme;
 
     return Scaffold(
+      key: _scaffoldKey,
       extendBodyBehindAppBar: true,
 
       appBar: AppBar(
