@@ -22,9 +22,13 @@ class DrawerPrincipal extends StatelessWidget {
     }
 
     switch (destino) {
-      // Libros es la raíz: desapila todo (incluido el drawer) hasta ella
+      // Libros es la raíz: cerramos el drawer explícitamente antes de popUntil
+      // porque pushAndRemoveUntil cierra el drawer al sustituir el Scaffold,
+      // pero popUntil solo revela el Scaffold raíz sin cerrar el drawer primero.
       case PantallaDrawer.libros:
-        Navigator.popUntil(context, (route) => route.isFirst);
+        final nav = Navigator.of(context);
+        nav.pop(); // cierra el drawer
+        nav.popUntil((route) => route.isFirst);
       // El resto reemplaza la sección actual mantiendo la raíz limpia:
       // [Libros, <sección>] sin importar desde dónde se navegue
       case PantallaDrawer.sagas:

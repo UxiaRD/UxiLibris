@@ -121,38 +121,45 @@ public class GoogleBooksService {
 
     /**
      * Busca libros por texto libre en Google Books combinando una búsqueda
-     * general y una búsqueda específica por autor ({@code inauthor:query}).
+     * específica por autor ({@code inauthor:query}) y una búsqueda general.
      *
-     * <p>Lanza dos peticiones en secuencia: la primera busca en todos los campos
-     * (hasta 20 resultados); la segunda busca exclusivamente en el campo de autor
-     * (hasta 10 resultados). Los resultados se mezclan y deduplicamos por título
-     * (insensible a mayúsculas), de modo que el buscador funciona bien tanto
-     * cuando el usuario escribe un título como cuando escribe el nombre de un autor.</p>
+     * <p>Los resultados de {@code inauthor:} van <strong>primero</strong> porque son
+     * los más relevantes cuando el usuario escribe un nombre de autor. La búsqueda
+     * general complementa con libros que no aparecieron en la anterior (útil cuando
+     * el usuario escribe un título). Ambas búsquedas fallan silenciosamente de forma
+     * independiente: si una falla pero la otra tiene resultados, estos se devuelven
+     * igualmente. Solo se propaga error si ambas fallan.</p>
      *
      * @param query texto de búsqueda introducido por el usuario
-     * @return lista de hasta 30 resultados únicos; lista vacía si no hay coincidencias
+     * @return lista de hasta 40 resultados únicos ordenados por relevancia;
+     *         lista vacía si no hay coincidencias
      * @throws ResponseStatusException con código 429 si se agotó la cuota de Google Books
      * @throws ResponseStatusException con código 503 si Google Books no está disponible
      */
     public List<IsbnResultDto> buscarPorTexto(String query) {
-        // Búsqueda general — puede lanzar excepción si hay error de red/cuota
-        List<IsbnResultDto> generales = buscarItems(query, 20);
-
-        // Búsqueda por autor — falla silenciosamente para no ocultar los generales
-        List<IsbnResultDto> porAutor;
+        // Búsqueda por autor primero: resultados más precisos cuando se escribe un nombre de autor
+        List<IsbnResultDto> porAutor = List.of();
         try {
-            porAutor = buscarItems("inauthor:" + query, 10);
+            porAutor = buscarItems("inauthor:" + query, 20);
+        } catch (Exception ignored) {}
+
+        // Búsqueda general: complementa con resultados por título, descripción, etc.
+        List<IsbnResultDto> generales = List.of();
+        try {
+            generales = buscarItems(query, 20);
         } catch (Exception e) {
-            porAutor = List.of();
+            // Si la búsqueda general falla pero ya tenemos resultados de autor, los devolvemos.
+            // Solo propagamos el error si ambas búsquedas fallaron.
+            if (porAutor.isEmpty()) throw e;
         }
 
-        // Mezclar deduplicando por título en minúsculas
+        // Mezclar deduplicando por título: inauthor va primero (más relevante)
         java.util.Set<String> vistos = new java.util.HashSet<>();
         List<IsbnResultDto> combinados = new java.util.ArrayList<>();
-        for (IsbnResultDto dto : generales) {
+        for (IsbnResultDto dto : porAutor) {
             if (vistos.add(dto.titulo().toLowerCase())) combinados.add(dto);
         }
-        for (IsbnResultDto dto : porAutor) {
+        for (IsbnResultDto dto : generales) {
             if (vistos.add(dto.titulo().toLowerCase())) combinados.add(dto);
         }
         return combinados;
