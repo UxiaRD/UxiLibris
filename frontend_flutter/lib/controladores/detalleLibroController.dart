@@ -7,10 +7,11 @@ import 'package:frontend_flutter/servicio/ApiService.dart';
 
 /// Controlador estático con la lógica de presentación de la pantalla de detalle de libro.
 class DetalleLibroController {
-  /// Calcula el estado textual de la saga asociada al libro ('Completada', 'Abandonada', 'En lectura').
+  /// Calcula el estado textual de la saga asociada al libro.
+  /// El prefijo 'Saga' distingue visualmente estos badges del estado propio del libro.
   static String? estadoSaga(Saga? saga) {
     if (saga == null) return null;
-    if (saga.abandonada) return 'Abandonada';
+    if (saga.abandonada) return 'Saga abandonada';
     final libros = Libreria.todosLosLibros
         .where((l) => l.sagaNombre == saga.nombre)
         .toList();
@@ -19,14 +20,14 @@ class DetalleLibroController {
         total > 0 &&
         libros.length == total &&
         libros.every((l) => l.estado == EstadoLibro.leido)) {
-      return 'Completada';
+      return 'Saga completada';
     }
-    return 'En lectura';
+    return 'Saga en lectura';
   }
 
   static Color colorEstadoSaga(String estado) => switch (estado) {
-        'Completada' => const Color(0xFF7B2FBE),
-        'Abandonada' => Colors.red,
+        'Saga completada' => const Color(0xFF7B2FBE),
+        'Saga abandonada' => Colors.red,
         _ => Colors.teal,
       };
 
