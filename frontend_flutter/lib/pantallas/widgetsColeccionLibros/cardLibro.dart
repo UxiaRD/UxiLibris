@@ -5,6 +5,7 @@ import 'package:frontend_flutter/modelo/libro.dart';
 
 const Color _colorDigital = Color(0xFF7B2FBE);
 const Color _colorDeseo = Color(0xFFE91E8C);
+const Color _colorPendienteFisico = Colors.green;
 
 /// Tarjeta visual de un libro en la cuadrícula: portada, título, estrellas de puntuación
 /// y badges de favorito, deseo y formato digital con sus colores identificativos.
@@ -14,6 +15,7 @@ class Cardlibro extends StatelessWidget {
   final double puntuacion;
   final FormatoLibro formato;
   final bool esDeseo;
+  final bool esPendienteFisico;
   final bool favorito;
   final VoidCallback? onFavoritoToggle;
 
@@ -24,6 +26,7 @@ class Cardlibro extends StatelessWidget {
     required this.puntuacion,
     this.formato = FormatoLibro.fisico,
     this.esDeseo = false,
+    this.esPendienteFisico = false,
     this.favorito = false,
     this.onFavoritoToggle,
   });
@@ -65,11 +68,13 @@ class Cardlibro extends StatelessWidget {
   Widget build(BuildContext context) {
     final esDigital = formato == FormatoLibro.digital;
 
-    // Deseo tiene prioridad en el borde; digital solo si no es deseo
+    // Deseo > digital > físico pendiente (prioridad descendente en el borde)
     final BorderSide? borde = esDeseo
         ? const BorderSide(color: _colorDeseo, width: 2)
         : esDigital
         ? const BorderSide(color: _colorDigital, width: 2)
+        : esPendienteFisico
+        ? const BorderSide(color: _colorPendienteFisico, width: 2)
         : null;
 
     return Card(
@@ -129,6 +134,7 @@ class Cardlibro extends StatelessWidget {
                 Text(
                   titulo,
                   style: const TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Row(

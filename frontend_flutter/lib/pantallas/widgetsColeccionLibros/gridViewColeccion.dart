@@ -53,6 +53,8 @@ class GridColeccion extends StatelessWidget {
             puntuacion: libro.puntuacion,
             formato: libro.formato,
             esDeseo: libro.estado == EstadoLibro.deseo,
+            esPendienteFisico: libro.estado == EstadoLibro.pendiente &&
+                libro.formato == FormatoLibro.fisico,
             favorito: libro.favorito,
             onFavoritoToggle: libro.id == null ? null : () async {
               libro.favorito = !libro.favorito;

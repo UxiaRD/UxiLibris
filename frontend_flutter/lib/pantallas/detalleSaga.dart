@@ -26,7 +26,6 @@ class PantallaDetalleSaga extends StatefulWidget {
   State<PantallaDetalleSaga> createState() => _PantallaDetalleSagaState();
 }
 
-
 class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
   /// Devuelve los libros de esta saga desde la lista global, ordenados por volumen.
   List<Libro> _libros() {
@@ -47,7 +46,7 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
     final total = widget.saga.totalLibros;
     if (total == null || total <= 0) return List<Libro?>.from(libros);
 
-    return List.generate(total, (i) {
+    final slots = List.generate(total, (i) {
       final vol = (i + 1).toDouble();
       try {
         return libros.firstWhere((l) => l.numLibroSaga == vol);
@@ -55,6 +54,15 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
         return null;
       }
     });
+
+    // Los libros con volumen decimal (p.ej. 5.5) o fuera del rango no encajan
+    // en un hueco entero; se añaden al final para que sigan siendo visibles.
+    final volsEnteros = List.generate(total, (i) => (i + 1).toDouble()).toSet();
+    final extras = libros.where(
+      (l) => l.numLibroSaga == null || !volsEnteros.contains(l.numLibroSaga),
+    ).toList();
+
+    return [...slots, ...extras];
   }
 
   /// Abre el formulario de libro pre-rellenado con el número de volumen del hueco pulsado.
@@ -101,7 +109,10 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
   Future<void> _toggleAbandonada() async {
     if (widget.saga.id == null) return;
     final nuevoValor = !widget.saga.abandonada;
-    final ok = await ApiService.toggleAbandonadaSaga(widget.saga.id!, nuevoValor);
+    final ok = await ApiService.toggleAbandonadaSaga(
+      widget.saga.id!,
+      nuevoValor,
+    );
     if (ok && mounted) {
       setState(() => widget.saga.abandonada = nuevoValor);
     }
@@ -169,7 +180,9 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                     widget.saga.abandonada ? Icons.replay : Icons.block,
                     color: widget.saga.abandonada ? Colors.green : Colors.red,
                   ),
-                  title: Text(widget.saga.abandonada ? 'Retomar saga' : 'Abandonar saga'),
+                  title: Text(
+                    widget.saga.abandonada ? 'Retomar saga' : 'Abandonar saga',
+                  ),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -185,7 +198,10 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
       ),
       body: FondoBase(
         rutaImagen: 'assets/images/fondos/fondoSagas.png',
-        child: libros.isEmpty && (widget.saga.totalLibros == null || widget.saga.totalLibros == 0)
+        child:
+            libros.isEmpty &&
+                (widget.saga.totalLibros == null ||
+                    widget.saga.totalLibros == 0)
             ? const Center(
                 child: Text('No hay libros registrados en esta saga'),
               )
@@ -207,14 +223,18 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                         child: CardHueco(volumen: index + 1),
                       );
                     }
-                    final tachada = widget.saga.abandonada &&
+                    final tachada =
+                        widget.saga.abandonada &&
                         libro.estado == EstadoLibro.pendiente;
                     return GestureDetector(
                       onTap: () async {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => PantallaDetalleLibro(libro: libro, saga: widget.saga),
+                            builder: (_) => PantallaDetalleLibro(
+                              libro: libro,
+                              saga: widget.saga,
+                            ),
                           ),
                         );
                         if (mounted) setState(() {});
@@ -228,12 +248,19 @@ class _PantallaDetalleSagaState extends State<PantallaDetalleSaga> {
                             puntuacion: libro.puntuacion,
                             formato: libro.formato,
                             esDeseo: libro.estado == EstadoLibro.deseo,
+                            esPendienteFisico: libro.estado == EstadoLibro.pendiente &&
+                                libro.formato == FormatoLibro.fisico,
                             favorito: libro.favorito,
-                            onFavoritoToggle: libro.id == null ? null : () async {
-                              libro.favorito = !libro.favorito;
-                              setState(() {});
-                              await ApiService.toggleFavorito(libro.id!, libro.favorito);
-                            },
+                            onFavoritoToggle: libro.id == null
+                                ? null
+                                : () async {
+                                    libro.favorito = !libro.favorito;
+                                    setState(() {});
+                                    await ApiService.toggleFavorito(
+                                      libro.id!,
+                                      libro.favorito,
+                                    );
+                                  },
                           ),
                           if (tachada)
                             Positioned.fill(
