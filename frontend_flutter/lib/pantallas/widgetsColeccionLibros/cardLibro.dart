@@ -136,6 +136,7 @@ class Cardlibro extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
