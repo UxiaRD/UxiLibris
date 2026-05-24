@@ -115,3 +115,7 @@ Thumbs.db
 application.properties
 **/application.properties
 config.local.properties
+
+# Imágenes Docker exportadas (superan el límite de 100 MB de GitHub)
+*.tar
+uxilibris-web.tar.gz

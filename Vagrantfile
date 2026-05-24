@@ -1,15 +1,17 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# REQUISITO PREVIO: ejecuta scripts\modoA_exportar_imagen.bat en tu maquina,
-# luego: git add uxilibris-web.tar.gz && git commit && git push
-# El aprovisionamiento descarga esa imagen desde el repositorio clonado.
+# REQUISITO PREVIO: compila el frontend web en tu maquina:
+#   cd frontend_flutter
+#   flutter build web --release --dart-define=BACKEND_URL=https://uxilibris-backend.onrender.com
+# Luego sube build/web al repo: git add -f frontend_flutter/build/web && git push
+# El aprovisionamiento clona el repo y construye la imagen nginx en la VM.
 
 Vagrant.configure("2") do |config|
 
   # Debian 13 "Trixie". Si el box aun no esta disponible en Vagrant Cloud
   # puedes sustituirlo temporalmente por "debian/bookworm64" (Debian 12).
-  config.vm.box = "debian/trixie64"
+  config.vm.box = "debian/bookworm64"
 
   # ── Red: puertos expuestos al anfitrion ────────────────────────────────────
   config.vm.network "forwarded_port", guest: 9443, host: 9443  # Portainer HTTPS
@@ -44,8 +46,11 @@ Vagrant.configure("2") do |config|
     git clone https://github.com/UxiaRD/UxiLibris.git /home/vagrant/uxilibris
     chown -R vagrant:vagrant /home/vagrant/uxilibris
 
-    echo "==> [4/5] Cargando imagen del frontend..."
-    docker load < /home/vagrant/uxilibris/uxilibris-web.tar.gz
+    echo "==> [4/5] Construyendo imagen del frontend..."
+    docker build \
+      -f /home/vagrant/uxilibris/Dockerfile.presentacion \
+      -t uxilibris-web \
+      /home/vagrant/uxilibris
 
     echo "==> Arrancando contenedor del frontend en puerto 80..."
     docker run -d \
