@@ -44,6 +44,7 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
 - Pull-to-refresh para sincronizar con el servidor.
 - **Portadas** desde URL (Google Books), imagen local (galería del dispositivo) o imagen por defecto.
 - **Formato del libro**: distingue entre ejemplar físico (borde por defecto) y digital (borde morado).
+- **Prioridades de lectura**: los libros físicos en estado *pendiente* se muestran con **borde verde** para identificarlos como lecturas pendientes en la estantería.
 - **Favoritos**: marca un libro como favorito con la estrella de la portada; se refleja en estadísticas.
 
 ### 💜 Lista de Deseos
@@ -59,6 +60,8 @@ Una aplicación para amantes de la lectura que permite llevar un registro detall
 - Crear, editar y eliminar sagas.
 - Pantalla de detalle con libros ordenados por volumen.
   - Si la saga tiene el total de libros definido, aparecen **tarjetas grises** para los volúmenes pendientes: al pulsar una se abre el formulario con saga y volumen prerellenados.
+  - Los volúmenes con número decimal (ej. 5.5) o fuera del rango definido aparecen al final de la cuadrícula sin desplazar los demás.
+- En el detalle de cada libro perteneciente a una saga se muestra el estado global de la saga: **Saga en lectura**, **Saga completada** o **Saga abandonada**, diferenciándolo visualmente del estado individual del libro.
 - Asignar libros existentes a una saga desde el diálogo de detalle.
 - **Auto-creación de saga**: al guardar un libro con saga asignada, la saga se crea automáticamente si no existe.
 
@@ -111,7 +114,7 @@ uxilibris_project/
 ├── .github/workflows/ci.yml           # Pipeline CI (tests backend + frontend)
 ├── docker-compose.yml                 # Orquesta backend + BD + frontend web
 ├── nginx.conf                         # Configuración del servidor web (frontend)
-├── Vagrantfile                        # Alternativa: VM Ubuntu con Docker preinstalado
+├── Vagrantfile                        # Alternativa: VM Debian con Docker Engine preinstalado
 │
 ├── scripts/
 │   ├── modoA_compilar_apk_nube.bat    # Compila APK apuntando a Render
@@ -472,6 +475,7 @@ Algunas funciones nativas del móvil no están disponibles cuando la app se ejec
 | Escáner de código de barras ISBN | ✅ | ❌ `mobile_scanner` no soporta web |
 | Selección de imagen de galería | ✅ | ⚠️ Selector de ficheros del sistema operativo |
 | Almacenamiento seguro de sesión | ✅ Keychain/Keystore | ⚠️ `localStorage` (sin cifrado) |
+| Portadas de Google Books | ✅ | ⚠️ Requiere compilar con `--web-renderer html`; el renderer CanvasKit por defecto bloquea imágenes externas sin cabeceras CORS |
 | Resto de la aplicación | ✅ | ✅ |
 
 ---
