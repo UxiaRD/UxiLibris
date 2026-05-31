@@ -94,18 +94,43 @@ class WidgetsFormulario {
     );
   }
 
-  /// Campo de texto para una propiedad personalizada. Escribe el valor directamente en el objeto.
-  static Widget buildCampoDinamico(Propiedad prop, ColorScheme colores) {
+  /// Campo de texto para una propiedad personalizada con botones de editar y eliminar.
+  static Widget buildCampoDinamico(
+    Propiedad prop,
+    ColorScheme colores, {
+    VoidCallback? onEditar,
+    VoidCallback? onEliminar,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
-      child: TextFormField(
-        initialValue: prop.valor?.toString(),
-        decoration: InputDecoration(
-          labelText: prop.nombre,
-          prefixIcon: Icon(Icons.add_comment_outlined, color: colores.primary),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        onChanged: (nuevoValor) => prop.valor = nuevoValor,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: prop.valor?.toString(),
+              decoration: InputDecoration(
+                labelText: prop.nombre,
+                prefixIcon: Icon(Icons.add_comment_outlined, color: colores.primary),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onChanged: (nuevoValor) => prop.valor = nuevoValor,
+            ),
+          ),
+          if (onEditar != null)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Editar nombre',
+              onPressed: onEditar,
+            ),
+          if (onEliminar != null)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              color: colores.error,
+              tooltip: 'Eliminar campo',
+              onPressed: onEliminar,
+            ),
+        ],
       ),
     );
   }

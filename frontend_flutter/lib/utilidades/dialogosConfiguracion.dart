@@ -2,18 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:frontend_flutter/modelo/propiedad.dart';
 
 class DialogosConfiguracion {
-  /// Muestra un diálogo para crear una nueva propiedad dinámica.
-  /// Devuelve la [Propiedad] creada o null si se cancela.
-  static Future<Propiedad?> mostrarDialogoNuevaPropiedad(
-    BuildContext context,
-  ) async {
-    final TextEditingController nombreController = TextEditingController();
+  /// Muestra un diálogo para crear o editar una propiedad dinámica.
+  /// Si se pasa [propiedadExistente], el diálogo se abre en modo edición
+  /// con el nombre prerellenado y conserva el valor al guardar.
+  /// Devuelve la [Propiedad] resultante o null si se cancela.
+  static Future<Propiedad?> mostrarDialogoPropiedad(
+    BuildContext context, {
+    Propiedad? propiedadExistente,
+  }) async {
+    final bool esEdicion = propiedadExistente != null;
+    final TextEditingController nombreController = TextEditingController(
+      text: propiedadExistente?.nombre ?? '',
+    );
 
     return showDialog<Propiedad>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text("Nueva Propiedad"),
+        title: Text(esEdicion ? "Editar campo" : "Nueva Propiedad"),
         content: TextField(
           controller: nombreController,
           autofocus: true,
@@ -30,18 +36,19 @@ class DialogosConfiguracion {
           ElevatedButton(
             onPressed: () {
               if (nombreController.text.isNotEmpty) {
-                // Retornamos la nueva propiedad con tipo texto por defecto
                 Navigator.pop(
                   context,
-                  Propiedad(
-                    nombre: nombreController.text,
-                    tipo: TipoDato.texto,
-                    valor: "",
-                  ),
+                  esEdicion
+                      ? propiedadExistente.copyWith(nombre: nombreController.text)
+                      : Propiedad(
+                          nombre: nombreController.text,
+                          tipo: TipoDato.texto,
+                          valor: "",
+                        ),
                 );
               }
             },
-            child: const Text("AÑADIR"),
+            child: Text(esEdicion ? "GUARDAR" : "AÑADIR"),
           ),
         ],
       ),

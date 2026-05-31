@@ -19,9 +19,9 @@ class Propiedad {
     this.opciones,
   });
 
-  Propiedad copyWith({dynamic nuevoValor}) {
+  Propiedad copyWith({String? nombre, dynamic nuevoValor}) {
     return Propiedad(
-      nombre: nombre,
+      nombre: nombre ?? this.nombre,
       tipo: tipo,
       esOptativa: esOptativa,
       valor: nuevoValor ?? valor,

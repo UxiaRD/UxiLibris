@@ -161,11 +161,23 @@ class _FormularioLibroState extends State<FormularioLibro> {
 
   /// Abre el diálogo para crear un campo personalizado y lo añade a la lista dinámica.
   void _gestionarNuevaPropiedad() async {
-    final nuevaProp = await DialogosConfiguracion.mostrarDialogoNuevaPropiedad(
-      context,
-    );
+    final nuevaProp = await DialogosConfiguracion.mostrarDialogoPropiedad(context);
     if (nuevaProp != null) {
       setState(() => _propiedadesDinamicas.add(nuevaProp));
+    }
+  }
+
+  /// Abre el diálogo de edición prerellenado y actualiza la propiedad en la lista.
+  void _editarPropiedad(Propiedad prop) async {
+    final editada = await DialogosConfiguracion.mostrarDialogoPropiedad(
+      context,
+      propiedadExistente: prop,
+    );
+    if (editada != null) {
+      setState(() {
+        final i = _propiedadesDinamicas.indexOf(prop);
+        if (i != -1) _propiedadesDinamicas[i] = editada;
+      });
     }
   }
 
@@ -286,7 +298,12 @@ class _FormularioLibroState extends State<FormularioLibro> {
             ),
             const SizedBox(height: 15),
             ..._propiedadesDinamicas.map(
-              (prop) => WidgetsFormulario.buildCampoDinamico(prop, colores),
+              (prop) => WidgetsFormulario.buildCampoDinamico(
+                prop,
+                colores,
+                onEditar: () => _editarPropiedad(prop),
+                onEliminar: () => setState(() => _propiedadesDinamicas.remove(prop)),
+              ),
             ),
             TextButton.icon(
               onPressed: _gestionarNuevaPropiedad,
